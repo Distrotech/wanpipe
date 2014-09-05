@@ -4717,9 +4717,9 @@ function install_ssmg_ss7()
 	echo "Installing SMG Daemon..."	
 	echo
 	if [ -z $ROOT ]; then
-		eval "./install -ss7 -pbxdir $AST_SOURCE_DIR"
+		eval "CC=${CC} ./install -ss7 -pbxdir $AST_SOURCE_DIR"
 	else
-		eval "./install -ss7 -rootdir $ROOT -pbxdir $AST_SOURCE_DIR"
+		eval "CC=${CC} ./install -ss7 -rootdir $ROOT -pbxdir $AST_SOURCE_DIR"
 	fi
 	if [ $? -ne 0 ]; then
 		echo "-------------------------------------"
@@ -4783,9 +4783,9 @@ function install_ssmg_pri()
 	echo "Installing SMG Daemon..."
 	echo
 	if [ -z $ROOT ]; then
-		eval "./install -pri -pbxdir $AST_SOURCE_DIR"
+		eval "CC=${CC} ./install -pri -pbxdir $AST_SOURCE_DIR"
 	else
-		eval "./install -pri -rootdir $ROOT -pbxdir $AST_SOURCE_DIR"
+		eval "CC=${CC} ./install -pri -rootdir $ROOT -pbxdir $AST_SOURCE_DIR"
 	fi
 	if [ $? -ne 0 ]; then
 		echo "-------------------------------------"
@@ -4855,9 +4855,9 @@ function install_ssmg_bri()
 	fi
 
 	if [ -z $ROOT ]; then
-		eval "./install -$smg_installation_type -pbxdir $AST_SOURCE_DIR"
+		eval "CC=${CC} ./install -$smg_installation_type -pbxdir $AST_SOURCE_DIR"
 	else
-		eval "./install -$smg_installation_type -rootdir $ROOT -pbxdir $AST_SOURCE_DIR"
+		eval "CC=${CC} ./install -$smg_installation_type -rootdir $ROOT -pbxdir $AST_SOURCE_DIR"
 	fi
 
 	if [ $? -ne 0 ]; then
