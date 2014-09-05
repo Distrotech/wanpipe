@@ -148,7 +148,7 @@ all:	wancfg
 	@echo "Ok."
 
 wancfg: 
-	$(CC) $(FILES) $(CFLAGS) -o $@ $^ -lfl -lm
+	$(CC) $(FILES) $(CFLAGS) -o $@ $^ -lm
 
 clean:
 	rm -f wancfg
