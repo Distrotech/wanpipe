@@ -269,11 +269,12 @@ echo
 echo "Compiling LibTeletone MGD ..."
 echo
 sleep 1
+eval "make clean 2> /dev/null > /dev/null"
 cd lib/libteletone
 eval "./configure > /dev/null"
 echo "..."
 eval "make clean > /dev/null"
-eval "make > /devnull" 
+eval "make > /dev/null"
 if [ $? -ne 0 ]; then
 	exit 1;
 fi
@@ -287,12 +288,11 @@ echo
 echo "Compiling Sangoma MGD ..."
 echo
 sleep 1
-eval "make clean 2> /dev/null > /dev/null"
 if [ $pri = "true" ]; then
-        eval "make PRI=YES" 
+        eval "make PRI=YES CC=${CC}"
 else
 if [ $noss7 = "true" ]; then
-        eval "make NO_SS7=YES" 
+        eval "make NO_SS7=YES CC=${CC}"
 else
         eval "make" 
 fi
@@ -303,13 +303,13 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ $pri = "true" ]; then
-	eval "make INSTALLPREFIX=$rootdir PRI=YES install"
+	eval "make INSTALLPREFIX=$rootdir PRI=YES CC=${CC} install"
 else
 if [ $noss7 = "true" ]; then
 	#This case is currently used for bri
-	eval "make INSTALLPREFIX=$rootdir NO_SS7=YES install"
+	eval "make INSTALLPREFIX=$rootdir NO_SS7=YES CC=${CC} install"
 else
-	eval "make INSTALLPREFIX=$rootdir install"
+	eval "make INSTALLPREFIX=$rootdir CC=${CC} install"
 fi
 fi
 
@@ -345,11 +345,11 @@ if [ "$no_woomera" == "false" ]; then
 			fi
 		else
 			eval "make clean 2> /dev/null > /dev/null"
-			eval "make PBXDIR=$pbxdir"
+			eval "make PBXDIR=$pbxdir CC=${CC}"
 			if [ $? -ne 0 ]; then
 				exit 1;
 			fi
-			make INSTALLPREFIX=$rootdir install
+			make INSTALLPREFIX=$rootdir CC=${CC} install
 			if [ $? -ne 0 ]; then
 				echo
 				echo "Error: Failed to compile chan_woomera into PBX source!"
