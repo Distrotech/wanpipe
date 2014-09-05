@@ -1,0 +1,48 @@
+X25 API Package
+===============
+
+Author: Nenad Corbic
+Date:   Mar 6, 2000
+
+
+
+The x25api package contains the sample client and server 
+programs which should be used in application
+development.
+
+
+Contents of the API Package
+---------------------------
+
+ 1) pthread/server.c :  Mutli-Threaded server application using pthreads.  The Pthread
+                        architecure should be used when dealing with large number
+			of svcs. 
+
+ 2) server_v1.c :  	Multi-Process server application that waits for incoming calls.
+                        Once a call is accepted, it starts transmitting data. 
+
+ 3) server_v2.c :       Single process server application that waits for incoming calls.
+ 			Once a call is accepted, it start tx/rx data.
+
+ 4) svc_client.c :	Client application that places calls. Application   
+                        doesn't wait for a call to be established; thus, multiple
+                        calls can be placed from a single process.
+
+ 5) pvc_client.c:	PVC Client/Server application. No call setup required, 
+                        data is transmitted as soon as x25 link comes up.  
+
+ 6) debug.c:		Debugging application. It lists all active WANPIPE socks
+                        and displays their state and % buffer usage.
+
+ 7) hdlc_client.c:	HDLC Client/Server application.  HDLC uses LAPB HDLC
+                        protocol instead of full X25. A single PVC connection.
+			In order to use the LAPB HDLC protocol, a LAPB option
+                        must be turned on in the WANPIPE configuration file.
+
+
+Programming Notes:
+------------------
+
+Please refer to the /usr/local/wanrouter/doc/x25socket.pdf 
+for programming instructions.
+

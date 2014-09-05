@@ -1,0 +1,73 @@
+
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Mon Jun 28 09:23:00 EDT 2004
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_X25, Comment
+
+[interfaces]
+wp1svc1 = wanpipe1, @123, WANPIPE, Comment
+
+[wanpipe1]
+CARD_TYPE 	= S51X
+S514CPU 	= A
+AUTO_PCISLOT	= YES
+PCISLOT 	= 0
+PCIBUS		= 0
+Firmware	= /etc/wanpipe/firmware/x25_514.sfm
+Interface 	= V35
+Clocking 	= Internal
+BaudRate 	= 64000
+MTU 		= 1500
+UDPPORT 	= 9000
+Station		= DCE
+LowestPVC	= 0
+HighestPVC 	= 0
+LowestSVC 	= 1
+HighestSVC	= 1
+HdlcWindow	= 7
+PacketWindow	= 7
+DEF_PKT_SIZE	= 1024
+MAX_PKT_SIZE	= 1024
+CCITTCompat	= 1988
+X25Config	= 0x0090
+LAPB_HDLC_ONLY	= NO
+CALL_SETUP_LOG 	= YES
+OOB_ON_MODEM	= NO
+T1		= 1
+T2		= 0
+T4		= 1
+N2		= 10
+T10_T20		= 30
+T11_T21		= 30
+T12_T22	 	= 30
+T13_T23		= 30
+T16_T26		= 30
+T16_T26		= 30
+T28		= 30
+R10_R20		= 5
+R12_R22		= 5
+R13_R23		= 5
+TTL 		= 255
+IGNORE_FRONT_END  = NO
+
+[wp1svc1]
+IdleTimeout 	= 90
+HoldTimeout 	= 10
+#X25_SRC_ADDR      =
+#X25_ACCEPT_DST_ADDR =
+#X25_ACCEPT_SRC_ADDR =
+#X25_ACCEPT_USR_DATA =

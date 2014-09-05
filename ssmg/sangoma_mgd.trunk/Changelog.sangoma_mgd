@@ -1,0 +1,241 @@
+sangoma_mgd.c
+======================================
+
+Jun 21 2010
+ * v1.71 Nenad Corbic <ncorbic@sangoma.com>
+ * Added a hwec_chan_status check instead of hwec check.
+ * This allows some ports to have hwec disabled and others enabled.
+
+Mar 27 2009
+ * v1.46 Nenad Corbic <ncorbic@sangoma.com>
+ *      Major updates on socket handling. A bug was introducted
+ *      when cmm and trunk was merged. 
+ *      Added configuration print in the logs.
+ *
+ 
+Mar 19 2009
+ * v1.45 Nenad Corbic <ncorbic@sangoma.com>
+ *      Outbound call timeout defaulted to 300 seconds.
+ *      Timeout on answer instead of accept.
+ *
+
+Mar 19 2009
+ * v1.44 Nenad Corbic <ncorbic@sangoma.com>
+ *      Adjustable boost size. Added boost version check.
+ *
+ 
+Feb 25 2009
+ * v1.43 David Yat Sin <dyatsin@sangoma.com>
+ *      Merged CMM and Trunk
+ *
+ 
+Jan 26 2008
+ * v1.42 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Call Bearer Capability
+ *      BugFix: Hangup NACK was sent out with invalid cause 0
+ *
+ 
+Sep 11 2008
+ * v1.34 David Yat Sin <dyatsin@sangoma.com>
+ *	Support for huntgroups
+
+Jan 26 2008
+ * v1.42 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Call Bearer Capability
+ *      BugFix Hangup NACK was sent out with invalid cause 0
+ 
+Jan 12 2008
+ * v1.41 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Fixed the NACK with cause 0 bug.
+ *      Added cause 19 on call timeout.
+ *      Added configuration option call_timeout to timeout
+ *      outbound calls.
+ 
+Dec 10 2008
+ * v1.40 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Check for Rx call overrun.
+ *      In unlikely case sangoma_mgd goes out of
+ *      sync with boost.
+
+Sep 17 2008
+ * v1.39 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Updated for Unit Test
+ *      Bug fix in Loop Logic, possible race
+ *      between media and woomera thread on loop end.
+ *
+
+Sep 05 2008
+ * v1.38 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Added a Double use of setup id logic.
+ *      Currently double use call gets dropped.
+ *
+
+Sep 02 2008
+ * v1.37 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Bug fix in REMOVE LOOP logic continued
+ *      The woomera->sock in loop logic was set to 0.
+ *      Closing it failed the next call.
+ *
+
+Jul 18 2008
+ * v1.33 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added UDP Sequencing to check for dropped frames
+ *      Should only be used for debugging.
+
+Jul 17 2008
+ * v1.32 David Yat Sin  <davidy@sangoma.com>
+ *      Support for d-channel incoming digit
+ *      passthrough to Asterisk
+
+Jun 03 2008
+ * v1.32cmm Nenad Corbic  <ncorbic@sangoma.com>
+ * 	Implemented new Restart ACK Policy
+ *	Split the Event packet into 2 types
+ *      	
+
+Apr 04 2008
+ * v1.31cmm Nenad Corbic  <ncorbic@sangoma.com>
+ *	New CMM Restart procedure for boost
+ *	Block TRUNK ID on ACK Timeout
+ *	
+
+Apr 29 2008
+ * v1.31 David Yat Sin  <davidy@sangoma.com>
+ *      Support for HW DTMF events.
+ *
+
+Feb 08 2008
+ * v1.30 Nenad Corbic  <ncorbic@sangoma.com>
+ *      The fix in v1.26 causes double stop.
+ *      I took out the v1.26 fix and added
+ *      a big warning if that condition is
+ *      ever reached.
+
+ Feb 07 2008
+ * v1.29 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Added strip_cid_non_digits option
+ *
+
+ Feb 06 2008
+ * v1.28 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Fixed a memory leak in clone event
+ *      function. Added memory check subsystem
+ *
+
+Jan 24 2008
+ * v1.27 Nenad Corbic  <ncorbic@sangoma.com>
+ *	Fixed a memory leak on incoming calls
+ *	Removed the use of server listener which 
+ *	was not used
+
+Jan 18 2008
+ * v1.26 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Fixed hangup after invalid Answer or Ack Session
+ *      Can cause double use of setup id - now fixed
+ *
+
+Dec 31 2007
+ * v1.25 Nenad Corbic  <ncorbic@sangoma.com>
+ *	Removed UDP Resync it can cause skb_over errors.
+ * 	Moved RDNIS message to higher debug level
+
+Nov 30 2007
+ * v1.24 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Bug fix on return code on ALL ckt busy
+ *
+
+Nov 28 2007
+
+ * v1.23 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Bug fix on socket open. Check for retun code >= 0
+ *
+
+ * v1.22 Nenad Corbic  <ncorbic@sangoma.com>
+ * Nov 27 2007
+ *      Updated DTMF Tx function
+ *      Fixed - dtmf tx without voice
+ *      Fxied - dtmf clipping.
+
+
+Nov 22 2007
+
+ * v1.21 Nenad Corbic  <ncorbic@sangoma.com>
+ *      Major unit testing of each state
+ *      Numerous bug fixes for non autoacm mode.
+ *      Changed "Channel-Name" to tg/cic
+ *      Added compile option WANPIPE_CHAN_NAME to change Asterisk channel
+ *      name of chan_woomera.so.  So one can use Dial(SS7/g1/${EXTE})
+ *      instead of WOOMERA (for example) 
+ *
+ * v1.20 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added option for Auto ACM response mode.
+ *
+ * v1.19 Nenad Corbic <ncorbic@sangoma.com>
+ *      Configurable DTMF
+ *      Bug fix in release codes (all ckt busy)
+ *
+ * v1.18 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added new rel cause support based on
+ *      digits instead of strings.
+ *
+ * v1.17 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added session support
+ *
+ * v1.16 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added hwec disable on loop ccr 
+ *
+ * v1.15 Nenad Corbic <ncorbic@sangoma.com>
+ *      Updated DTMF Locking 
+ *      Added delay between digits
+ *
+ * v1.14 Nenad Corbic <ncorbic@sangoma.com>
+ *      Updated DTMF Library
+ *      Fixed DTMF synchronization
+ *
+ * v1.13 Nenad Corbic <ncorbic@sangoma.com>
+ *      Woomera OPAL Dialect
+ *      Added Congestion control
+ *      Added SCTP
+ *      Added priority ISUP queue
+ *      Fixed presentation
+ *
+ * v1.12 Nenad Corbic <ncorbic@sangoma.com>
+ *      Fixed CCR 
+ *      Removed socket shutdown on end call.
+ *      Let Media thread shutodwn sockets.
+ *
+ * v1.11 Nenad Corbic <ncorbic@sangoma.com>
+ *      Fixed Remote asterisk/woomera connection
+ *      Increased socket timeouts
+ *
+ * v1.10 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added Woomera OPAL dialect.
+ *      Start montor thread in priority
+ *
+ * v1.9 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added Loop mode for ccr
+ *      Added remote debug enable
+ *      Fixed syslog logging.
+ *
+ * v1.8 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added a ccr loop mode for each channel.
+ *      Boost can set any channel in loop mode
+ *
+ * v1.7 Nenad Corbic <ncorbic@sangoma.com>
+ *      Pass trunk group number to incoming call
+ *      chan woomera will use it to append to context
+ *      name. Added presentation feature.
+ *      name. Added presentation feature.
+ *
+ * v1.6 Nenad Corbic <ncorbic@sangoma.com>
+ *      Use only ALAW and MLAW not SLIN.
+ *      This reduces the load quite a bit.
+ *      Send out ALAW/ULAW format on HELLO message.
+ *      RxTx Gain is done now in chan_woomera.
+ *
+ * v1.5 Nenad Corbic <ncorbic@sangoma.com>
+ *      Bug fix in START_NACK_ACK handling.
+ *      When we receive START_NACK we must alwasy pull tank before
+ *      we send out NACK_ACK this way we will not try to send NACK 
+ *      ourself.
+

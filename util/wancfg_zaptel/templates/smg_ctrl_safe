@@ -1,0 +1,37 @@
+#!/bin/bash
+cmd=$1;
+
+while [ ! -z "$2" ]; 
+do
+	args=$args"$2 "
+	shift
+done
+
+function parse_args()
+{
+	for arg in $args
+	do
+		case $arg in 
+			nosyslog)
+				use_syslog=0;
+				;;
+			safe)
+				use_safe=1;
+				;;
+		esac
+
+	done	
+}
+
+parse_args
+
+
+if [ "$cmd" = "start" ]; then
+	smg_ctrl safe_start
+elif [ "$cmd" = "stop" ]; then
+	smg_ctrl stop
+elif [ "$cmd" = "restart" ]; then
+	smg_ctrl restart
+else 
+	echo "Invalid command";
+fi

@@ -1,0 +1,84 @@
+#!/bin/sh
+home=`pwd`
+cd $home
+
+read_meta_conf ()
+{
+
+	if [ $ostype = "Linux" ]; then
+		WAN_BASE=/etc
+		WAN_HOME=$WAN_BASE/wanpipe
+		META_CONF=$WAN_BASE/wanpipe/wanrouter.rc
+	elif [ $ostype = "FreeBSD" -o $ostype = "OpenBSD" ]; then
+		WAN_BASE=/usr/local/etc
+		WAN_HOME=$WAN_BASE/wanpipe
+		wanrouter_rc_file=""
+		if [ -r /etc/rc.conf ]; then
+			. /etc/rc.conf
+		fi
+		if [ -n "$wanrouter_rc_file" ]; then
+			WAN_HOME=${wanrouter_rc_file%/*}
+		fi
+		META_CONF=$wanrouter_rc_file
+	fi
+
+	# Read meta-configuration file.
+	if [ -f $META_CONF ]
+	then . $META_CONF
+	else
+		return 1 
+	fi
+	return 0
+}
+
+choose_openzap_freetdm()
+{
+	if [ -f "/usr/local/freeswitch/mod/mod_openzap.so" ];then 
+		openzap_recommended="openzap (currently installed in your system)";
+		freetdm_recommended="freetdm";
+	elif [ -f "/usr/local/freeswitch/mod/mod_freetdm.so" ];then
+		openzap_recommended="openzap";
+		freetdm_recommended="freetdm (currently installed in your system)";
+        elif [ -f "/usr/local/freeswitch/mod/mod_freetdm.so" ] && [ -f "/usr/local/freeswitch/mod/mod_openzap.so"  ] ;then
+                openzap_recommended="openzap (currently installed in your system)";
+                freetdm_recommended="freetdm (currently installed in your system)";
+	elif [ ! -f "/usr/local/freeswitch/mod/mod_freetdm.so" ] && [ ! -f "/usr/local/freeswitch/mod/mod_openzap.so"  ] ;then
+		openzap_recommended="openzap";
+		freetdm_recommended="freetdm";
+	fi
+
+	echo "Please choose one of the following"
+	echo "----------------------------------"
+	echo "1) $openzap_recommended"
+	echo "2) $freetdm_recommended"
+	echo ""
+	echo "Enter your option : "
+	read choice
+	
+	case $choice in
+	1)	./wancfg_zaptel.pl --conf_fs --conf_dir=$WAN_BASE $ARGS;;
+			
+	2)	./wancfg_zaptel.pl --ftdm_api --conf_dir=$WAN_BASE $ARGS;;
+	esac	
+}
+
+ostype=`sysctl -a |grep ostype`
+ostype=`echo $ostype | sed 's/.* //'`
+
+while [ ! -z "$1" ];
+do
+        ARGS=$ARGS"$1 "
+        shift
+done
+
+
+read_meta_conf
+if [ $? -ne 0 ]; then
+	echo "ERROR: Failed to find Wanpipe meta config file!"
+	exit 1
+fi
+
+cd ${WAN_HOME}/wancfg_zaptel
+clear
+choose_openzap_freetdm
+cd $home

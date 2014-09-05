@@ -1,0 +1,20 @@
+AFT FIRMWARE UPDATE
+===================
+
+1) Make sure WANPIPE is installed on your
+   system, via:
+
+	./Setup install
+
+
+2) Change directory to 
+	
+	wanpipe/util/wan_aftup
+
+	Where wanpipe/ is directory created
+	on wanpipe install.
+
+
+3) Read the README file :)
+
+

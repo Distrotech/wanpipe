@@ -1,0 +1,161 @@
+WANPIPE ADCCP LAPB API Support
+==============================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with ADCCP support
+-------------------------------------
+
+The ADCCP support is not installed by default
+during WANPIPE installation process.
+
+To enable ADCCP support install WANPIPE using
+the --protocol option:
+
+	./Setup install --protocol=ADCCP
+
+OR
+
+ 	Select desired protocols under the
+	CUSTOM driver compilation option:
+	(part of ./Setup install)
+
+After successful installation proceed to 
+configure you ADCCP card using /usr/sbin/wancfg 
+GUI configurator.
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Configuring ADCCP 
+-----------------
+
+Run: /usr/sbin/wancfg
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: ADCCP Protocol
+
+4. Hardware Section
+	Select Probe Hardware
+		Select your adapter PRI port.
+
+	Specify LAPB Parameters
+
+	Specify DTE/DCE
+
+	Specify HDLC Station Address 
+
+5. Interface Section
+	Specify interface name.
+	(Leave it default)
+
+6. End of configuration, exit and save
+
+
+
+Start ADCCP card
+----------------
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+     Confirm that "Starting ADCCP Protocol!" message exist
+
+
+
+Custom API Application
+----------------------
+
+A sample API application exists in
+/etc/wanpipe/api/x25 directory.
+
+To compile it run:  make
+
+To run it run:      ./hdlc_client wanpipe1 <ifname> write_enable
+		 
+		    Where <ifname> is the name of
+		    your interface. If you left it default
+		    it would be:
+
+		    	./hdlc_client wanpipe1 wp1adccp write_enable
+
+	
+	            The write_enable flag enables tx of packets,
+		    if the option is ommited the application will
+		    only receive.
+
+Use this app as a building block for you custom
+APP.
+
+
+Further Info
+------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+

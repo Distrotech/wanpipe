@@ -1,0 +1,18 @@
+<configuration name="openzap.conf" description="OpenZAP Configuration">
+  <settings>
+    <param name="debug" value="0"/>
+    <!--<param name="hold-music" value="$${moh_uri}"/>-->
+    <!--<param name="enable-analog-option" value="call-swap"/>-->
+    <!--<param name="enable-analog-option" value="3-way"/>-->
+  </settings>
+  <boost_spans>
+	<!--BOOSTPRI-->
+	<!--BOOSTBRI-->
+  </boost_spans>
+  
+  <analog_spans>
+	  <!--SANGOMA_FXO-->
+	  <!--SANGOMA_FXS-->
+  </analog_spans>
+  
+</configuration>

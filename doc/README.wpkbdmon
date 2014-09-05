@@ -1,0 +1,35 @@
+WANPIPE KEYBOARD LED INDICATOR
+------------------------------
+
+Author: Nenad Corbic  <ncorbic@sangoma.com>
+
+Description:
+------------
+
+The wpkbdmon daemon monitors the links status of a particular
+WANPIPE device and conveys its operational statistics via
+keybard leds: NUM LOCK, CAPS LOCK and SCROLL_LOCK
+
+	NUM_LOCK    = Line State  (On=connected,    Off=disconnected)
+	CAPS_LOCK   = Tx data     (On=transmitting, Off=no tx data)
+	SCROLL_LOCK = Rx data     (On=receiving,    Off=no rx data)
+
+Usage:
+------
+
+wpkbdmon <wanpipe device> <interface name> [update_interval]
+
+   <wanpipe device>  = wanpipe# (#=1,2,3 ...)
+   <interface name>  = wanpipe network interface ex: wp1_fr16
+   [update interval] = 1-60 seconds , optional (default 5 sec)
+
+	ex: /usr/sbin/wpkbdmon wanpipe1 wp1_ppp 5
+
+	Monitor interface wp1_ppp on device wanpipe1 in
+	5 second intervals.  Display the link status,
+	tx and rx state via keyboard lights.
+
+NOTE: The wpkbdmon daemon can only monitor a single network interface
+      at a time.
+
+      

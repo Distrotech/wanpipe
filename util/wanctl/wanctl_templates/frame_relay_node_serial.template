@@ -1,0 +1,55 @@
+
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Wed Apr 14 13:11:59 EDT 2004
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_FR, Comment
+
+[interfaces]
+wp1fr = wanpipe1, 16, WANPIPE, Comment
+
+[wanpipe1]
+CARD_TYPE 	= S51X
+S514CPU 	= A
+AUTO_PCISLOT	= YES
+PCISLOT 	= 0
+PCIBUS		= 0
+Firmware	= /etc/wanpipe/firmware/fr514.sfm
+Interface 	= V35
+Clocking 	= Internal
+BaudRate 	= 64000
+MTU 		= 1500
+UDPPORT 	= 9000
+NUMBER_OF_DLCI 	= 1
+Station 	= NODE
+Signalling 	= ANSI
+T391 		= 10
+T392 		= 16
+N391 		= 6
+N392 		= 3
+N393 		= 4
+FR_ISSUE_FS	= YES
+TTL 		= 255
+IGNORE_FRONT_END  = NO
+
+[wp1fr]
+MULTICAST 	= NO
+INARP 		= NO
+INARPINTERVAL 	= 0
+INARP_RX	= NO
+IPX		= NO
+TRUE_ENCODING_TYPE	= NO
+DYN_INTR_CFG	= NO

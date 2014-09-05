@@ -1,0 +1,19 @@
+FRAME RELAY API Package
+=======================
+
+Author: Nenad Corbic
+Date:   Mar 6, 2000
+
+
+
+The fr package contains the sample client and server 
+program that should be used in user application
+development.
+
+
+Contents of the API Package
+---------------------------
+
+ 1) fr_api.c :  	Client application that sends and receives data.
+			To disable sending of data, comment out a WRITE definition.
+

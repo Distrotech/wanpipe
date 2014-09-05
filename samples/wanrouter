@@ -1,0 +1,3269 @@
+#!/bin/bash -p
+# chkconfig: 2345 7 9
+# Description:	WANPIPE WAN Router Initialization Script.
+#
+# copyright	(c) 1999-2002, Sangoma Technologies Inc.
+#
+#		This program is free software; you can redistribute it and/or
+#		modify it under the terms of the GNU General Public License
+#		as published by the Free Software Foundation; either version
+#		2 of the License, or (at your option) any later version.
+# ==========================================================================
+# Sep 19, 2007  Alex Feldman	Add DEPMOD=NO support for FreeBSD OS.
+# July 28,2004 	Alex Feldman	Do not run 'ztcfg' after interface 
+#				configuration. Run ztcfg script manually
+#				after all Voip interfaces loaded.
+# Jan 16, 2004 	David Rokhvarg	Added 'lineprobe' option
+# Mar 12, 2001  Nenad Corbic	Added new if support
+# Feb 20, 2001  Nenad Corbic	Use /proc/net/wanrouter/status to determine
+#				the active devices.
+# Jul 17, 2000  Nenad Corbic	Added version option.
+#				Fixed the shutdown bug. If all interfaces
+#                               are down but modules loaded, unload
+#                               modules.
+# May 30, 2000  Nenad Corbic    Updated for v2.1.4
+#                               Enable IP Forwarding Option	
+# Apr 05, 2000  Nenad Corbic 	Updated for v2.1.3
+# Feb 22. 2000  Nenad Corbic    Updated for v2.1.2 
+# Feb 15, 2000  Nenad Corbic    Load WANPIPE socket module along
+#                               with router modules.
+# Jan 18, 2000  Nenad Corbic    No interface files are needed for API,
+#                               interfaces. No IP addresses neccessary. 
+# Nov 09, 1999  Nenad Corbic    Updated for v2.1.1
+#                               Enabled starting and stoping
+#                               each wanpipe device separately.
+# Nov 09, 1999  Nenad Corbic    Updated for v2.1.1
+# Oct 04, 1999  Nenad Corbic    Updated for v2.1.0
+# Aug 04, 1999  Nenad Corbic    Updated for v2.0.5
+# Oct 15, 1998	Jaspreet Singh	Updated for v2.0.4
+# Dec 09, 1997	Jaspreet Singh	Updated for v2.0.2
+# Nov 28, 1997	Jaspreet Singh	Updated for v2.0.1
+# Nov 06, 1997	Jaspreet Singh	Updated for v2.0.0
+# Jul 28, 1997	Jaspreet Singh	Updated for v1.0.5
+# Jul 10, 1997	Jaspreet Singh	Updated for v1.0.4
+# Dec 15, 1996	Gene Kozin	Initial version based on Sangoma's WANPIPE(tm)
+# ============================================================================
+
+####### FUNCTION DEFINITIONS #################################################
+
+
+# ----------------------------------------------------------------------------
+# Prompt user for input.
+# ----------------------------------------------------------------------------
+prompt()
+{
+	if test $NONINTERACTIVE; then
+		return 0
+	fi
+
+	# BASH echo -ne "$*" >&2
+	echo -n "$*" >&2
+	read CMD rest
+	return 0
+}
+
+# ----------------------------------------------------------------------------
+# Get Yes/No
+# ----------------------------------------------------------------------------
+getyn()
+{
+	if test $NONINTERACTIVE; then
+		return 0
+	fi
+
+	while prompt "$* (y/n) "
+	do	case $CMD in
+			[yY])	return 0
+				;;
+			[nN])	return 1
+				;;
+			*)	echo -e "\nPlease answer y or n" >&2
+				;;
+		esac
+	done
+}
+
+# ----------------------------------------------------------------------------
+# Pause.
+# ----------------------------------------------------------------------------
+pause()
+{
+
+	# BASH [ $# -ne 0 ] && echo -e $* >&2
+	[ $# -ne 0 ] && echo -e "$*" >&2
+	echo -e "Press [Enter] to continue...\c" >&2
+	read tmp
+	return 0
+}
+
+check_bash ()
+{
+	BASH_SUPPORT=`echo $BASH_VERSION | cut -d'.' -f1 2> /dev/null`
+}
+
+check_awk ()
+{
+	major_ver=${RELEASE%%.*}
+	if [ $OSYSTEM = "Linux" ]; then
+		eval "type awk 2> /dev/null > /dev/null"
+	elif [ $OSYSTEM = "FreeBSD" ]; then
+		eval "type awk 2> /dev/null > /dev/null"
+	else
+		eval "awk 2> /dev/null > /dev/null"
+	fi
+	if [ $? -eq 0 ]; then
+		AWK_SUPPORT=YES
+	else
+		AWK_SUPPORT=NO
+	fi
+}
+
+cleanup ()
+{
+	eval "rm -f $WAN_PROG_LOCK 2> /dev/null > /dev/null"
+
+	#Check module checks if modules are loaded and updates
+        #the subsys lock for LINUX
+	check_module 
+
+	if [ $g_rc -gt 0 ]; then
+		exit $g_rc
+	fi
+
+	exit $1
+}
+
+
+# ----------------------------------------------------------------------------
+# Check to see if a value belongs to the list.
+# Return:	0 - yes
+#		1 - no
+# ----------------------------------------------------------------------------
+check_list()
+{
+	[ $# -lt 2 ] && return 1
+
+	val=$1
+	shift
+	# BASH for i in $*
+	for i in "$*"
+	do [ "$val" = "$i" ] && return 0
+	done
+	return 1
+}
+
+# ----------------------------------------------------------------------------
+# Display error message.
+# ----------------------------------------------------------------------------
+error() 
+{
+	echo -e "$SCRIPT: $*!"
+	[ -f "$WAN_LOG" ] && echo -e "$*!" >> $WAN_LOG
+	return 0
+}
+
+file_exist() 
+{
+	local ret
+ 	eval "ls $1.* > /dev/null 2> /dev/null"
+        ret=$?
+	return $ret
+}
+
+# ----------------------------------------------------------------------------
+# Configure network interface.
+# This routine performs TCP/IP-level interface configuration.  Interface name
+# is given as an argument. It reads a configuration file with the same name in
+# and calls ifconfig and route to do the job.
+#
+# Configuration file is actually a shell script containing only variables:
+#
+#	ONBOOT=yes			if not 'yes' then skip this file
+#	IPADDR=xxx.xxx.xxx.xxx		IP address of this interface
+#	NETMASK=xxx.xxx.xxx.xxx		Network mask for this interface
+#	NETWORK=xxx.xxx.xxx.xxx		Network address
+#	BROADCAST=xxx.xxx.xxx.xxx	Broadcast address
+#	POINTOPOINT=xxx.xxx.xxx.xxx	Point-to-point address
+#	GATEWAY=xxx.xxx.xxx.xxx		Gateway address
+# ----------------------------------------------------------------------------
+interface_up()
+{
+	ONBOOT=
+	IPADDR=
+	NETMASK=
+	NETWORK=
+	BROADCAST=
+	POINTOPOINT=
+	GATEWAY=
+
+	if [ ! -d "$WAN_INTR_DIR" ]; then
+		error "Directory $WAN_INTR_DIR not found"
+		return 1
+	fi
+
+	if [ $NEW_IF_TYPE = YES ]; then
+		if [ $LINUX_DISTR = redhat ]; then
+			if [ $WAN_INTR_DIR = "/etc/sysconfig/network-scripts" ]; then
+				ifup $1
+				return 0
+			fi
+		fi
+		# BASH source $WAN_INTR_DIR/ifcfg-$1
+		. $WAN_INTR_DIR/ifcfg-$1
+	else
+		if [ ! -f $WAN_INTR_DIR/$1 ]; then
+			ifconfig $1 up
+			return 0;
+		fi
+
+		# BASH source $WAN_INTR_DIR/$1"
+		. $WAN_INTR_DIR/$1
+	fi
+
+
+	# Configure interface.
+	if [ "$IPADDR" -a "$IPADDR" != "0.0.0.0" ]; then
+		# Prepare ifconfig options.
+		OPTIONS=
+		if [ $OSYSTEM = "Linux" ]; then
+			[ "$POINTOPOINT" ] && OPTIONS="$OPTIONS pointopoint $POINTOPOINT"
+		else
+			[ "$POINTOPOINT" ] && OPTIONS="$OPTIONS $POINTOPOINT"
+		fi
+		[ "$NETMASK" ] && OPTIONS="$OPTIONS netmask $NETMASK"
+		[ "$BROADCAST" ] && OPTIONS="$OPTIONS broadcast $BROADCAST"
+	
+		if [ $OSYSTEM = "Linux" ]; then
+			ifconfig $1 $IPADDR $OPTIONS
+		else
+			ifconfig $1 inet $IPADDR $OPTIONS
+		fi
+		ifconfig $1 up
+	else
+		ifconfig $1 up
+	fi
+
+	if [ "$GATEWAY" ]; then
+		check_command_exist route
+		if [ $? -eq 0 ]; then
+			if [ $OSYSTEM = "Linux" ]; then
+				if [ "$GATEWAY" = 0 ] || [ "$GATEWAY" = "0.0.0.0" ]; then
+					if [ "$IPADDR" -a "$IPADDR" != "0" -a "$IPADDR" != "0.0.0.0" ]; then 
+						route add default dev $1
+					fi
+				else
+					route add default gw $GATEWAY	
+				fi
+			else
+				if [ "$GATEWAY" = 0 ] || [ "$GATEWAY" = "0.0.0.0" ]; then
+					if [ "$IPADDR" -a "$IPADDR" != "0" -a "$IPADDR" != "0.0.0.0" ]; then
+						route add -net 0.0.0.0 -interface $1
+					fi
+				else
+					route add -net 0.0.0.0 $GATEWAY	
+				fi
+			fi
+		else
+			if [ $OSYSTEM = "Linux" ]; then
+				check_command_exist ip
+				if [ $? -eq 0 ]; then
+					if [ "$GATEWAY" = 0 ] || [ "$GATEWAY" = "0.0.0.0" ]; then
+						ip route add default dev $1
+					else
+						ip route add default via $GATEWAY
+					fi
+					return 0
+				fi
+			fi
+			echo
+			echo "Error: Failed to set route, no route or ip cmd found"
+			echo
+		fi
+	fi
+
+	if [ $OSYSTEM = "Linux" ] && [ $LINUX_DISTR = redhat ]; then
+        	/etc/sysconfig/network-scripts/ifup-routes $1
+	fi
+	
+
+	return 0
+}
+
+check_module () {
+
+	if [ $OSYSTEM = "Linux" ]; then
+		[ -d "$ROUTER_PROC" ] && {
+			touch $WAN_LOCK 2> /dev/null
+			return 0
+		}
+	else
+		for i in $WAN_DRIVERS
+		do $MODULE_STAT | grep -q $i && {
+			touch $WAN_LOCK 2> /dev/null
+			return 0
+		}
+		done
+	fi
+
+	# Driver is not loaded
+	if [ -e $WAN_LOCK ]; then
+		rm -f $WAN_LOCK 2> /dev/null
+	fi
+	return 1;
+}
+
+get_mod_name() 
+{
+	local path=$1
+	local name=$2
+
+	if [ "$DEPMOD" = "YES" ]; then
+		if [ "$OSYSTEM" = "Linux" ]; then
+			module_name=$name
+		else
+			module_name=$name$MODULE_EXT
+		fi
+	else
+		module_name=$path/$name$MODULE_EXT
+	fi
+	return 0
+}
+
+load_driver () {
+
+	local err
+
+	if [ $OSYSTEM = "Linux" ]; then
+		$MODULE_LOAD $1  > /dev/null 
+		err=$?
+	elif [ $OSYSTEM = "FreeBSD" ]; then
+		err=`$MODULE_LOAD $1 >/dev/null`
+	elif [ $OSYSTEM = "OpenBSD" -o $OSYSTEM = "NetBSD" ]; then
+		err=`$MODULE_LOAD -o ${WAN_MODULE_DIR}/$1.out -e$1 -p${WAN_MODULE_DIR}/$POSTINSTALL ${WAN_MODULE_DIR}/$1.o  1> /dev/null`
+	fi
+	return $err
+}
+
+unload_driver () {
+
+	local err
+
+	if [ $OSYSTEM = "OpenBSD" -o $OSYSTEM = "NetBSD" ]; then
+		\rm -rf ${WAN_MODULE_DIR}/$1.out
+		err=`$MODULE_UNLOAD -n $1 2> /dev/null`
+	else
+		err=`$MODULE_UNLOAD $1  2> /dev/null` 
+		err=`$MODULE_UNLOAD sdladrv  2> /dev/null` 
+	fi
+
+
+#Deprecated: Confirm Alex
+#FIXME
+#	if [ $OSYSTEM = "Linux" ]; then
+#		# try to unload Echo Canceller module
+#		eval "wan_ec_client unload 2>/dev/null"
+#	fi
+
+	return $err
+}
+
+#--------------------------------------------------------------------------
+# Create character device /dev/wanrouter
+#--------------------------------------------------------------------------
+create_cdev()
+{
+	if [ $OSYSTEM = "FreeBSD" ]; then
+		[ ! -e "$CDEV_WANROUTER" ] && {
+			mknod $CDEV_WANROUTER c $CDEV_MAJOR $CDEV_MINOR
+		}
+	fi
+}
+
+
+# ----------------------------------------------------------------------------
+# Start WAN wanrouter.
+#	o create log file
+#	o check configuration file presence
+#	o load WAN drivers (using modprobe)
+#	o configure drivers
+#	o configure interfaces
+# ----------------------------------------------------------------------------
+load_module()
+{
+	local opt=${1:-NO}
+
+	check_module 
+	if [ $? -eq 0 ]; then
+		return 0
+	fi			
+
+	if [ $opt != silent ]; then
+		echo "Starting WAN Router..."
+		echo "`date`: starting WAN router" >> $WAN_LOG
+	fi
+
+	if [ $OSYSTEM = "Linux" ]; then
+		if [ -e "/proc/net/wanrouter" ]; then
+			
+			#Make sure to load optionl modules
+			wansock_config LOAD
+			annexg_config LOAD
+			lip_config LOAD
+			wanec_config LOAD       
+			
+			#RuggedCom LedTask
+			touch $WANPIPE_IS_RUNNING
+			return 0
+		fi
+	fi
+
+	# Check if SecureLevel allows to load module.
+	if [ $OSYSTEM = "OpenBSD" ]; then
+		if [ $SECURELEVEL -gt 0 ]; then
+echo "Error: Your securelevel does not allow to load kernel modules!"
+			return 1
+		fi
+	fi
+
+	for i in $MODULES
+	do
+
+		module_name=$i$MODULE_EXT
+		if [ ! -f $module_name ]; then
+			if [ $OSYSTEM = "Linux" ]; then
+				eval "echo $OPT_MODULES | grep $i > /dev/null 2> /dev/null"
+				if [ $? -ne 0 ]; then
+					mod_error $i
+					return 1
+				fi
+			else
+				mod_error $i
+				return 1
+			fi
+		fi
+	done
+
+	[ "$ROUTER_BOOT" = "NO" -o -z "$WAN_DRIVERS" ] && { 
+
+		echo -e "\n\nERROR in $WAN_CONF_DIR/wanrouter.rc file !!!" 
+		echo -e "   ROUTER_BOOT is set to NO, OR" 
+		echo -e "   WAN_DRIVERS must be set to wanpipe\n"
+		echo -e "   wanrouter start failed !!!\n" 
+		return 1
+  	}
+
+	if [ $DEPMOD = YES ]; then
+		if [ $opt != silent ]; then
+			echo -n "Loading WAN drivers: "
+		fi
+		for i in $WAN_DRIVERS
+		do
+			$MODULE_STAT | grep -q $i && continue
+
+			if [ $opt != silent ]; then
+				echo -n "$i "
+				echo -n "Loading driver $i ... " >> $WAN_LOG
+			fi
+			
+			if load_driver $i
+			then 
+				echo "ok" >> $WAN_LOG
+			else 
+				if [ $opt != silent ]; then
+					echo -e "\nFailed to load wanpipe modules !\n"
+					echo "fail" >> $WAN_LOG
+				fi
+				unload_module	
+				return 1
+			fi
+		done
+	else
+		if [ $opt != silent ]; then
+			echo -n "Loading WAN drivers: "
+		fi
+		
+		for i in $MODULES
+		do
+			module_name=$i$MODULE_EXT
+			if load_driver "$module_name"
+			then
+				if [ $opt != silent ]; then
+					echo "ok" >> $WAN_LOG
+				fi
+			else 
+				if [ $opt != silent ]; then
+					echo -e "\nFailed to load $module_name modules !\n"
+					echo "fail" >> $WAN_LOG
+				fi
+				unload_module	
+				return 1
+			fi
+		done
+	fi
+
+	if [ $OSYSTEM = "Linux" ]; then
+		wansock_config LOAD
+		annexg_config LOAD
+	fi
+
+	if ! lip_config LOAD
+        then
+             	unload_module
+                return 1
+        fi
+
+	if ! wanec_config LOAD
+        then
+		lip_config UNLOAD
+	       	unload_module
+	       	return 1
+	fi
+
+	if [ $opt != silent ]; then
+		echo "done."
+	fi
+
+	# Create char devices (if needed)
+	create_cdev
+
+	touch $WANPIPE_IS_RUNNING
+	return 0
+}
+
+router_config()
+{
+	# Configure router.
+	if [ $OSYSTEM != "Linux" ]; then
+		[ -e "$CDEV_WANROUTER" ] || {
+			return 1
+		}
+	fi
+
+	# $1 = /etc/wanpipe#.conf  where # is an integer
+	if [ "$WAN_DYN_WANCONFIG" = YES ]; then
+		eval "/usr/sbin/wanconfig_client cmd=start,card=$2" 
+	else
+		wanconfig -v -f $1 -a $WAN_ADSL_LIST >> $WAN_LOG 
+	fi
+}
+
+interf_config()
+{
+	local device=$1
+	local WAN_CONF=$2
+	local int_file
+	local INTERFACES
+	local voip_flag
+
+		
+	#echo "============  iterf_config ================"
+
+	# Configure network interfaces.
+
+	#If TTY is defined there are no network interfaces
+	eval "grep \"TTY.*=.*YES\" -i $WAN_CONF > /dev/null"
+	if [ $? -eq 0 ]; then
+		echo -e "done."
+		return 0
+	fi
+
+	#eval "grep \"WAN_EDU_KIT\" -i $WAN_CONF > /dev/null"
+	#if [ $? -eq 0 ]; then
+	#	echo -e "done."
+	#	return 0
+	#fi
+
+	eval "grep \"WAN_DEBUG\" -i $WAN_CONF > /dev/null"
+	if [ $? -eq 0 ]; then
+		echo -e "done."
+		return 0
+	fi
+
+	eval "grep \"WAN_MLINK_PPP\" -i $WAN_CONF > /dev/null"
+	if [ $? -eq 0 ]; then
+		echo -e "done."
+		return 0
+	fi
+
+#NC: Used to be when we used PPPD but now we
+#    use syncppp for PPPOA. This is just legacy
+#    the code should be deleted once we are sure
+#    we will never go back to tty model
+#	eval "grep \"WAN_ADSL\" -i $WAN_CONF > /dev/null"
+#	if [ $? -eq 0 ]; then
+#		eval "grep \"PPP_.*_OA\" -i $WAN_CONF > /dev/null"
+#		if [ $? -eq 0 ]; then
+#			echo -e "done."
+#			return 0
+#		fi
+#	fi
+
+#	cd $WAN_INTR_DIR
+
+#	if [ -f $WAN_INTERFACE_PROC_FILE ]; then
+#		INTERFACES=`cat $WAN_INTERFACE_PROC_FILE | grep $device | cut -d' ' -f1`
+#	else
+	INTERFACES=`grep ".*=.*$device" -i $WAN_CONF | cut -d' ' -f1 2> /dev/null` 
+#	fi
+
+	# BASH INTERFACES=${INTERFACES// /}
+	INTERFACES=${INTERFACES%% }
+	
+	if [ -z "$INTERFACES" ]; then
+		error "No interface definitions found in $WAN_CONF"
+		return 1
+	fi
+
+	echo -n "Configuring interfaces: "
+	for i in $INTERFACES
+	do      
+		int_file=${i%%=*}
+		
+		#Not every system has egrep. Egrep uses the regular expression matching. 
+
+		check_command_exist egrep
+		if [ $? -eq 0 ]; then
+			API=`egrep "$int_file[[:space:]]*=" -i $WAN_CONF | cut -d',' -f3 2> /dev/null`
+		else
+			API=`grep "$int_file =" -i $WAN_CONF | cut -d',' -f3 2> /dev/null`
+		fi
+
+		#If the card is in backup mode, it will be used to monitor
+		#the primary link.  We don't want IP information, thus
+		#we set the API field. This will cause the interface to 
+		#come up without IP information.
+		eval "grep \"BACKUP.*=.*YES\" -i $WAN_CONF > /dev/null"
+		if [ $? -eq 0 ]; then
+			API=API
+		fi
+		
+		#Substitution and replacement are no supported
+                #on bash versions lower than 2.0
+			
+		#if the card is configured as API, bring up all
+		#interfaces without IP information.
+
+		if [ ! -z $API ]; then
+
+			#Remove all white spaces
+			if [ "$AWK_SUPPORT" = YES ]; then
+				API=`echo $API | awk '{ gsub(" ", "") ; print }'`
+			elif [ "$BASH_SUPPORT" -gt 1 ]; then
+				# BASH API=${API// /}
+				API=${API%% }
+			fi
+		
+			if [ "$API" = "API" ] || [ "$API" = "TDM_API" ] || [ "$API" = "API_LEGACY" ]  ; then
+				echo -n "$int_file "
+				ifconfig $int_file up
+				continue
+			fi
+
+			if [ "$API" = "TDM_VOICE_API" ] || [ "$API" = "TDM_SPAN_VOICE_API" ] || [ "$API" = "TDM_CHAN_VOICE_API" ]; then
+				echo -n "$int_file "
+				ifconfig $int_file up
+				continue
+			fi
+
+			if [ "$API" = "DATA_API" ]; then
+				echo -n "$int_file "
+				ifconfig $int_file up
+				continue
+			fi
+
+			if [ "$API" = TTY ]; then
+				continue
+			fi
+
+			
+			#brings up (for example wp1_fr16 and wp1_fr16e)
+			#with IP addresses 0.0.0.0
+			if [ $API = "BRIDGE" ] || [ $API = "XMTP2_API" ];then
+
+				# Bring up BRIDGE interface
+				echo -n "$int_file "
+				ifconfig $int_file up
+				continue
+			fi
+
+			if [ $API = "TRUNK" ];then
+
+				# Bring up Trunk interface
+				echo -n "$int_file "
+				ifconfig $int_file up
+				continue
+			fi
+
+			if [ $API = "SWITCH" ];then
+
+				# Bring up SWITCH interface
+				echo -n "$int_file "
+				ifconfig $int_file up
+				continue
+			fi
+
+			if [ $API = "ANNEXG" ];then
+
+				# Bring up SWITCH interface
+				echo -n "$int_file "
+				ifconfig $int_file up
+				continue
+			fi
+
+			if [ $API = "VoIP" ] || [ $API = "TDM_VOICE" ] || [ $API = "TDM_VOICE_API" ] ;then
+
+				# Bring up VoIP interface
+				echo -n "$int_file "
+				ifconfig $int_file up
+				voip_flag=1
+				continue
+			fi
+
+			if [ $API = "PPPoE" ] || [ $API = "STACK" ];then
+
+				# Bring up SWITCH interface
+				echo -n "$int_file "
+				ifconfig $int_file up
+				continue
+			fi
+
+		fi
+		if [ $NEW_IF_TYPE = YES ]; then
+			if_file=ifcfg-$int_file;
+		else
+			if_file=$int_file;
+		fi
+
+		if [ ! -d "$WAN_INTR_DIR" ]; then
+			error "Directory $WAN_INTR_DIR not found"
+			return 1
+		fi
+		cd $WAN_INTR_DIR
+
+		if [ -s $if_file ]; then
+			echo -n "$int_file "
+			interface_up $int_file || {
+				error "Failed to configure interface $int_file"
+				continue
+			}
+		else
+			echo "Error Interface File $int_file not found"
+			return 1;
+		fi
+		
+	done
+	echo -e "\ndone."
+
+	return 0
+}
+
+# ----------------------------------------------------------------------------
+# Stop WAN router.
+#	o shut down interfaces
+#	o unload WAN drivers
+#	o remove lock file
+# ----------------------------------------------------------------------------
+interf_down()
+{
+	local device=$1
+	local WAN_CONF=$2
+	local int_file
+	local INTERFACES
+
+	# Shut down network interfaces.
+	#if [ ! -d "$WAN_INTR_DIR" ]; then
+	#	return;
+	#}
+	INTERFACES=`grep ".*=.*$device" -i $WAN_CONF | cut -d' ' -f1 2> /dev/null`
+	for i in $INTERFACES
+	do
+		int_file=${i%%=*}
+		wanrouter_script stop $device $int_file #excutes interface stop script
+		echo "Shutting down $device interface: $int_file"
+		ifconfig $int_file down
+	done
+}
+
+# ----------------------------------------------------------------------------
+# Configure devices (all or single).
+# ----------------------------------------------------------------------------
+config_devices()
+{
+	# bASH local devices=$*
+	local devices="$*"
+
+	for dev in $devices; do
+		if [ $OSYSTEM = "Linux" ] && [ ! -e "$ROUTER_PROC/$dev" ]; then
+			echo -e "Error: Device $dev is not supported by kernel\n"
+			continue	
+		fi
+		WAN_CONF=$WAN_CONF_DIR/$dev.conf
+
+		check_file $WAN_CONF || cleanup 1
+
+		check_exists $dev
+		if [ $? -ne 0 ]; then
+			echo "Error: Device $dev does not exist/not allocated."
+			echo "       Check the messages log for the number of probed "
+			echo "       devices."
+			echo
+			continue			
+		fi
+
+		check_dev_running $dev
+		if [ $? -eq 0 ]; then
+			echo "Error: Device $dev is already running"
+			echo -e "    Run 'wanrouter stop $dev' first\n"
+			continue
+		fi 
+	
+		#Since we changed the name of dev above,
+		#we must check if we are running ft1 device,
+		#output a correct message	
+		if [ $ft1_or_wanpipe -gt 0 ]; then
+			echo "Starting up device: $dev, FT1 config mode"
+			echo "Starting up device: $dev, FT1 config mode" >> $WAN_LOG
+		else
+			echo "Starting up device: $dev"
+			echo "Starting up device: $dev" >> $WAN_LOG
+		fi
+
+		router_config $WAN_CONF $dev
+#NC: Jul 22 2003
+#Just because one card
+#fails to load do not stop
+#other cards from loading
+		if [ $? -ne 0 ]; then
+			g_rc=1;
+#			#echo "Exiting rc = 3"
+#			cleanup 3
+		fi
+	done
+
+	return 0
+}
+
+# ----------------------------------------------------------------------------
+# Unconfigure devices (all or single).
+# ----------------------------------------------------------------------------
+unconfig_devices()
+{
+	# bASH local devices=$*
+	local devices="$*"
+
+	#Stop all routers but check if device
+	#is running first
+	for dev in $devices; do
+		WAN_CONF=$WAN_CONF_DIR/$dev.conf
+
+		#If we are starting ft1 device there are no
+		#interfaces. 
+		wanrouter_script stop $dev
+		if [  $ft1_or_wanpipe -gt 0 ]; then
+			echo "Shutting down device: $dev, FT1 config mode"
+			echo "Shutting down device: $dev, FT1 config mode" >> $WAN_LOG
+		else
+			echo "Shutting down device: $dev"
+			echo "Shutting down device: $dev" >> $WAN_LOG
+		fi
+		router_unconfig $WAN_CONF $dev
+
+	done
+
+	#Check if any devices are still running
+	#  If YES: don't unload the modules, just printout
+	#	   the list of active devices
+	#  If NO:  unload modules
+	
+	check_and_print_still_running && cleanup 0
+
+	cd $WAN_HOME
+	echo -e "No devices running, Unloading Modules"
+	unload_module
+	remove_cdev
+
+	for dev in $devices; do
+		WAN_CONF=$WAN_CONF_DIR/$dev.conf
+
+		INTERFACES=`grep ".*=.*$dev" -i $WAN_CONF | cut -d' ' -f1 2> /dev/null`
+		for ifname in $INTERFACES; do
+			ifname=${ifname%%=*}
+		done
+
+	done
+
+	return 0
+}
+
+# ----------------------------------------------------------------------------
+# Configure wan interfaces (all or single).
+# ----------------------------------------------------------------------------
+config_interfaces()
+{
+	# bASH local devices=$*
+	local devices="$*"
+
+	for dev in $devices; do
+
+		WAN_CONF=$WAN_CONF_DIR/$dev.conf
+	
+		check_file $WAN_CONF || cleanup 1
+
+		interf_config $dev $WAN_CONF
+
+#NC: Jul 22 2003
+#Just because one interface
+#fails to load, do not stop all
+#other interfaces.
+#		if [ $? -ne 0 ]; then
+#			cleanup 4
+#		fi
+	done
+
+	for dev in $devices; do
+		WAN_CONF=$WAN_CONF_DIR/$dev.conf
+		INTERFACES=`grep ".*=.*$dev" -i $WAN_CONF | cut -d' ' -f1 2> /dev/null`
+		for ifname in $INTERFACES; do
+			ifname=${ifname%%=*}
+			wanrouter_script start $dev $ifname
+		done
+		wanrouter_script start $dev
+	done
+
+	return 0
+}
+
+# ----------------------------------------------------------------------------
+# unconfigure interface (all or single).
+# ----------------------------------------------------------------------------
+unconfig_interfaces()
+{
+	# bASH local devices=$*
+	local devices="$*"
+
+	#Stop all interfaces, but check whether 
+	#device is running first
+	for dev in $devices; do
+
+		if [ "$dev" = "" ]; then
+			continue;
+		fi
+	
+		WAN_CONF=$WAN_CONF_DIR/$dev.conf
+
+		#Check that all configuration files exist
+		check_file $WAN_CONF || cleanup 1
+
+		check_exists $dev	
+		if [ $? -eq 0 ]; then
+			check_dev_running $dev	
+			if [ $? -eq 0 ]; then
+				WAN_CONF=$WAN_CONF_DIR/$dev.conf
+				interf_down $dev $WAN_CONF
+			fi
+		fi
+	done
+
+	return 0
+}
+
+
+router_unconfig()
+{
+	if [ $OSYSTEM != "Linux" ]; then
+		[ -e "$CDEV_WANROUTER" ] || {
+			return
+		}
+	fi
+
+
+	if [ "$WAN_DYN_WANCONFIG" = YES ]; then
+		eval "/usr/sbin/wanconfig_client cmd=stop,card=$2" 
+	else
+		wanconfig -v -d $1 -a $WAN_ADSL_LIST >> $WAN_LOG
+	fi
+	# Unload WAN drivers.
+}
+
+
+#----------------------------------------------------------------------------
+# Remove character device /dev/wanrouter
+#----------------------------------------------------------------------------
+remove_cdev()
+{
+	if [ $OSYSTEM = "FreeBSD" ]; then
+		[ -e "$CDEV_WANROUTER" ] && {
+			rm $CDEV_WANROUTER
+		}
+	fi
+}
+
+unload_module()
+{
+	cd $WAN_HOME
+
+	rm -f $WANPIPE_IS_RUNNING
+	if [ $RUGGEDCOM = "Yes" ]; then
+        	sleep 2
+		if lsof | grep '/proc/net/wanrouter' -q; then
+			echo "/proc/net/wanrouter still busy!  Failed to make ledtask release..."
+			touch $WANPIPE_IS_RUNNING
+			return 0
+		fi   
+	fi
+
+	if [ -z $FLAG_UNLOAD_NO_CHECK ]
+	then
+		check_and_print_still_running && cleanup 1
+	fi
+
+	if [ $OSYSTEM = "Linux" ]; then
+		wansock_config UNLOAD
+		annexg_config UNLOAD
+	elif [ $OSYSTEM = "OpenBSD" ]; then
+		if [ $SECURELEVEL -gt 0 ]; then
+			echo "Error: Your securelevel does not allow to load kernel modules!"
+			return 1
+		fi	
+	fi
+
+	wanec_config UNLOAD
+	lip_config UNLOAD
+
+	if [ $DEPMOD = YES ]; then
+	
+		for i in $WAN_DRIVERS
+		do $MODULE_STAT | grep -q $i && {
+			unload_driver $i
+		}
+		done
+
+	else
+		for i in $UMODULES
+		do
+			unload_driver $i
+		done
+	fi
+	
+	wan_force_unload_modules
+}
+
+
+wanec_config ()
+{
+	local opt=$1
+
+	if [ "$WANEC_LOAD" != "YES" ]; then
+		return 0
+	fi
+
+	if [ $OSYSTEM != "FreeBSD" -a $OSYSTEM != "Linux" ]; then
+		return 0
+	fi 
+
+	file_exist $MOD10
+	if [ $? -ne 0 ]; then
+		return 0 
+	fi
+
+	if [ $opt = UNLOAD ]; then
+		lsmods=`$MODULE_STAT`
+
+		for i in $WANEC_UNLOAD_DRIVERS
+		do 
+			echo "$lsmods" | grep -q "$i" && {
+				get_mod_name $WANEC_MOD_DIR $i
+				if ! unload_driver $module_name
+				then
+					return 1
+				fi
+			}
+		done
+	else 
+		
+		for i in $WANEC_LOAD_DRIVERS
+		do 
+			$MODULE_STAT | grep -q $i && continue
+
+			get_mod_name $WANEC_MOD_DIR $i
+			if ! load_driver $module_name
+			then
+				return 1
+			fi
+		done
+	fi
+
+	return 0
+}
+
+
+lip_config ()
+{
+	local opt=$1
+
+	if [ "$WAN_LIP_LOAD" != "YES" ]; then
+		return 0
+	fi
+
+	if [ $OSYSTEM != "FreeBSD" -a $OSYSTEM != "Linux" ]; then
+		return 0
+	fi 
+
+	file_exist $MOD9
+	if [ $? -ne 0 ]; then
+		return 0 
+	fi
+
+	if [ $opt = UNLOAD ]; then
+		lsmods=`$MODULE_STAT`
+
+		for i in $LIP_UNLOAD_DRIVERS
+		do 
+			echo "$lsmods" | grep -q "$i" && {
+				get_mod_name  $WANPIPE_LIP_MOD_DIR $i 
+				if ! unload_driver $module_name
+				then
+					return 1
+				fi
+			}
+		done
+	else 
+		
+		for i in $LIP_LOAD_DRIVERS
+		do 
+			$MODULE_STAT | grep -q $i && continue
+
+			get_mod_name $WANPIPE_LIP_MOD_DIR $i 
+			if ! load_driver $module_name
+			then
+				return 1
+			fi
+		done
+	fi
+
+	return 0
+}
+
+
+
+mod_error()
+{
+	echo -e "\n"
+        error "Wanpipe Module: $1 not found !!!"
+	if [ $OSYSTEM = "Linux" ]; then
+	        echo -e "        WANPIPE drivers must be compiled as modules"
+        	echo -e "        Check kernel configuration in /usr/src/linux/.config: "
+	        echo -e "             CONFIG_WAN_ROUTER=m"
+        	echo -e "             CONFIG_VENDOR_SANGOMA=m\n"               
+	else
+		echo -e "WANPIPE drivers are modules files. "
+		echo -e "Try to re-compile WANPIPE drivers."
+	fi
+}
+
+get_distrib()
+{
+	grep -i "red *hat" "/etc/issue" > /dev/null 
+	if [ $? -eq 0 ]
+	then
+		return 1; #RedHat Found
+	else
+		return 0;
+	fi
+
+}
+
+check_config()
+{
+	for dev in $WAN_DEVICES; do
+		check_file "$WAN_CONF_DIR/$dev.conf" || {
+			return 1;
+		}
+	done
+	return 0;
+}
+
+check_file()
+{
+	local file=$1
+
+	[ ! -f "$file" ] && {
+			if [ ! -z $file ]; 
+			then
+				echo -e "ERROR: Wanpipe configuration file not found:"
+				echo -e "               $file\n"
+			else
+				echo -e "ERROR: Wanpipe configuration file not found in $WAN_CONF_DIR\n"
+			fi
+			return 1;
+	}
+	return 0;
+}
+
+print_active_devices()
+{
+	local ac_list;
+	local ac_wan;
+	local rc=0;
+	local silent=${1:-0}
+	local devices
+
+	echo "Devices currently active:"
+	echo -n "	" 
+
+	if [ $OSYSTEM = "Linux" ]; then
+		#If /proc directory doesn't exist nothing
+        	#to print, thus exit
+		[ ! -d "$ROUTER_PROC" ] && return 0 
+
+		devices=`cat $ROUTER_PROC/status | cut -d' ' -f1 | grep wanpipe | sort`
+	else
+		check_module 
+		if [ $? -ne 0 ]; then
+			return 0
+		fi
+		devices=`wanconfig status | cut -d' ' -f1 | grep wanpipe | sort`
+	fi
+	
+	if [ ! -z "$devices" ]; then
+		if [  $silent -ne 0 ]; then	
+			echo $devices
+		fi
+		rc=1;
+	fi
+	
+	echo -e "\n" 
+
+	return $rc
+}
+
+check_exists () {
+
+	local device=$1
+
+	if [ $OSYSTEM = "Linux" ]; then
+		[ ! -d "$ROUTER_PROC" ] && return 1  #Device not running
+
+		if [ ! -f $ROUTER_PROC/$device ]; then 
+			echo "Error: Device $device does not exist/not allocated."
+			echo "       Check the messages log for the number of probed devices."
+			echo
+			return 1
+		fi
+	fi
+	
+	# Device exists
+	return 0
+
+}
+
+check_dev_running ()
+{
+	local device=$1
+	local res
+
+	if [ $OSYSTEM = "Linux" ]; then
+		[ ! -d "$ROUTER_PROC" ] && return 1  #Device not running
+
+		res=`cat $ROUTER_PROC/status | grep "$device "`
+	else
+		check_module 
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+		res=`wanconfig status | grep "$device "`
+	fi	
+
+	[ ! -z "$res" ] && {
+		#Device running
+		return 0
+	}
+
+	#Device not running
+	return 1;
+}
+
+check_and_print_still_running ()
+{
+	local devices 
+
+	if [ $OSYSTEM = "Linux" ]; then
+		if [ ! -d $ROUTER_PROC ]; then
+			return 1
+		fi
+
+		devices=`cat $ROUTER_PROC/status | cut -d' ' -f1 | grep wanpipe | sort`
+	else
+		check_module 
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+		
+		devices=`wanconfig status | cut -d' ' -f1 | grep wanpipe | sort`
+	fi
+	
+	if [ ! -z "$devices" ]; then
+		echo "Devices Still Running:"
+		# BASH echo -en "\t"
+		echo -n " "
+		echo $devices
+		echo
+		return 0
+	fi
+
+	return 1
+}
+
+create_ft1_conf () {
+
+	local dev=$1
+	local res
+
+	wandev=`grep "wanpipe.*=" $WAN_CONF_DIR/$dev.conf 2> /dev/null`
+	res=$?
+	if [ $res -eq 0 ]; then
+		wandev=${wandev%%=*}
+		if [ $AWK_SUPPORT = YES ]; then
+			eval "wandev=`echo $wandev | awk '{ gsub(" ", "") ; print }'`"
+		elif [ $BASH_SUPPORT -gt 1 ]; then
+			# BASH wandev=${wandev// /}
+			wandev=${wandev%% }
+		fi
+	else
+		echo -e "Error: Device name not found in $WAN_CONF_DIR/$dev.conf\n"
+		cleanup 1
+	fi
+
+        wancard=`grep "CARD_TYPE.*=.*" -i $WAN_CONF_DIR/$dev.conf 2> /dev/null`
+	wancpu=`grep "S514CPU.*=.*" -i $WAN_CONF_DIR/$dev.conf 2> /dev/null`
+	wanslot_auto=`grep "AUTO_PCISLOT.*=.*" -i $WAN_CONF_DIR/$dev.conf 2> /dev/null`
+	wanslot=`grep "PCISLOT.*=.*" -i	$WAN_CONF_DIR/$dev.conf 2> /dev/null`
+	wanbus=`grep "PCIBUS.*=.*" -i	$WAN_CONF_DIR/$dev.conf 2> /dev/null`
+	wanio=`grep "IOPORT.*=.*" -i	$WAN_CONF_DIR/$dev.conf 2> /dev/null`
+	wanirq=`grep "IRQ.*=.*" -i	$WAN_CONF_DIR/$dev.conf 2> /dev/null`
+
+	if [ -z "$wancard" ]; then
+		echo -e "Error: Missing fileds in $WAN_CONF_DIR/$dev.conf" 
+		echo -e "       configuraton file, in [$wandev] section.\n " 
+		cleanup 1
+	fi
+
+	if [ -z "$wancpu" -o -z "$wanslot" ]; then
+		if [ -z "$wanio" -o -z "$wanirq" ]; then
+			echo -e "Error: Missing fileds in $WAN_CONF_DIR/$dev.conf" 
+			echo -e "       configuraton file, in [$wandev] section.\n " 
+			cleanup 1
+		fi
+	fi
+
+	cat <<EOM > $WAN_CONF_DIR/$FT1_CONF
+
+#FT1 Configuration File
+#
+# Note: This file was automatically generated by wanrouter
+#       script. 
+#       DO NOT CHANGE IT
+#
+# CHDLC Protocol is used since, its firmware is the
+# only one with FT1 configuration functions.
+
+[devices]
+
+$wandev = WAN_CHDLC, Cisco HDLC Firmware  
+
+[$wandev]
+
+$wancard
+$wancpu
+$wanslot_auto
+$wanslot
+$wanbus
+
+$wanio
+$wanirq
+
+Firmware        = $WAN_HOME/firmware/cdual514.sfm   # adapter firmware
+
+#--------------------- END OF FT1 CONFIGURATION ------------------------
+
+EOM
+
+}
+
+
+check_config_opt () 
+{
+	local dev=$1
+	local opt=$2
+
+	case $dev in
+
+	ft1_wanpipe*) 
+
+		#Strip off 'ft1_' from 'ft1_wanpipe#'
+		dev=${dev##ft1_}
+
+		#Check if wanpipe#.conf file exists
+		check_file "$WAN_CONF_DIR/$dev.conf"
+		if [ $? -gt 0 ]; then
+			cleanup 1
+		fi
+
+		#If we are starting the router up, create
+		#the ft1.conf file in $WAN_CONF_DIR directory
+		if [ $opt -eq 0 ]; then
+			create_ft1_conf $dev
+		fi
+
+		#Return string ft1
+		result "ft1" 
+
+		#Get the wanpipe device number, and return it
+                #as a return code. This indicates that we want
+                #to setup ft1 device
+		dev=${dev##wanpipe}
+		if [ $AWK_SUPPORT = YES ]; then
+			dev=`echo $dev | awk '{ gsub(" ", "") ; print }'`
+		elif [ $BASH_SUPPORT -gt 1 ]; then
+			# BASH dev=${dev// /}
+			dev=${dev%% }
+		fi
+		return $dev
+		;;
+	
+	wanpipe*) 
+		#Check if wanpipe#.conf file exists
+		check_file "$WAN_CONF_DIR/$dev.conf"
+		if [ $? -gt 0 ]; then
+			cleanup 1
+		fi
+
+		#return string wanpipe#
+		result $dev
+
+		#return zero which indicates that we
+		#want to startup reglar wanpipe device
+		#not ft1 device
+		return 0
+		;;
+
+	*)
+		#Illegal syntax obtained
+		echo "Error: Incorrect device name syntax !"
+		cleanup 1
+		;;
+	esac
+
+}
+
+check_ft1_config ()
+{
+	local ft1=$1
+
+	if [ $ft1 = ft1 ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+result () {
+	echo $1 > $RC
+}
+
+check_osystem () {
+
+	if [ $OSYSTEM = "Linux" ]; then
+
+		if [ -d $WAN_LOCK_DIR ]; then
+			return 0
+		else
+			echo
+			echo "Warning: WAN_LOCK_DIR = $WAN_LOCK_DIR does not exist!"
+			echo "Please update the WAN_LOCK_DIR in /etc/wanpipe/wanrouter.rc"
+			echo
+		fi
+
+		if [ -d /var/lock/subsys ]; then
+		 	WAN_LOCK_DIR=/var/lock/subsys
+		elif [ -d /var/lock ]; then
+		 	WAN_LOCK_DIR=/var/lock
+		else 
+			WAN_LOCK_DIR=$WAN_CONF_DIR	
+		fi
+	fi
+
+}
+
+wansock_config ()
+{
+	local opt=$1
+
+	if [ $OSYSTEM != "Linux" ]; then
+		return 0
+	fi
+
+	file_exist $MOD5
+	if [ $? -ne 0 ]; then
+		return 0
+	fi
+
+	if [ $DEPMOD != YES ]; then
+		return 0
+	fi
+	
+	if [ $opt = UNLOAD ]; then
+		$MODULE_STAT | grep -q "$AF_WANPIPE_DRIVERS" && {
+			unload_driver $AF_WANPIPE_DRIVERS
+		}
+	else 
+		load_driver $AF_WANPIPE_DRIVERS
+	fi
+	return 0
+}
+
+annexg_config ()
+{
+	local opt=$1
+
+	if [ $OSYSTEM != "Linux" ]; then
+		return 0
+	fi
+
+	if [ "$WAN_ANNEXG_LOAD" != "YES" ]; then
+		return 0
+	fi
+
+	file_exist $MOD6
+	if [ $? -ne 0 ]; then 	
+		return 0 
+	fi
+
+	file_exist $MOD7
+	if [ $? -ne 0 ]; then
+		return 0
+	fi
+
+	file_exist $MOD8
+	if [ $? -ne 0 ]; then
+		return 0
+	fi
+
+	if [ $DEPMOD != YES ]; then
+		return 0
+	fi
+
+	if [ $opt = UNLOAD ]; then
+		lsmods=`$MODULE_STAT`
+
+		for i in $ANNEXG_UNLOAD_DRIVERS
+		do 
+			echo "$lsmods" | grep -q "$i" && {
+				unload_driver $i
+			}
+		done
+	else 
+		
+		for i in $ANNEXG_LOAD_DRIVERS
+		do 
+			load_driver $i
+		done
+	fi
+
+	return 0
+}
+
+
+print_wanpipe_config () {
+
+	echo -e "Wanpipe Config:\n"
+	if [ $OSYSTEM = "Linux" ]; then
+		cat /proc/net/wanrouter/config 
+	else
+		wanconfig config
+	fi
+}
+
+print_wanrouter_status () {
+
+	echo -e "\nWanrouter Status:\n"
+	if [ $OSYSTEM = "Linux" ]; then
+		cat /proc/net/wanrouter/status 
+	else
+		wanconfig status
+	fi
+}
+
+print_config_summary ()
+{
+	local pfiles;
+	local pfile;
+	local pdev;
+	local id=$(id -u)
+		
+	PROC_FILE=~/proc_output.$$
+	if [ -e /dev/shm ] && [ $id -eq 0 ]; then
+		PROC_FILE=/dev/shm/proc_output.$$ 
+	fi
+	
+
+	cd $WAN_HOME
+	
+	pfiles=`ls wanpipe*\.conf 2> /dev/null`
+	if [ $? -ne 0 ]; then
+		echo "No Wanpipe configuration files found in $WAN_HOME";
+		return;
+	fi
+
+	echo -e "Configuration File Summary in : $WAN_HOME/\n"
+
+	echo -e "Device\t\tProtocol\tType   Cpu/Io Slot/Irq  Bus\tState"
+	echo -e "------------------------------------------------------------------------"
+
+	for pfile in $pfiles
+	do
+
+		#Test for invalid file: wanpipe1.conf.tmp"
+		echo $pfile | grep ".*\..*\..*" > /dev/null 2> /dev/null
+		if [ $? -eq 0 ]; then
+			continue
+		fi
+
+	
+		pdev=`grep "^wanpipe*=*" $pfile | cut -d'=' -f1 | cut -d' ' -f1 2> /dev/null`
+		if [ $? -ne 0 ]; then
+			continue
+		fi
+		if [ -z "$pdev" ]; then
+			continue
+		fi
+
+		echo -n "$pdev	"
+		
+		pprot=`grep "^wanpiped*=*" $pfile | cut -d'=' -f2 | awk '{ gsub(" ", "") ; print }' | cut -d',' -f1`
+		if [ $? -ne 0 ]; then
+			continue
+		fi
+
+		if [ -z $pprot ]; then
+			continue
+		fi
+
+		if [ $pprot = WAN_X25 ] || [ $pprot = WAN_PPP ] || [ $pprot = WAN_FR ] || [ $pprot = WAN_MFR ] || [ $pprot = WAN_BSC ] || [ $pprot = WAN_AFT ] || [ $pprot = WAN_SS7 ] || [ $pprot = WAN_POS ] || [ $pprot = WAN_ATM ]; then
+			#echo -e -n "$pprot\t\t"
+			echo -n "$pprot	"
+		else
+			echo -n "$pprot	"
+		fi
+
+		phw=`grep "^S514CPU*" $pfile`
+		if [ $? -eq 0 ]; then
+			echo -n "PCI	"
+			
+			pcpu=`grep -i "^S514CPU*" $pfile | cut -d'=' -f2 | awk '{ gsub(" ", "") ; print }' | cut -d',' -f1`
+			echo -n "$pcpu	"
+			
+			pslot=`grep -i "^PCISLOT*" $pfile | cut -d'=' -f2 | awk '{ gsub(" ", "") ; print }' | cut -d',' -f1`
+			echo -n "$pslot	"
+			pbus=`grep -i "^PCIBUS*" $pfile | cut -d'=' -f2 | awk '{ gsub(" ", "") ; print }' | cut -d',' -f1`
+			if [ -z $pbus ]; then
+				echo -n "0	"
+			else
+				echo -n "$pbus	"
+			fi	
+			
+		else
+			if [ $pprot = WAN_ADSL ]; then
+		
+				echo -n "PCI	"
+
+				echo -n "N/A	"
+				
+				pslot=`grep -i "^PCISLOT*" $pfile | cut -d'=' -f2 | awk '{ gsub(" ", "") ; print }' | cut -d',' -f1`
+				echo -n "$pslot	"
+				pbus=`grep -i "^PCIBUS*" $pfile | cut -d'=' -f2 | awk '{ gsub(" ", "") ; print }' | cut -d',' -f1`
+				if [ -z $pbus ]; then
+					echo -n "0	"
+				else
+					echo -n "$pbus	"
+				fi	
+
+			else
+		
+				echo -n "ISA	"
+				pport=`grep -i "^IOPORT*" $pfile | cut -d'=' -f2 | awk '{ gsub(" ", "") ; print }' | cut -d',' -f1`
+				echo -n "$pport	"
+				pport=`grep -i "^IRQ*" $pfile | cut -d'=' -f2 | awk '{ gsub(" ", "") ; print }' | cut -d',' -f1`
+				echo -n "$pport	"
+				
+				echo -n "n/a	"
+
+			fi
+ 		fi
+
+		if [ $OSYSTEM = "Linux" ]; then
+			if [ -e /proc/net/wanrouter ]; then
+				if [ ! -e $PROC_FILE ]; then
+					cat /proc/net/wanrouter/status > $PROC_FILE
+				fi
+				pstate=`cat $PROC_FILE | grep "$pdev " | cut -d'|' -f4 | awk '{ gsub(" ", "") ; print }'`
+			else
+				pstate=""
+			fi
+
+		else
+				
+			check_module 
+			if [ $? -eq 0 ]; then
+				pstate=`wanconfig status | grep $pdev | cut -d'|' -f4 | awk '{ gsub(" ", "") ; print }'`
+			else
+				pstate=""
+			fi
+		fi 
+		if [ "$pstate" = "" ]; then
+			echo -n "Inactive"
+		else
+			echo -n "$pstate"
+		fi
+
+		echo 
+		
+	done
+
+	if [ -e  $PROC_FILE ]; then
+		rm -f $PROC_FILE
+	fi
+}
+
+
+wanrouter_if_debug()
+{
+	echo 
+	echo "Debug Info for $1"
+	echo
+
+	echo "WANPIPE Release: $ROUTER_VERSION"
+	echo	
+	echo
+
+	eval "$IFCONFIG_LIST | grep -w $1 >> /dev/null 2>>/dev/null"
+	if [ $? -ne 0 ]; then
+		check_dev_running $1
+		if [ $? -eq 0 ]; then
+			wanconfig -D $1
+			return;
+		fi
+
+		echo
+		echo "Error: Interface $1 does not exist!"
+		echo
+		cleanup 1
+		return;
+	fi
+
+	if [ ! -f /usr/sbin/wanpipemon ]; then
+		echo
+		echo "Error:    /usr/sbin/wanpipemon not found"
+		echo "Solution: Re-install latest wanpipe release"
+		echo
+		return;
+	fi
+
+	eval "/usr/sbin/wanpipemon -i $1 -c xm 2>> /dev/null"
+	if [ $? -ne 0 ]; then
+		echo 
+		echo "Error: /usr/sbin/wanpipemon failed!"
+		echo "       Make sure $1 is a valid wanpipe interface"
+		echo "       Otherwise call Sangoma Tech Support"
+		echo
+		return
+	fi
+
+	sleep 3
+
+	eval "/usr/sbin/wanpipemon -i $1 -c sc"
+	if [ $? -ne 0 ]; then
+		echo 
+		echo "Error: /usr/sbin/wanpipemon failed!"
+		echo "       Make sure $1 is a valid wanpipe interface"
+		echo "       Otherwise call Sangoma Tech Support"
+		echo
+		return
+	fi
+	sleep 2
+	eval "/usr/sbin/wanpipemon -i $1 -c sc"
+	if [ $? -ne 0 ]; then
+		echo 
+		echo "Error: /usr/sbin/wanpipemon failed!"
+		echo "       Make sure $1 is a valid wanpipe interface"
+		echo "       Otherwise call Sangoma Tech Support"
+		echo
+		return
+	fi
+	
+	sleep 5
+
+	echo "Start WANPIPE /var/log/messages"
+	echo
+	if [ $OSYSTEM = "Linux" ]; then
+		eval "tail -n 200 /var/log/messages | grep -i \"[wanpipe|sdladrv]\" "
+	else
+		eval "tail -n 200 /var/log/messages | grep -i \"wanpipe\|sdladrv\" "
+	fi
+	echo
+	echo "End of WANPIPE /var/log/messages"
+	echo
+
+	sleep 5
+	
+
+	echo
+	echo "---------- Starting Trace [ PRESS ENTER TO STOP ] ---------"
+	echo
+	sleep 3
+
+	eval "/usr/sbin/wanpipemon -i $1 -c tr"
+	if [ $? -ne 0 ]; then
+		echo 
+		echo "Error: /usr/sbin/wanpipemon failed!"
+		echo "       Make sure $1 is a valid wanpipe interface"
+		echo "       Otherwise call Sangoma Tech Support"
+		echo
+	fi
+}
+
+
+pci_parity_ctrl ()
+{
+	local parity_cmd;
+	local pdev;
+	local IDS;
+	local verbosity=${2:-1}
+
+	if [ $OSYSTEM != "Linux" ]; then
+		echo "Error: PCI Parity Ctrl only available on Linux"
+		echo
+		return
+	fi
+
+	IDS=`lspci | cut -d' ' -f1`
+
+	if [ -z $1 ]; then
+		echo "Displaying System PCI Parity Configuration";
+		echo "=========================================="
+		echo
+		lspci -vvv | grep Parity
+		echo
+		echo "=========================================="
+		return
+	fi
+	
+	parity_cmd=${1:-"off"}
+
+	if [ $parity_cmd != "on" ]; then
+		parity_cmd="off";
+	fi
+
+	eval "type setpci 2> /dev/null > /dev/null"
+	if [ $? -ne 0 ]; then
+		echo "Parity Set Error: setpci utility not found!"
+		return
+	fi
+
+	if [ $verbosity -gt 0 ]; then
+		echo "Setting PCI Parity to $parity_cmd";
+	fi
+
+	for pdev in $IDS
+	do
+		if [ "$parity_cmd" = "on" ]; then
+			eval "setpci -s $pdev 3e.b=0x7"
+		else
+			eval "setpci -s $pdev 3e.b=0x4"
+		fi
+
+	done
+
+	return
+}
+
+wanrouter_pre_start()
+{
+	
+	if [ "$WAN_PCI_PARITY" = "OFF" ]; then
+		echo "Wanrouter: Disabling PCI Parity on Start!" >> $WAN_LOG;
+		pci_parity_ctrl "off" 0
+	elif [ "$WAN_PCI_PARITY" = "ON" ]; then
+		echo "Wanrouter: Enabling PCI Parity on Start!" >> $WAN_LOG;
+		pci_parity_ctrl "on" 0
+	fi
+}
+
+
+wanrouter_debug ()
+{
+	local err=0
+	echo
+
+	if [ ! -d $WAN_HOME ]; then
+		echo "Error:    $WAN_HOME not found"
+		echo "Reason:   Wanpipe not installed properly"
+		echo "Solution: Re-install wanpipe"
+		return
+	fi
+	
+	check_module
+	if [ $? -ne 0 ]; then
+		load_module
+		if [ $? -ne 0 ]; then
+			if [ $OSYSTEM = "Linux" ]; then
+				echo "Error:    /proc/net/wanrouter not found"
+			fi
+			echo "Reason:   Wanpipe kernel modules failed to load"
+			echo "Solution: Run 'wanrouter hwprobe' or 'wanrouter start'"
+			echo "          Contact Sangoma Tech Support"
+			echo
+			return
+		fi
+		unload_module
+	fi
+
+	if [ ! -f $WAN_HOME/wanpipe1.conf ]; then
+		echo "Warning:  wanpipe1.conf configuration file not found"
+		echo "Reason:   did not run /usr/sbin/wancfg to create it"
+		echo "Solution: run /usr/sbin/wancfg :)"
+		echo
+		err=1
+	fi
+
+	eval "grep -i invalid $WAN_LOG"
+	if [ $? -eq 0 ]; then
+		echo
+		echo "Error:    Configuration file syntax error in $WAN_LOG"
+		echo "Reason:   Miss-configuration: run 'wanrouter conflog'"
+		echo "Solution: Re-run /usr/sbin/wancfg and configure all variables "
+		echo
+		err=1
+	fi
+
+	eval "tail -n 20 /var/log/messages | grep -i \"wanpipe.*error[,:]\" " 
+	if [ $? -eq 0 ]; then
+		echo "------------------------------------------"
+		echo "Error:    Error occured during wanrouter startup/shutdown"
+		echo "Reason:   Check /var/log/messages file: run 'wanrouter messages'"
+		echo "Solution: Review /var/log/messages and contact Sangoma Tech Support"
+		echo
+		err=1
+	else
+
+		eval "tail -n 20 /var/log/messages | grep -i \"sdladrv.*invalid[,:]\"" 
+		if [ $? -eq 0 ]; then
+			echo "------------------------------------------"
+			echo "Error:    Config error occured during wanrouter startup/shutdown"
+			echo "Reason:   Check /var/log/messages file: run 'wanrouter messages'"
+			echo "Solution: Review /var/log/messages and contact Sangoma Tech Support"
+			echo
+			err=1
+		else
+
+			eval "tail -n 20 /var/log/messages | grep -i \"wanpipe.*warning\" " 
+			if [ $? -eq 0 ]; then
+				echo "------------------------------------------"
+				echo "Warning:  Warning occured during wanrouter startup/shutdown"
+				echo "Reason:   Check /var/log/messages file"
+				echo "Solution: Review /var/log/messages and contact Sangoma Tech Support"
+				echo
+				err=1
+			fi
+		fi
+	fi
+
+	if [ $err -eq 0 ]; then
+		echo "Wanpipe environment/utilites/modules/operation OK"
+	fi
+	echo
+}
+
+check_command_exist ()
+{
+	local cmd=$1
+	local cmd_rc
+
+	if [ $OSYSTEM = "Linux" ]; then
+		eval "type $1 > /dev/null 2> /dev/null"
+	else
+		eval "which $1 > /dev/null 2> /dev/null"
+	fi
+	cmd_rc=$?
+
+	return $cmd_rc
+}
+
+init_meta_conf () 
+{
+	ROUTER_BOOT=
+	WANPIPE_CONF_DIR=
+	WANPIPE_INTR_DIR=
+	ROUTER_LOG=
+	ROUTER_LOCK=
+	ROUTER_IP_FORWARD=
+	NEW_IF_TYPE=
+	WANCFG_LIB=
+	WAN_DEVICES=
+
+	ROUTER_BOOT=
+	WAN_CONF_DIR=
+	WAN_INTR_DIR=
+	WAN_LOG=
+	WAN_LOCK=
+	WAN_LOCK_DIR=
+	WAN_IP_FORWARD=
+	NEW_IF_TYPE=
+	WAN_LIB_DIR=
+	WAN_ADSL_LIST=
+	WAN_DEVICES=
+}
+
+read_meta_conf ()
+{
+
+	if [ $OSYSTEM = "Linux" ]; then
+		WAN_HOME=/etc/wanpipe
+	elif [ $OSYSTEM = "FreeBSD" -o $OSYSTEM = "OpenBSD" ]; then
+		WAN_HOME=/usr/local/etc/wanpipe
+		wanrouter_rc_file=""
+		if [ -r /etc/rc.conf ]; then
+			. /etc/rc.conf
+		fi
+		if [ -n "$wanrouter_rc_file" ]; then
+			WAN_HOME=${wanrouter_rc_file%/*}
+		fi
+	fi
+	WAN_CONF_DIR=$WAN_HOME
+	META_CONF=$WAN_HOME/wanrouter.rc
+	WAN_INTR_DIR=$WAN_HOME/interfaces
+
+	# Read meta-configuration file.
+	if [ -f $META_CONF ]
+		then . $META_CONF
+	else
+		return 1 
+	fi
+	if [ -f $WAN_HOME/global.conf ]; then
+		. $WAN_HOME/global.conf
+	fi
+	return 0
+}
+
+meta_conf_compatiblity ()
+{
+	WAN_CONF_DIR=$WANPIPE_CONF_DIR
+	WAN_INTR_DIR=$WANPIPE_INTR_DIR
+	WAN_LOG=$ROUTER_LOG
+	WAN_LOCK=$ROUTER_LOCK
+	WAN_LOCK_DIR=${ROUTER_LOCK%/*}
+	WAN_IP_FORWARD=$ROUTER_IP_FORWARD
+	WAN_LIB_DIR=$WANCFG_LIB
+	WAN_ADSL_LIST=$WANPIPE_CONF_DIR/wan_adsl.list
+
+}
+
+wanrouter_script()
+{
+	local cmd=$1
+	local dev=$2
+	local ifname=$3
+
+	#echo "Starting Script: $WAN_SCRIPTS_DIR/$dev-$ifname-$cmd"
+
+	if [ "$ifname" != "" ]; then
+		#Interface name exists
+		if [ -f "$WAN_SCRIPTS_DIR/$dev-$ifname-$cmd" ]; then
+			eval "sh $WAN_SCRIPTS_DIR/$dev-$ifname-$cmd $dev $ifname"
+		fi
+		
+	elif [ "$dev" != "" ]; then
+		#Device name exists
+		if [ -f "$WAN_SCRIPTS_DIR/$dev-$cmd" ]; then
+			eval "sh $WAN_SCRIPTS_DIR/$dev-$cmd $dev"
+		fi
+	else
+		#Global Cmd
+		if [ -f "$WAN_SCRIPTS_DIR/$cmd" ]; then
+			eval "sh $WAN_SCRIPTS_DIR/$cmd"
+		fi
+	fi
+}
+
+generate_adsl_list()
+{
+	local vci=0;
+	local vpi=0;
+
+	echo "35 0" > $WAN_ADSL_LIST
+	echo "35 8" >> $WAN_ADSL_LIST
+
+	vci=30
+	vpi=0
+	while [ 1 ]; do
+		while [ 1 ]; do
+
+			echo "$vci $vpi" >> $WAN_ADSL_LIST
+
+			vpi=$((vpi+1))
+			if [ $vpi = 10 ]; then
+				vpi=0
+				break;
+			fi
+		done
+
+		vci=$((vci+1))
+
+		if [ $vci -eq 40 ]; then
+			vci=30
+			break;
+		fi
+	done
+}
+
+# FIXME: Add code for BSD
+wan_force_unload_modules()
+{
+	if [ $OSYSTEM = "Linux" ]; then
+		if [ -e "$ROUTER_PROC" ] && [ -e "$ROUTER_PROC/status" ]; then
+			wp_list=`cat $ROUTER_PROC/status | cut -d' ' -f1 | grep wanpipe | sort -r` 
+			if [ -z $wp_list ]; then
+				mod_list=`cat /proc/modules | grep wan | cut -d ' ' -f1 | xargs`
+				for tmp_mod in $mod_list
+				do
+					eval "rmmod $tmp_mod >> /dev/null 2>> /dev/null"
+				done
+			fi
+		fi
+	fi
+}
+
+# FIXME: Add code for BSD
+stop_running_wanpipes ()
+{
+
+	if [ $OSYSTEM = "Linux" ]; then
+		if [ -e "$ROUTER_PROC/status" ]; then
+			wp_list=`cat $ROUTER_PROC/status | cut -d' ' -f1 | grep wanpipe | sort -r`
+			
+			for list in $wp_list
+			do
+				# BASH list=${list// /};
+				list=${list%% };
+				if [ ! -z $list ]; then
+					eval "rm -f $WAN_PROG_LOCK 2> /dev/null > /dev/null"
+					wanrouter stop $list 
+				fi
+			done
+	
+			wan_force_unload_modules
+		fi
+	fi
+}        
+
+config_wanrouter_rc ()
+{
+	local sequence
+	local num
+	local val
+
+	cat << EOM
+
+WANPIPE STARTUP CONFIG
+
+Current Wanpipe devices configured
+to start on bootup:
+
+$WAN_DEVICES
+	
+	Please specify new startup string:
+		eg: wanpipe1 wanpipe2 ...
+
+	Note: Single space must exist between
+      	      device names.
+
+EOM
+
+echo -n "Enter Wanpipe Startup Sequence: " 
+
+read sequence 
+
+if [ -z "$sequence" ]; then
+	echo
+	echo "Error: startup sequence must contain at least one device name"
+	echo "       eg: wanpipe1"
+	echo
+	return
+fi
+
+eval "echo $sequence | grep \"wanpipe\d*\" > /dev/null 2> /dev/null"
+if [ $? -ne 0 ]; then
+	echo
+	echo "Error: startup sequence must contain at least one device name"
+	echo "       eg: wanpipe1"
+	echo
+	return
+fi
+
+echo
+echo "New Sequence is: $sequence"
+echo
+
+getyn "Is the above sequence correct ?"
+
+if [ $? -eq 0 ]; then
+	echo
+	echo "Setting wanpipe startup sequence to: $sequence"
+	echo
+	cat $META_CONF | grep "WAN_DEVICES=" -v  > $WAN_HOME/tmp.$$
+	echo "WAN_DEVICES=\"$sequence\"" >>  $WAN_HOME/tmp.$$
+	cat  $WAN_HOME/tmp.$$ > $META_CONF
+fi
+
+}
+
+init_global_params()
+{
+
+	if [ $OSYSTEM = "Linux" ]; then
+		ROUTER_VERSION=7.0.10
+		IFCONFIG_LIST=ifconfig
+		MODULE_STAT=lsmod
+		WAN_DRIVERS="wanpipe"
+		AF_WANPIPE_DRIVERS=af_wanpipe
+		ANNEXG_LOAD_DRIVERS="wanpipe_lapb wanpipe_x25 wanpipe_dsp"
+		ANNEXG_UNLOAD_DRIVERS="wanpipe_dsp wanpipe_x25 wanpipe_lapb"
+		LIP_LOAD_DRIVERS="wanpipe_lip"
+		LIP_UNLOAD_DRIVERS="wanpipe_lip"
+		WANEC_LOAD_DRIVERS="wanec"
+		WANEC_UNLOAD_DRIVERS="wanec"
+		MODULE_LOAD=modprobe
+		MODULE_UNLOAD="modprobe -r"
+		MODULE_EXT=".ko"
+		DEPMOD=YES
+	
+		check_command_exist modprobe
+		if [ $? -ne 0 ]; then
+			check_command_exist insmod
+			if [ $? -eq 0 ]; then
+				DEPMOD=NO	
+				MODULE_LOAD=insmod
+				MODULE_UNLOAD=rmmod
+			fi
+		fi
+	
+		MOD1=/lib/modules/sdladrv
+		MOD2=/lib/modules/wanrouter
+		MOD3=/lib/modules/wanpipe_syncppp
+		MOD4=/lib/modules/wanpipe
+		MOD5=/lib/modules/af_wanpipe
+	
+		if [ -d /lib/modules/$(uname -r) ]; then
+			uname -r | grep "^2.4.*" > /dev/null
+			if [ $? -eq 0 ]; then
+				MODULE_EXT=".o"
+				if [ -d /lib/modules/$(uname -r)/kernel ]; then
+					MOD1=/lib/modules/$(uname -r)/kernel/drivers/net/wan/sdladrv
+					MOD2=/lib/modules/$(uname -r)/kernel/net/wanrouter/wanrouter
+					MOD3=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_syncppp
+					MOD4=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe
+					MOD5=/lib/modules/$(uname -r)/kernel/net/wanrouter/af_wanpipe
+	
+					MOD6=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_lapb
+					MOD7=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_x25
+					MOD8=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_dsp
+
+					MOD9=/lib/modules/$(uname -r)/kernel/net/wanrouter/wanpipe_lip
+					WANPIPE_LIP_MOD_DIR=/lib/modules/$(uname -r)/kernel/net/wanrouter
+					MOD10=/lib/modules/$(uname -r)/kernel/net/wanrouter/wanec
+					WANEC_MOD_DIR=/lib/modules/$(uname -r)/kernel/net/wanrouter
+
+				fi
+			else
+	
+				uname -r | grep "^2.6.*" > /dev/null
+				if [ $? -eq 0 ]; then
+					if [ -d /lib/modules/$(uname -r)/kernel ]; then	
+						MOD1=/lib/modules/$(uname -r)/kernel/drivers/net/wan/sdladrv
+						MOD2=/lib/modules/$(uname -r)/kernel/net/wanrouter/wanrouter
+						MOD3=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_syncppp
+						MOD4=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe
+						MOD5=/lib/modules/$(uname -r)/kernel/net/wanrouter/af_wanpipe
+	
+						MOD6=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_lapb
+						MOD7=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_x25
+						MOD8=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_dsp
+
+						MOD9=/lib/modules/$(uname -r)/kernel/net/wanrouter/wanpipe_lip
+						WANPIPE_LIP_MOD_DIR=/lib/modules/$(uname -r)/kernel/net/wanrouter
+						MOD10=/lib/modules/$(uname -r)/kernel/net/wanrouter/wanec
+						WANEC_MOD_DIR=/lib/modules/$(uname -r)/kernel/net/wanrouter
+					fi
+				else
+					uname -r | grep "^3.*.*" > /dev/null
+					if [ $? -eq 0 ]; then	
+						MOD1=/lib/modules/$(uname -r)/kernel/drivers/net/wan/sdladrv
+						MOD2=/lib/modules/$(uname -r)/kernel/net/wanrouter/wanrouter
+						MOD3=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_syncppp
+						MOD4=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe
+						MOD5=/lib/modules/$(uname -r)/kernel/net/wanrouter/af_wanpipe
+	
+						MOD6=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_lapb
+						MOD7=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_x25
+						MOD8=/lib/modules/$(uname -r)/kernel/drivers/net/wan/wanpipe_dsp
+
+						MOD9=/lib/modules/$(uname -r)/kernel/net/wanrouter/wanpipe_lip
+						WANPIPE_LIP_MOD_DIR=/lib/modules/$(uname -r)/kernel/net/wanrouter
+						MOD10=/lib/modules/$(uname -r)/kernel/net/wanrouter/wanec
+						WANEC_MOD_DIR=/lib/modules/$(uname -r)/kernel/net/wanrouter
+					else
+						if [ -d /lib/modules/$(uname -r)/net ]; then
+							MOD1=/lib/modules/$(uname -r)/net/sdladrv
+							MOD2=/lib/modules/$(uname -r)/misc/wanrouter
+							MOD3=/lib/modules/$(uname -r)/net/wanpipe_syncppp
+							MOD4=/lib/modules/$(uname -r)/net/wanpipe
+							MOD5=/lib/modules/$(uname -r)/misc/af_wanpipe
+	
+							MOD6=/lib/modules/$(uname -r)/net/wanpipe_lapb
+							MOD7=/lib/modules/$(uname -r)/net/wanpipe_x25
+							MOD8=/lib/modules/$(uname -r)/net/wanpipe_dsp
+
+							MOD9=/lib/modules/$(uname -r)/misc/wanpipe_lip
+							WANPIPE_LIP_MOD_DIR=/lib/modules/$(uname -r)/misc
+							MOD10=/lib/modules/$(uname -r)/misc/wanec
+							WANEC_MOD_DIR=/lib/modules/$(uname -r)/misc
+						fi
+					fi
+				fi
+			fi
+		fi
+	
+		MODULES="$MOD1 $MOD2 $MOD3 $MOD4 $MOD5"
+		OPT_MODULES="$MOD3 $MOD5"
+		UMODULES="af_wanpipe wanpipe wanpipe_syncppp wanrouter sdladrv"
+		
+	elif [ $OSYSTEM = "FreeBSD" ]; then
+	
+		SYSCTL=/sbin/sysctl
+		AWK=/usr/bin/awk
+		PKGINFO=/usr/sbin/pkg_info
+		major_ver=${RELEASE%%.*}
+		ROUTER_VERSION=`$PKGINFO | $AWK '$1~/wanpipe/ {print $1}'`
+		ROUTER_VERSION=${ROUTER_VERSION#wanpipe-}
+		IFCONFIG_LIST=ifconfig
+		CDEV_WANROUTER=/dev/$SCRIPT
+		CDEV_MAJOR=139
+		CDEV_MINOR=0
+		MODULE_STAT=kldstat
+		MODULE_LOAD=kldload
+		MODULE_UNLOAD=kldunload
+		MODULE_EXT=".ko"
+		DEPMOD=YES
+		if [ "$major_ver" = "5" -o "$major_ver" = "6" ]; then
+			MODULE_DIR=/boot/modules
+		else
+			MODULE_DIR=/modules
+		fi
+	
+		if [ -z ${WAN_MODULE_DIR} ]; then
+			WAN_MODULE_DIR=${MODULE_DIR}
+		fi
+		dir=`kldconfig -r |grep $WAN_MODULE_DIR 2>/dev/null`
+		if [ -z $dir ]; then
+			kldconfig -m $WAN_MODULE_DIR 2>/dev/null
+		fi
+
+		usymbol=`nm $WAN_MODULE_DIR/wanpipe.ko | grep " U zt_register" > /dev/null`
+		if [ -n $usymbol ]; then
+			kldconfig -m /usr/local/lib/zaptel 2>/dev/null
+		fi
+			
+		MOD9="${WAN_MODULE_DIR}/wanpipe_lip"
+		WANPIPE_LIP_MOD_DIR=${WAN_MODULE_DIR}
+		MOD10="${WAN_MODULE_DIR}/wanec"
+		WANEC_MOD_DIR=${WAN_MODULE_DIR}
+		MODULES="${WAN_MODULE_DIR}/sdladrv ${WAN_MODULE_DIR}/wanrouter ${WAN_MODULE_DIR}/wanpipe"
+		UMODULES="wanpipe_lip wanec wanpipe wanrouter sdladrv"
+		WAN_DRIVERS="wanpipe"
+		LIP_LOAD_DRIVERS="wanpipe_lip"
+		LIP_UNLOAD_DRIVERS="wanpipe_lip"
+		WANEC_LOAD_DRIVERS="wanec"
+		WANEC_UNLOAD_DRIVERS="wanec"
+		
+	elif [ $OSYSTEM = "OpenBSD" ]; then
+	
+		SYSCTL=/sbin/sysctl
+		AWK=/usr/bin/awk
+		PKGINFO=/usr/sbin/pkg_info
+		SECURELEVEL=`$SYSCTL -n kern.securelevel`
+		ROUTER_VERSION=`$PKGINFO | $AWK '$1~/wanpipe/ {$1=""; print }'`
+		IFCONFIG_LIST="ifconfig -a"
+		CDEV_WANROUTER=/dev/$SCRIPT
+		CDEV_MAJOR=139
+		CDEV_MINOR=0
+		POSTINSTALL=create_cdev
+		MODULE_STAT=modstat
+		MODULE_LOAD=modload
+		MODULE_UNLOAD=modunload
+		MODULE_DIR=/usr/lkm
+		DEPMOD=YES
+		if [ -z ${WAN_MODULE_DIR} ]; then
+			WAN_MODULE_DIR=${MODULE_DIR}
+		else
+			if [ "${WAN_MODULE_DIR}" != ${MODULE_DIR} ]; then
+				DEPMOD=NO	
+			fi
+		fi
+		MODULE_EXT=".o"
+		MODULES="${WAN_MODULE_DIR}/wanpipe"
+		UMODULES="wanpipe"
+		WAN_DRIVERS="wanpipe"
+	elif [ $OSYSTEM = "NetBSD" ]; then
+	
+		SYSCTL=/sbin/sysctl
+		AWK=/usr/bin/awk
+		PKGINFO=/usr/sbin/pkg_info
+		SECURELEVEL=`$SYSCTL -n kern.securelevel`
+		ROUTER_VERSION=`$PKGINFO | $AWK '$1~/wanpipe/ {$1=""; print }'`
+		IFCONFIG_LIST="ifconfig -a"
+		CDEV_WANROUTER=/dev/$SCRIPT
+		CDEV_MAJOR=139
+		CDEV_MINOR=0
+		POSTINSTALL=create_cdev
+		MODULE_STAT=modstat
+		MODULE_LOAD=modload
+		MODULE_UNLOAD=modunload
+		MODULE_DIR=/usr/lkm
+		DEPMOD=YES
+		if [ -z ${WAN_MODULE_DIR} ]; then
+			WAN_MODULE_DIR=${MODULE_DIR}
+		else
+			if [ "${WAN_MODULE_DIR}" != ${MODULE_DIR} ]; then
+				DEPMOD=NO	
+			fi
+		fi
+		MODULE_EXT=".o"
+		MODULES="${WAN_MODULE_DIR}/wanpipe"
+		UMODULES="wanpipe"
+		WAN_DRIVERS="wanpipe"
+	fi
+	return 0	
+}
+
+####### MAIN #################################################################
+# set -x
+
+RCDLINKS="0,K10 1,K10 2,S20 3,S20 4,S20 5,S20 6,K10"
+
+
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/loca/bin:/usr/local/sbin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
+OSYSTEM=`uname -s`
+RELEASE=`uname -r`
+PROD=wanpipe
+SCRIPT=wanrouter
+REDHAT=/usr/src/redhat
+ROUTER_PROC=/proc/net/wanrouter
+WAN_PROG_LOCK=/var/lock/wanrouter_lock
+DEPMOD=YES
+LINEPROBE_PATH=/usr/sbin/lineprobe
+WANPIPE_IS_RUNNING=/var/run/wanpipe_is_running
+g_rc=0;
+
+RUGGEDCOM=No
+
+check_bash
+check_awk
+
+# Return code 
+RC=$(pwd)/return_code
+GET_RC="cat $RC"
+FT1_CONF=ft1.conf
+
+# Ignore interrupt signals.
+trap '' 2
+
+init_meta_conf
+read_meta_conf
+if [ $? -ne 0 ]; then
+	echo "$SCRIPT: Error: $META_CONF not found!"
+	exit 1;
+fi 
+
+if [ "$WANPIPE_CONF_DIR" != "" -a "$WAN_CONF_DIR" = "" ] || [ "$WAN_ADSL_LIST" = "" ]; then
+	meta_conf_compatiblity
+fi
+
+init_global_params
+
+WAN_LIP_LOAD=YES
+WANEC_LOAD=YES
+WAN_ANNEXG_LOAD=${WAN_ANNEXG_LOAD:-NO}
+WAN_DYN_WANCONFIG=${WAN_DYN_WANCONFIG:-NO}
+NEW_IF_TYPE=${NEW_IF_TYPE:-NO}
+WAN_INTR_DIR=$WAN_INTR_DIR
+LINUX_DISTR=unknown
+
+
+if [ -f $WAN_PROG_LOCK ]; then
+	echo -e "\nERROR: wanrouter script already running!\n";
+	cleanup 0;
+fi
+
+touch $WAN_PROG_LOCK
+
+check_osystem
+
+#Check osystem confirms the WAN_LOCK directory
+WAN_LOCK=$WAN_LOCK_DIR/wanrouter
+
+
+if [ ! -f $WAN_ADSL_LIST ]; then
+	generate_adsl_list
+fi
+
+if [ $OSYSTEM = "Linux" ]; then
+	eval "grep \"Debian\" -i /etc/issue > /dev/null"
+	if [ $? -eq 0 ]; then 
+		LINUX_DISTR=debian	
+	fi
+	eval "grep \"Red *Hat\" -i /etc/issue > /dev/null"
+	if [ $? -eq 0 ]; then
+		LINUX_DISTR=redhat	
+	fi
+	eval "grep \"Mandrake\" -i /etc/issue > /dev/null"
+	if [ $? -eq 0 ]; then
+		LINUX_DISTR=redhat	
+	fi
+
+	if [ "$WAN_DYN_WANCONFIG" = "YES" ]; then
+		if [ ! -e "/etc/wanpipe/wanconfig_socket" ]; then
+			echo "Starting wanconfig dameon"
+			eval "/usr/sbin/wanconfig -x >> $WAN_LOG 2>> $WAN_LOG &"
+			if [ $? -ne 0 ]; then
+				echo "Failed to start wanconfig daemon!"
+				cleanup 0;
+			fi
+		else
+			if [ ! -e "/var/run/wanconfig.pid" ]; then
+				echo "Starting wanconfig dameon"
+				\rm -f /etc/wanpipe/wanconfig_socket
+				eval "/usr/sbin/wanconfig -x >> $WAN_LOG 2>> $WAN_LOG &"
+				if [ $? -ne 0 ]; then
+					echo "Failed to start wanconfig daemon!"
+					cleanup 0;
+				fi
+			else
+				kill -USR1 $(cat /var/run/wanconfig.pid) >> /dev/null 2>> /dev/null
+				if [ $? -ne 0 ]; then
+					echo "Starting wanconfig dameon"
+					\rm -f /etc/wanpipe/wanconfig_socket
+					eval "/usr/sbin/wanconfig -x >> $WAN_LOG 2>> $WAN_LOG &"
+					if [ $? -ne 0 ]; then
+						echo "Failed to start wanconfig daemon!"
+						cleanup 0;
+					fi
+				fi
+			fi
+		fi
+	else
+		if [ -e "/etc/wanpipe/wanconfig_socket" ]; then
+			if [ -f /var/run/wanconfig.pid ]; then
+				eval "kill -TERM $(cat /var/run/wanconfig.pid)" 		
+				echo "Killing wanconfig daemon"
+			fi
+		fi
+	fi
+fi
+
+echo
+# If modules doesn't loaded remove all lock file from WAN_LOCK_DIR.
+check_module
+
+ft1_or_wanpipe=0
+# See how we were called.
+case "$1" in
+	start)	
+
+
+		# WANROUTER START
+		if [ -z $2 ]; then	
+
+			if [ "$WANPIPE_GLOBAL_CFG" = "DAHDI" ]; then
+				echo "Executing DAHDI config $WANPIPE_GLOBAL_FE_MEDIA"
+				if [ -z $WANPIPE_GLOBAL_FE_MEDIA ]; then
+					WANPIPE_GLOBAL_FE_MEDIA=T1
+				fi
+				eval "rm -f $WAN_PROG_LOCK 2> /dev/null > /dev/null"
+				eval "wancfg_dahdi --no-dahdi --no-chan-dahdi --silent --fe_media=$WANPIPE_GLOBAL_FE_MEDIA"
+
+                if [ "$WANPIPE_WITH_DIGIUM" = "TRUE" ]; then
+                    eval "cp $WAN_CONF_DIR/wancfg_zaptel/templates/dahdi_cfg_script_with_digium $WAN_CONF_DIR/scripts/start"
+                fi
+			fi	
+
+			check_config || cleanup 1
+
+			load_module
+			if [ $? -ne 0 ]; then
+				cleanup 2
+			fi
+
+			wanrouter_pre_start;
+			
+			config_devices $WAN_DEVICES
+
+			config_interfaces $WAN_DEVICES
+
+			wanrouter_script start  
+				
+		elif [ -z $3 ]; then
+		#ROUTER START WANPIPE
+			
+			[ -f $WAN_CONF_DIR/$FT1_CONF ] && rm -f $WAN_CONF_DIR/$FT1_CONF
+			dev=$2
+
+			#Parse the dev name, and if it starts with
+			#ft1 than it means we should load the ft1 
+ 			#driver.  
+			check_config_opt $dev 0
+			ft1_or_wanpipe=$?
+			dev=$($GET_RC)
+			rm -f $RC
+
+			WAN_CONF=$WAN_CONF_DIR/$dev.conf
+
+			check_file $WAN_CONF || cleanup 1
+
+			load_module
+			if [ $? -ne 0 ]; then
+				cleanup 2
+			fi
+
+			#If we are starting FT1 driver, we have to check
+			#wether the actual wanpipe# device is running or
+                        #not, thus name dev has to be changed to 'wanpipe#'
+			if [ $ft1_or_wanpipe -gt 0 ]; then
+				dev="wanpipe$ft1_or_wanpipe"
+			fi 
+
+			wanrouter_pre_start;
+
+			config_devices $dev
+			if [ $? -ne 0 ]; then
+				cleanup 3
+			fi
+
+			#When loading ft1 device there are not interfaces
+			if [ $ft1_or_wanpipe -eq 0 ]; then
+				config_interfaces $dev
+				if [ $? -ne 0 ]; then
+					cleanup 4
+				fi
+			fi
+			
+		else
+		#ROUTER START WANPIPE INTERFACE
+			
+			if [ $OSYSTEM != "Linux" ]; then
+				echo " This option doesn't supported yet!"
+				cleanup 0	
+			fi
+			dev=$2
+			if_name=$3
+			
+			#Parse the dev name, and if it starts with
+			#ft1 than it means we should load the ft1 
+ 			#driver.  
+			check_config_opt $dev 0
+			ft1_or_wanpipe=$?
+			dev=$($GET_RC)
+			rm -f $RC
+
+			WAN_CONF=$WAN_CONF_DIR/$dev.conf
+
+			check_file $WAN_CONF || cleanup 1
+
+			load_module
+			if [ $? -ne 0 ]; then
+				cleanup 2
+			fi
+
+			eval "$IFCONFIG_LIST | grep -w $if_name > /dev/null 2> /dev/null"
+			if [ $? -eq 0 ]; then
+				echo -e "\nInterface $if_name is already up!\n"
+				cleanup 1
+			fi
+		
+			wanrouter_pre_start;
+
+			echo "Configuring interface: $if_name"
+
+			if [ "$WAN_DYN_WANCONFIG" = YES ]; then
+				eval "/usr/sbin/wanconfig_client cmd=start,card=$dev,dev=$if_name" 
+			else
+				eval "/usr/sbin/wanconfig -v card $dev dev $if_name up >> $WAN_LOG"
+			fi
+
+
+			#Regardles of config try to bring up the interface
+			#Interface up command will fail on its own
+			#if [ $? -ne 0 ]; then
+			#	cleanup 1
+			#fi    
+			
+			interface_up $if_name
+			if [ $? -ne 0 ]; then
+				echo -e "\nInterface $if_name start error: ip setup failure!\n"
+				cleanup 1
+			else
+				echo "Interface $if_name up."
+			fi
+
+			wanrouter_script start $dev $if_name
+		fi
+		;;
+	stop)	
+		
+		#WANROUTER STOP
+		if [ -z $2 ]; then
+
+			check_module
+			if [ $? -ne 0 ]; then
+				unload_module
+				remove_cdev
+				echo -e "Router is already stopped !\n"
+				cleanup 1
+			fi
+
+			#Check that all wanpipe#.conf file defined in 
+			# WAN_DEVICES exist
+			check_config || {
+				unload_module
+				remove_cdev
+				echo -e "No devices running, Unloading Modules"
+				cleanup 1
+			}
+
+			if [ "$WAN_DEVICES_REV_STOP_ORDER" = "YES" ]; then
+				tmp_dev_list=
+				for dev in $WAN_DEVICES; do
+					tmp_dev_list="$dev ""$tmp_dev_list"
+				done
+				WAN_DEVICES=$tmp_dev_list
+			fi
+
+					
+			wanrouter_script stop 
+	
+			unconfig_interfaces $WAN_DEVICES
+
+			unconfig_devices $WAN_DEVICES
+
+		elif [ -z $3 ]; then
+		#WANROUTER STOP WANPIPE
+
+			dev=$2
+
+			if [ "$dev" = "all" ]; then
+                stop_running_wanpipes
+				cleanup 0
+			fi
+
+			if [ "$dev" = "force" ]; then
+				check_module
+				if [ $? -ne 0 ]; then
+					unload_module
+					echo -e "Router is already stopped !\n";
+					cleanup 1;
+				fi
+				wanif_list_shutdown=`grep w $ROUTER_PROC/interfaces | cut -d' ' -f1 | sort -r`
+				if [ ! -z "$wanif_list_shutdown" ]
+				then
+					echo -e "Interfaces to shutdown: \n$wanif_list_shutdown\n"
+					for ifshutdown in $wanif_list_shutdown
+					do
+						ifconfig $ifshutdown down
+						if [ $? -ne 0 ]
+						then
+							echo -ne "failed to shutdown iface $ifshutdown, trying to continue ..."
+						fi
+					done
+				fi
+				wancard_list_shutdown=`cat $ROUTER_PROC/status | cut -d' ' -f1 | grep wanpipe | sort -r`
+				for cardshutdown in $wancard_list_shutdown
+				do
+					wanconfig card $cardshutdown stop
+				done
+				unload_module
+				cleanup 0
+			fi
+
+			check_config_opt $dev 1
+			ft1_or_wanpipe=$?
+			dev=$($GET_RC)
+			rm -f $RC
+
+			#Check that modules are up and running
+			check_module
+			if [ $? -ne 0 ]; then
+				unload_module
+				echo -e "Router is already stopped !\n";
+				cleanup 1;
+			fi
+
+			#If we are stopping FT1 driver, we have to check
+			#whether the actual wanpipe# device is running or
+                        #not, thus name dev has to be changed to 'wanpipe#'
+			if [ $ft1_or_wanpipe -gt 0 ]; then
+				dev="wanpipe$ft1_or_wanpipe"
+			fi 
+
+			if [  $ft1_or_wanpipe -eq 0 ]; then
+				unconfig_interfaces $dev
+			fi
+
+			unconfig_devices $dev
+			
+			[ -f $WAN_CONF_DIR/$FT1_CONF ] && rm -f $WAN_CONF_DIR/$FT1_CONF
+
+		else
+			if [ $OSYSTEM != "Linux" ]; then
+				echo " This option doesn't supported yet!"
+				cleanup 0	
+			fi
+			dev=$2
+			if_name=$3
+			
+			#Parse the dev name, and if it starts with
+			#ft1 than it means we should load the ft1 
+ 			#driver.  
+			check_config_opt $dev 0
+			ft1_or_wanpipe=$?
+			dev=$($GET_RC)
+			rm -f $RC
+
+			WAN_CONF=$WAN_CONF_DIR/$dev.conf
+
+			check_file $WAN_CONF || cleanup 1
+
+			wanrouter_script stop $dev $if_name
+
+			eval "$IFCONFIG_LIST | grep -w $if_name > /dev/null 2> /dev/null"
+			if [ $? -eq 0 ]; then
+				echo "Interface $if_name down"
+				eval "ifconfig $if_name down"
+			fi
+		
+			echo "Unconfiguring interface: $if_name"
+			if [ "$WAN_DYN_WANCONFIG" = YES ]; then
+				eval "/usr/sbin/wanconfig_client cmd=stop,card=$dev,dev=$if_name"  
+			else
+				eval "/usr/sbin/wanconfig -v card $dev dev $if_name down >> $WAN_LOG"
+			fi
+			if [ $? -ne 0 ]; then
+				cleanup 1
+			fi
+
+			check_and_print_still_running && cleanup 0
+
+			cd $WAN_HOME
+			echo -e "No devices running, Unloading Modules"
+			unload_module
+
+		fi			
+		;;
+
+	start_dev)	
+
+		if [ -z $2 ]; then	
+			# WANROUTER START_DEV
+
+			check_config || cleanup 1
+
+			load_module
+			if [ $? -ne 0 ]; then
+				cleanup 2
+			fi
+
+			config_devices $WAN_DEVICES
+				
+		elif [ -z $3 ]; then
+			#ROUTER START_DEV WANPIPE
+			
+			dev=$2
+
+			load_module
+			if [ $? -ne 0 ]; then
+				cleanup 2
+			fi
+
+			config_devices $dev
+			if [ $? -ne 0 ]; then
+				cleanup 3
+			fi
+		fi
+		;;
+
+	stop_dev)	
+		
+		if [ -z $2 ]; then
+			#WANROUTER STOP_DEV
+
+			check_module
+			if [ $? -ne 0 ]; then
+				unload_module
+				remove_cdev
+				echo -e "Router is already stopped !\n"
+				cleanup 1
+			fi
+
+			#Check that all wanpipe#.conf file defined in 
+			# WAN_DEVICES exist
+			check_config || {
+				unload_module
+				remove_cdev
+				echo -e "No devices running, Unloading Modules"
+				cleanup 1
+			}
+
+			if [ "$WAN_DEVICES_REV_STOP_ORDER" = "YES" ]; then
+				tmp_dev_list=
+				for dev in $WAN_DEVICES; do
+					tmp_dev_list="$dev ""$tmp_dev_list"
+				done
+				WAN_DEVICES=$tmp_dev_list
+			fi
+
+			unconfig_devices $WAN_DEVICES
+
+
+		elif [ -z $3 ]; then
+			#WANROUTER STOP_DEV WANPIPE
+
+			dev=$2
+
+			if [ "$dev" = "all" ]; then
+                                stop_running_wanpipes
+				cleanup 0
+			fi
+
+			#Check that modules are up and running
+			check_module
+			if [ $? -ne 0 ]; then
+				unload_module
+				echo -e "Router is already stopped !\n";
+				cleanup 1;
+			fi
+
+			unconfig_devices $dev
+		fi
+		;;
+
+	start_ip)	
+
+		if [ -z $2 ]; then	
+			# WANROUTER START_IP
+			check_config || cleanup 1
+
+			config_interfaces $WAN_DEVICES
+
+			wanrouter_script start  
+				
+		elif [ -z $3 ]; then
+			#ROUTER START_IP WANPIPE
+			config_interfaces $2			
+		fi
+		;;
+
+	stop_ip)
+
+		if [ -z $2 ]; then
+			#WANROUTER STOP_IP
+			unconfig_interfaces $WAN_DEVICES
+
+		elif [ -z $3 ]; then
+			#WANROUTER STOP_IP WANPIPE
+			unconfig_interfaces $2
+		fi
+		;;
+
+	script)
+
+		#Debug Statement, used to test the script option
+		#echo "WAN_ACTION=$WAN_ACTION WAN_DEVICE=$WAN_DEVICE WAN_INTERFACE=$WAN_INTERFACE" >> /var/log/messages
+	
+	        #wanrouter script
+		if [ ! -z $WAN_ACTION ]; then
+			if [ ! -z $WAN_INTERFACE ]; then
+				wanrouter_script $WAN_ACTION $WAN_DEVICE $WAN_INTERFACE
+			elif [ ! -z $WAN_DEVICE ]; then
+				wanrouter_script $WAN_ACTION $WAN_DEVICE
+			else
+				wanrouter_script $WAN_ACTION
+			fi
+		fi
+		;;
+	
+	list)
+		
+		check_module 
+		if [ $? -ne 0 ]; then
+			echo -e "Router is stopped !\n";
+			cleanup 0;
+		fi
+		
+		print_active_devices 1;
+		cleanup 0;
+		;;
+
+	restart)
+		eval "rm -f $WAN_PROG_LOCK 2> /dev/null > /dev/null"
+		if [ "$2" = "" ]; then
+			$0 stop;
+			$0 start;
+		elif [ "$3" = "" ]; then
+			$0 stop $2;
+			$0 start $2;
+		else
+			$0 stop $2 $3;
+			$0 start $2 $3;
+		fi
+		cleanup 0;
+		;;
+
+	restart_dev)
+		eval "rm -f $WAN_PROG_LOCK 2> /dev/null > /dev/null"
+		if [ "$2" = "" ]; then
+			$0 stop_dev;
+			$0 start_dev;
+		elif [ "$3" = "" ]; then
+			$0 stop_dev $2;
+			$0 start_dev $2;
+		fi
+		cleanup 0;
+		;;
+
+	restart_ip)
+		eval "rm -f $WAN_PROG_LOCK 2> /dev/null > /dev/null"
+		if [ "$2" = "" ]; then
+			$0 stop_ip;
+			$0 start_ip;
+		elif [ "$3" = "" ]; then
+			$0 stop_ip $2;
+			$0 start_ip $2;
+		fi
+		cleanup 0;
+		;;
+
+	modules)
+
+		if [ $OSYSTEM = "Linux" ]; then
+			cat /proc/modules | grep wan;
+		else
+			$MODULE_STAT | grep -i "wan\|sdla";
+			#$MODULE_STAT | grep sdla;
+		fi
+		cleanup 0;
+
+		;;
+	status)
+
+		check_module 
+		if [ $? -ne 0 ]; then
+			echo -e "Router is stopped !\n";
+			cleanup 0;
+		fi
+
+		print_active_devices 1;
+		print_wanpipe_config
+		print_wanrouter_status
+		echo ""
+
+		cleanup 0;
+		;;
+
+
+	summary)
+		print_config_summary;
+		cleanup 0;
+		;;
+
+	hwprobe)
+		load_module silent
+		if [ $? -ne 0 ]; then
+			cleanup 1
+		fi
+		if [ "$2" = "verbose" ]; then
+			if [ $OSYSTEM = "Linux" ]; then
+				cat /proc/net/wanrouter/hwprobe_verbose
+			else
+				wanconfig hwprobe verbose
+			fi
+		elif [ "$2" = "dump" ]; then
+			if [ $OSYSTEM = "Linux" ]; then
+				cat /proc/net/wanrouter/hwprobe_dump
+			else
+				wanconfig hwprobe verbose
+			fi
+		elif [ "$2" = "legacy" ]; then
+			if [ $OSYSTEM = "Linux" ]; then
+				cat /proc/net/wanrouter/hwprobe_legacy
+			else
+				wanconfig hwprobe legacy
+			fi
+		else
+			if [ $OSYSTEM = "Linux" ]; then
+				cat /proc/net/wanrouter/hwprobe
+			else
+				wanconfig hwprobe
+			fi
+		fi
+		echo
+		cleanup 0;
+		;;
+
+	debug)
+		if [ -z $2 ]; then
+			wanrouter_debug;
+		else
+			wanrouter_if_debug $2;
+		fi
+		cleanup 0;
+		;;
+
+	parity)
+		pci_parity_ctrl $2
+		;;
+
+	wanrc)
+		
+		config_wanrouter_rc
+		cleanup 0;
+		;;
+	
+	messages)
+		echo
+		echo "Start WANPIPE /var/log/messages"
+		echo
+		if [ $OSYSTEM = "Linux" ]; then
+			eval "tail -n 200 /var/log/messages | grep -i \"[wanpipe|sdladrv]\" "
+		else
+			eval "tail -n 200 /var/log/messages | grep -i \"wanpipe\|sdladrv\" "
+		fi
+		echo
+		echo "End of WANPIPE /var/log/messages"
+		echo
+		cleanup 0;
+		;;
+
+	conflog)
+		echo
+		echo "Start WANPIPE $WAN_LOG"
+		echo
+		eval "cat $WAN_LOG"
+		echo
+		echo "End of WANPIPE $WAN_LOG"
+		echo
+		cleanup 0;
+		;;
+	
+	version)
+		echo "WANPIPE Release: $ROUTER_VERSION"
+		;;
+	
+	lineprobe)
+		if [ $OSYSTEM != "Linux" ]; then
+			echo -e "The 'lineprobe' option supported on Linux OS only.\n"
+			cleanup 1;
+		fi
+		
+		echo -e "Starting the lineprobe ...\n"
+
+		#The lineprobe calls wanrouter internally.
+		#This instance of wanrouter will prevent the other from starting.
+		#Remove the lock.
+		eval "rm -f $WAN_PROG_LOCK 2> /dev/null > /dev/null"
+
+		#Remove name of the program from command line.
+		shift 1
+		#Pass rest of the arguments to lineprobe.
+		if [ -e $LINEPROBE_PATH ]; then
+			eval "lineprobe" "$@"
+		else
+			echo -e "File $LINEPROBE_PATH does not exist!"
+			echo -e "Please check 'lineprobe' was successfully compiled.\n"
+		fi
+
+		;;
+
+	*)	echo -e "\nWANPIPE: WAN Router startup script\n"
+		echo -e "Usage: $SCRIPT: {options} <wanpipe#> <interface>\n"
+		
+		echo -e "	wanrouter start : Starts all devices specified in"
+		echo -e "                      $WAN_CONF_DIR/wanrouter.rc WAN_DEVICES\n"
+		echo -e "	wanrouter stop  : Stops all devices specified in"
+		echo -e "                      $WAN_CONF_DIR/wanrouter.rc WAN_DEVICES\n"	
+		echo -e "	wanrouter start wanpipe# : Start a single device\n"
+		echo -e "	wanrouter stop  wanpipe# : Stops a single device" 
+		echo -e "                               (# can range from 1 to 16)\n"
+		if [ $OSYSTEM = "Linux" ]; then
+			echo -e "	wanrouter start   wanpipe# if_name : Start a single interface on device\n"
+			echo -e "	wanrouter stop    wanpipe# if_name : Stops a single interface on device" 
+			echo -e "                                            (# can range from 1 to 16)\n"
+
+		fi
+		echo -e "	wanrouter restart	 : Restart all devices specified in"
+		echo -e "                      $WAN_CONF_DIR/wanrouter.rc WAN_DEVICES\n"
+		echo -e "	wanrouter restart wanpipe# : Restart a single device"
+		echo -e "                               (# can range from 1 to 16)\n"
+		echo
+		if [ $OSYSTEM = "Linux" ]; then
+			echo -e "	wanrouter restart wanpipe# if_name : Restart a single interface on device"
+			echo -e "                                            (# can range from 1 to 16)\n"
+			echo
+		fi
+		echo -e " 	wanrouter list		: List all active devices\n"
+		echo -e "	wanrouter modules	: Show wanpipe kernel modules\n"
+		echo -e "	wanrouter status	: Display status for all active devices\n"
+		echo -e "	wanrouter summary	: Summary of config files in $WAN_HOME\n"
+		echo -e "	wanrouter hwprobe	: Display wanpipe hardware probe info.\n"
+		echo -e "	wanrouter debug		: Check current wanpipe environment."
+		echo -e "                                  After a startup error run this command to"
+		echo -e "                                  get a possible solution"
+		echo -e "                                   i.e. wanrouter start; wanrouter debug;\n"
+		if [ $OSYSTEM = "Linux" ]; then
+			echo -e " 	wanrouter debug if_name : Display common debugging statistics"
+			echo -e "                                  In case of line problems save to file," 
+			echo -e "                                  wait 2-5mi and send to Sangoma Tech Support"
+			echo -e "                                   i.e. wanrouter debug wp1fr16 > debug_file;\n" 
+		fi
+		echo -e " 	wanrouter messages	: Display wanpipe kernel event messages"
+		echo -e "                                  i.e. /var/log/messages\n"
+		echo -e "	wanrouter conflog	: Display wanpipe configuration parsing messages"
+		echo -e "                                  i.e. $WAN_LOG\n"
+		echo -e " 	wanrouter wanrc		: Configure the wanpipe boot startup order"
+		echo -e "                                  in $META_CONF\n"
+		echo -e "	wanrouter version	: wanpipe version information.\n"
+
+		if [ $OSYSTEM = "Linux" ]; then
+		echo -e "	wanrouter lineprobe [-c wanpipe#] [options] "
+		echo -e "                                : Monitor/Debug a line connected to an"
+		echo -e "                                  automatically detected or preconfigured card."
+		echo -e "                                  i.e.: wanrouter lineprobe;  or" 
+		echo -e "                                      : wanrouter lineprobe -c wanpipe1;"
+		echo -e "                                  Type 'wanrouter lineprobe -help' to get the"
+		echo -e "                                  list of 'lineprobe' options."
+		fi
+		cleanup 0
+		;;
+esac
+echo
+cleanup 0
+exit 0

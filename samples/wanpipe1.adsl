@@ -1,0 +1,59 @@
+
+#================================================
+# wanpipe1 Configuration File
+#================================================
+#
+# Date: Thu Oct 24 12:02:58 EDT 2002
+#
+# Note: This file was generated automatically
+#       by /usr/local/wanrouter/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_ADSL, Comment
+
+[interfaces]
+wp1adsl = wanpipe1, , PPPoE, Comment
+
+[wanpipe1]
+CARD_TYPE 	= S518
+AUTO_PCISLOT	= YES
+PCISLOT 	= 6
+PCIBUS		= 0
+MTU 		= 1500
+UDPPORT 	= 9000
+ 
+DSL_INTERFACE	= LAN
+Rfc1483Mode	= BLLC_OA
+ATM_AUTOCFG	= NO
+Rfc1483Vci	= 35
+Rfc1483Vpi	= 0
+ 
+Verbose			= 1
+RxBufferCount		= 50
+TxBufferCount		= 50
+GtiStandard		= 4
+GtiTrellis		= 1
+GtiTxPowerAtten		= 0
+GtiCodingGain		= 0xff00
+GtiMaxBitsPerBin	= 0x0E
+GtiTxStartBin		= 0x06
+GtiTxEndBin		= 0x1F
+GtiRxStartBin		= 0x20
+GtiRxEndBin		= 0xFF
+GtiRxBinAdjust		= 0
+GtiFramingStruct	= 0x0003
+GtiExpandedExchange	= 0x8000
+GtiClockType		= 0x04
+GtiMaxDownRate		= 8192
+ 
+TTL 		= 255
+IGNORE_FRONT_END  = NO
+
+[wp1adsl]

@@ -1,0 +1,20 @@
+Bandwidth Monitor 1.1.0
+
+Bandwidth monitor is a very simple utility that allows the user to view the bandwidth
+currently being consumed to and from each network interface, the total bandwidth in use on
+each interface, and the total bandwidth in use on all interfaces.
+
+The program continuously reads /proc/net/dev and calculates bandwidth based on the
+interfaces listed there, updating about every two seconds.
+
+To compile the program, simply type:  make
+
+To specify an update time other than two seconds:  bwm [seconds].  Seconds must be a whole
+number greater than 0.
+
+To specify a file other than /proc/net/dev:  bwm [seconds] [filename].
+
+If you have the inclination to do so, and you make this utility better, I would like to
+know! Please drop me a line at barney@freewill.tzo.com.
+
+Bandwidth Monitor is released under the GPL.

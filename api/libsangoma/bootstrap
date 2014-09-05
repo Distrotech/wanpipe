@@ -1,0 +1,6 @@
+#!/bin/bash
+autoheader
+libtoolize --force
+aclocal
+automake -a
+autoconf

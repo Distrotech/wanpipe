@@ -1,0 +1,34 @@
+Wanpipe for Linux Kernel ATM Stack
+==================================
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+Release: wanpipe-3.1.0.p12.tgz or greater
+
+
+1. Untar wanpipe release
+
+2. Change directory to newly created wanpipe directory
+	cd wanpipe/
+
+3. Install wanpipe
+	./Setup install --protocols=DEF-KATM
+        	|
+		->Select all default.
+
+4. Configure for Kernel ATM mode. 
+   Copy wanpipe1.katm into /etc/wanpipe
+
+	cp samples/wanpipe1.katm /etc/wanpipe/wanpipe1.conf
+
+5. Start wanpipe
+	wanrouter start wanpipe1
+
+6. Confirm that wanpipe device exists in kernel atm 
+	cat /proc/net/atm/devices
+
+
+That is it.
+
+Nenad
+

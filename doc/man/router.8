@@ -1,0 +1,35 @@
+
+.TH ROUTER 8 "MARCH 1998" Linux "User Manuals"
+.SH NAME 
+router \- Load/Unload WANPIPE Drivers for Sangoma multiprotocol WAN Cards
+.SH SYNOPSIS
+.B router {
+.I start
+.B |
+.I stop
+.B } 
+
+.SH DESCRIPTION
+WANPIPE Driver provides driver support for WANPIPE internal router cards over
+Frame Relay, PPP, Cisco HDLC and X25 networks.  The driver supports  WANPIPE 
+S508 amd FT1/508 cards.   The lastest version of these packages only support 
+WANPIPE S508 and FT1/508 cards.  So if you currently own a 502E or a 503 
+please contact Sangoma Technologies Inc. for an upgrade.
+
+To load the WANPIPE driver please enter the following:
+
+.B router
+.I start
+
+This will load three modules called router.o, sdladrv.o and wanpipe.o.  After loading the driver modules, the configuration data will be read from the router.conf file in /etc directory and passed onto the protocol specific driver.   The protocol interface is setup using ifconfig and routes are added to reflect the network configuration.
+
+To unload the WANPIPE driver simply enter the following command:
+
+.B router
+.I stop
+
+This will unload the three modules and bring down your interface.
+
+.SH AUTHOR
+.I Jaspreet Singh 
+<jaspreet@sangoma.com>

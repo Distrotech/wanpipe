@@ -1,0 +1,634 @@
+
+.TH ROUTER.CONF 8 "MARCH 1998" Linux "User Manuals"
+.SH NAME 
+router.conf \- WANPIPE configuration file
+
+.SH DESCRIPTION
+
+This is the main router configuration file which defines WAN links and network
+interfaces to configure WANPIPE drivers.  The router.conf file in the /etc directory has to editted to make it specific to the WANPIPE hardware and the protocol being used.  The following steps should be followed to ensure proper setup of your WANPIPE driver:
+
+.TP
+1) Edit [devices] section
+
+WANPIPE devices are named 'wanpipeN', where N is 1 to 8.  For each adapter installed add a line to the [devices] section as follows:
+
+wanpipeN = {
+.I config_id
+}, {
+.I description
+}
+
+where 
+.I config_id
+is one of the following:
+
+.nf  
+WAN_X25 for X.25 link
+WAN_FR for frame relay link
+WAN_PPP for PPP link
+WAN_CHDLC for Cisco HDLC link
+WAN_BSC for BiSync Streaming API
+.fi
+
+and 
+.I description
+is an optional description string
+
+For example:
+
+.nf
+wanpipe1 = WAN_X.25, X.25 link
+wanpipe2 = WAN_FR, frame relay link
+wanpipe3 = WAN_PPP, PPP link
+wanpipe4 = WAN_CHDLC, Cisco HDLC link
+wanpipe5 = WAN_BSC, BiSync Streaming API
+.fi
+
+.TP
+2) Edit [interfaces] section
+
+This section defines the Network interfaces created by the Configure script.  For each interface defined add a line to the [interfaces] section as follows:
+
+{
+.I 
+name
+} = {
+.I device
+},{
+.I media_addr
+},{
+.I used_by
+},{
+.I description
+}
+
+where:  
+.IP
+.I name     
+represents name of the interface defined in (/usr/lib/router/interfaces/)
+.IP
+.I device   
+represents name of the device (from the [devices] section) this interface is associated with
+.IP
+.I media_addr  
+represents media address for this logical channel, if applicable. IF NO MEDIA
+ADDRESS IS SPECIFIED THEN ENTER A SPACE IN THIS FIELD.
+.IP
+.I used_by
+represents whether the interface is used for WANPIPE or API.  ONLY WAN_BSC 
+supports API tag.
+.IP
+.I description 
+description of this interface (optional)
+
+Media address syntax is device and media specific.  The convention is as follows:
+
+for X.25 permanent virtual circuit use PVC number in decimal notation
+
+for X.25 switched virtual circuit use '@' character followed by the X.25
+destination address in decimal notation
+
+for Frame relay permanent virtual use DLCI number in decimal notation circuit
+
+For example:
+.IP
+wan0 = wanpipe1, @123456, WANPIPE, X.25 connection to the branch office 1 (SVC)
+.IP
+wan1 = wanpipe1, 1, WANPIPE, X.25 PVC connection to the branch office 2 (PVC)
+.IP
+wan2 = wanpipe2, 16, WANPIPE, frame relay connection to the branch office 3
+.IP
+wan3 = wanpipe2, 17, WANPIPE, frame relay connection to ISP
+.IP
+< no media address is used >
+.IP
+ppp0   = wanpipe3, , PPP , WANPIPE, link to office 1
+.IP
+chdlc0 = wanpipe4, , WANPIPE, Cisco HDLC link to office 2
+.IP
+bsync0 = wanpipe5, , API, Bisync interface for receiving data
+
+.TP
+3) Edit device private configuration section
+
+For each WANPIPE device defined in the [devices] section create a section with the same name, i.e. for the device wanpipe1 create a section [wanpipe1], for the device wanpipe2 create a section [wanpipe2] and so on.
+
+
+This section includes all the card specific parameters with additonal protocol specific parameters if applicable.  With this section you can configure all the WANPIPE cards.  However for the Integrated CSU/DSU (FT1) boards you MUST also configure them using the FT1 CONFIGURATION UTILITY called cfgft1 found at /usr/sbin
+directory.
+
+
+The following explains the keywords used in device private configuration section and states whether they are mandatory or optional. It also states which keywords are protocol specific.  
+
+.IP
+.I IOPort
+Adapter's I/O port address.  Make sure there is no conflict. (Mandatory for all cards and protocols)
+
+.IP
+.I IRQ
+Adapter's interrupt request level.  Make sure there is no conflict. (Mandatory for all cards and protocol)
+
+.IP 
+.I MemAddr 
+Address of the adapter shared memory window.  If commented out the memory address is determined automatically. (Optional)
+
+.IP
+.I Firmware
+Name of the adapter firmware (including path).  (Mandatory for all cards)
+Notice the difference for each PROTOCOL:
+.IP 
+FRAME RELAY
+Available options are: 
+.nf
+For 508 cards: /usr/lib/router/wanpipe/fr508.sfm
+.fi
+.IP
+PPP
+Available options are:
+.nf
+For 508 cards: /usr/lib/router/wanpipe/ppp508.sfm
+.fi
+.IP
+CISCO HDLC
+Available options are: 
+.nf
+For 508 cards: /usr/lib/router/wanpipe/chdlc508.sfm
+.fi
+.IP
+X25
+Available options are:
+.nf
+For 508 cards: /usr/lib/router/wanpipe/x25_508.sfm
+.fi
+.IP
+BiSync Streaming API
+Available options are:
+.nf
+For 502E/503 cards: /usr/lib/router/wanpipe/bstrm502.sfm
+.fi
+
+.IP
+.I Interface
+Physical interface type. Available options (508 cards) are:
+.IP
+RS232 :
+RS-232C interface (V.10)
+.IP
+V35 :
+V.35 interface (V.11/RS-422/RS-485/X.21)
+
+Does not apply to FT1 cards.
+
+.IP
+.I Clocking
+Source of the adapter transmit and receive clock signals.  Available options are:
+.IP
+External :
+Clock is provided externally (e.g. by the modem or CSU/DSU).  Use this for FT1 boards.
+.IP
+Internal :
+Clock is generated on the adapter.  When there are two Sangoma Cards back to back set clocking to Internal on one of the cards.
+
+.IP
+.I BaudRate
+Data transfer rate in bits per second.  These values are meaningful if internal clocking is selected.  (like in a back-to-back testing configuration) Notice the difference for each PROTOCOL:
+
+.IP
+FRAME RELAY, PPP and CISCO HDLC
+Typical values are:
+
+.nf
+   9600            9.6  kbps
+  19200           19.2  kbps
+  38400           38.4  kbps
+  56000           56    kbps
+  64000           64    kbps
+ 128000          128    kbps
+1544000          1.544  Mbps (T-1)
+2048000          2      Mbps (E-1)
+.fi
+
+.IP
+X25
+Typical values are:
+
+.nf
+  9600            9.6 kbps
+ 19200           19.2 kbps
+ 38400           38.4 kbps
+ 56000           56   kbps
+ 64000           64   kbps
+128000          128   kbps
+.fi
+
+.IP
+.I MTU
+Maximum transmit unit size (in bytes).  This value limits the maximum size of the data packet that can be sent over the WAN link, including any encapsulation header that router may add.  It usually has to be not less than the largest MTU of all interfaces configured for this link plus WAN media header size (if any), unless the WAN driver can perform fragmentation of data packets.  Notice the difference for each PROTOCOL:
+.IP                                
+FRAME RELAY
+Note that this also includes header information required for encapsulating higher level protocols such as TCP/IP and IPX.  The maximum MTU size supported by the adapter is 4096 bytes.  Default value is 1500.
+
+.IP
+X25
+This value defines the maximum size of the X.25 data packet.  Available options  are:
+.nf 
+  64
+ 128
+ 256
+ 512
+1024
+.fi
+Note that X.25 driver provides for packet fragmentation, so that MTUs of the network interfaces using X.25 link can be as large as needed
+
+.IP
+PPP
+The MTU value specified is used for Local Maximum-Receive-Unit(MRU)/MTU and Minimum Remote MRU.  Recommended value for PPP is 1500.
+
+.IP
+CISCO HDLC
+The MTU value specified is used for Maximum length of the Cisco HDLC data field.Range is 300 - 15354.  Recommended value is 1500.
+
+.IP
+.I UDPPORT
+The UDP port to be used for UDP management by the monitor (explained later).  The monitor utilities like fpipemon and pipemon should refer to the udpport defined here.  
+                
+.IP 
+.I Station
+Notice the difference for each PROTOCOL:
+
+.IP 
+FRAME RELAY
+This parameter specifies whether the adapter should operate as a Customer Premises Equipment (CPE) or emulate a frame relay switch (Access Node).  Available options are:
+
+.nf
+CPE     CPE mode (default)
+Node    Access Node (switch emulation mode)
+.fi
+
+.IP
+PPP
+Does not Apply.
+
+.IP
+CISCO HDLC
+Does not Apply.
+
+.IP
+X25
+This parameter defines whether the adapter should operate as a Data Terminal Equipment (DTE) or Data Circuit Equipment (DCE).  Normally, you should select DTE mode.  DCE mode is primarily used in back-to-back testing configurations. Available options are:
+
+.nf
+DTE     DTE mode (default)
+DCE     DCE mode
+.fi
+
+.IP
+.I TTL
+This keyword defines the Time To Live for a UDP packet used by the monitoring system.  The user can control the scope of a UDP packet by associating a number that decrements with each hop.  Notice the difference for each PROTOCOL:
+
+.IP
+FRAME RELAY
+Any value between 0 to 255.
+.IP
+PPP
+Any value between 0 to 255.
+.IP
+CISCO HDLC
+Any value between 0 to 255.
+.IP 
+X25 
+Currently not implemented.
+
+.IP
+.I IPX
+This parameter either enables or disables the use of IPX data.  YES or NO (default) is allowed.  (See also wanpipe.ipx) Notice the difference for each PROTOCOL:
+
+.IP 
+FRAME RELAY 
+Supported for multiple channels.
+
+.IP
+PPP
+Supported.
+
+.IP
+CISCO HDLC
+Does not apply.  Cisco HDLC only supports IP.
+
+.IP 
+X25
+Supported for multiple channel.
+
+.IP
+.I NETWORK
+This parameters specifies the IPX Network Number.  Can be any unique 8 digit hexadecimal number. The default is 0xDEADBEEF.  (See also wanpipe.ipx)  Notice the difference for each PROTOCOL:
+
+.IP
+FRAME RELAY
+Supported for multiple channel.
+
+.IP
+PPP
+Supported.
+
+.IP
+CISCO HDLC
+Does not apply.
+
+.IP                                
+X25
+Supported for multiple channel.
+
+.IP
+.I Signalling      
+*****ONLY APPLIES TO FRAME RELAY PROTOCOL*****
+                        
+This parameter specifies frame relay link management type.  Available options are:
+
+.nf 
+ANSI    ANSI T1.617 Annex D (default)
+Q933    ITU Q.933A
+LMI     LMI
+.fi
+
+.IP
+.I DLCINUMBER       
+*****ONLY APPLIES TO FRAME RELAY PROTOCOL*****
+
+This parameter is used to define logical channels activated by the adapter configured as an Access Node.  Number of DLCI should not exceed 100 for the S508 adapter.  Default value for DLCINUMBER parameter is 0.  This is typically used in a back-to-back testing configuration.
+
+.IP
+.I T391            
+*****ONLY APPLIES TO FRAME RELAY PROTOCOL*****
+
+This is the Link Integrity Verification Timer value in seconds.  It should be within a range from 5 to 30 and is relevant only if adapter is configured as CPE.
+
+.IP
+.I T392            
+*****ONLY APPLIES TO FRAME RELAY PROTOCOL*****
+
+This is the Polling Verification Timer value in seconds. It should be within a range from 5 to 30 and is relevant only if adapter is configured as Access Node.  
+.IP
+.I N391            
+*****ONLY APPLIES TO FRAME RELAY PROTOCOL*****
+
+This is the Full Status Polling Cycle Counter. Its value should be within a range from 1 to 255 and is relevant only if adapter is configured as CPE.
+
+.IP
+.I N392            
+*****ONLY APPLIES TO FRAME RELAY PROTOCOL*****
+
+This is the Error Threshold Counter. Its value should be within a range from 1 to 10 and is relevant for both CPE and Access Node configurations.
+
+.IP
+.I N393            
+*****ONLY APPLIES TO FRAME RELAY PROTOCOL*****
+
+This is the Monitored Events Counter. Its value should be within a range from 1 to 10 and is relevant for both CPE and Access Node configurations.
+
+.IP
+.I LowestPVC, HighestPVC    
+*****ONLY APPLIES TO X25 PROTOCOL*****
+               
+These parameters are used to define permanent virtual circuit range as assigned by your the X.25 service provider.  Valid values are between 0 and 4095.  Default values for both parameters are 0, meaning that no PVCs are assigned.  Note that maximum number of both permanent and virtual cuircuits should not exceed 255.
+
+.IP
+.I LowestSVC, HighestSVC     
+*****ONLY APPLIES TO X25 PROTOCOL*****
+               
+These parameters are used to define switched virtual circuit range as assigned by your the X.25 service provider.  Valid values are between 0 and 4095.  Defaultvalues for both parameters are 0, meaning that no SVCs are assigned.  Note that maximum number of both permanent and virtual cuircuits should not exceed 255.  
+                
+.IP
+.I HDCLWindow       
+*****ONLY APPLIES TO X25 PROTOCOL*****
+
+This parameter defines the size of the HDLC frame window, i.e. the maximum number of sequentially numbered Information frames that can be sent without waiting for acknowledgement.  Valid values are from 1 to 7.  Default is 7.
+ 
+.IP
+.I PacketWindow    
+*****ONLY APPLIES TO X25 PROTOCOL*****
+
+This parameter defines the default size of the X.25 packet window, i.e. the maximum number of sequentially numberred data packets that can be sent without waiting for acknowledgement.  Valid values are from 1 to 7.  Default is 2.
+
+.IP
+.I CCITTCompat     
+*****ONLY APPLIES TO X25 PROTOCOL*****
+
+This parameter defines CCITT X.25 compatibility level.  Available options are: 
+.IP
+1988   1988 version of the Recommendation X.25 (default) 
+.IP
+1984   1984 version of the Recommendation X.25
+.IP
+1980   1980 version of the Recommendation X.25
+
+.IP
+.I AUTHENTICATOR   
+*****ONLY APPLIES TO PPP PROTOCOL*****
+
+This paramater decides whether your local host will be the authenticator or not.  Options : YES or NO.  
+
+If your local side is the authenticator then your side will require that the authentication is passed before the link can be established.  If your local side is not the authenticator then your peer side will determine if any authentication is required or not.
+
+.IP
+.I IP_MODE 
+*****ONLY APPLIES TO PPP PROTOCOL*****
+This parameter decides whether you want to request local and remote IP addresses
+or NOT.  Options: STATIC or PEER.  If you are configured as STATIC then your 
+side will not request for IP addresses. If you are configured as PEER then your 
+side will request the remote end for local and remote IP address. 
+Default: STATIC 
+
+.IP
+.I IGNORE_DCD
+*****ONLY APPLIES TO CISCO HDLC PROTOCOL*****
+This parameter decides whether DCD will be ignored or not when determining 
+active link status for Cisco HDLC.  Options: YES or NO. Default: NO
+
+.IP
+.I IGNORE_CTS
+*****ONLY APPLIES TO CISCO HDLC PROTOCOL*****
+This parameter decides whether CTS will be ignored or not when determining 
+active link status for Cisco HDLC.  Options: YES or NO. Default: NO
+
+.IP
+.I IGNORE_KEEPALIVE 
+*****ONLY APPLIES TO CISCO HDLC PROTOCOL*****
+This parameter decides whether Keep alives will be ignored or not when 
+determining active link status for Cisco HDLC. Options YES of NO. Default: NO
+
+.IP
+.I KEEPALIVE_TX_TIMER 
+*****ONLY APPLIES TO CISCO HDLC PROTOCOL*****
+This parameter states the interval between keep alive.  If you are set to ignore
+keepalives then this value is meaningless. The value of this parameter is given
+in milliseconds. Options: 0 - 60000 ms. Default: 10000 ms
+
+.IP
+.I KEEPALIVE_RX_TIMER 
+*****ONLY APPLIES TO CISCO HDLC PROTOCOL*****
+This parameter states the interval to expect keepalives If you are set to ignore
+keepalives then this value is meaningless. The value of this parameter is given
+in milliseconds.  Options 10 - 60000 ms. Default: 10000 ms
+
+.IP
+.I KEEPALIVE_ERR_MARGIN 
+*****ONLY APPLIES TO CISCO HDLC PROTOCOL*****                        
+This parameter states the number of consecutive keep alive timeouts before 
+bringing down the link.  If  you are set to ignore keepalives then this value is
+meaning less.  Options: 1 - 20.  Default: 3
+
+.IP
+.I SLARP_TIMER     
+*****ONLY APPLIES TO CISCO HDLC PROTOCOL*****
+This parameter decides whether to send SLARP packets or not.  Options: 0 - 
+60000ms.  If 0 is specified then no SLARP packets are transmitted. Any non zero
+value in the range specifies the time in milliseconds between sending SLARP 
+request. Default: 5000 ms.
+
+
+.TP
+4) Edit/Create Interface private configuration section
+
+This section applies only to FRAME RELAY, PPP, CISCO HDLC and X25 protocol. For every interface listed in the [interfaces] section create another section underneath all the private device configuration section.  For instance for interface "fr1" create section [fr1], for interface "svc1" create section [svc1] and so on.  If these sections are not defined then all the parameters in the section are assigned default value.
+
+For FRAME RELAY protocol the following parameter(s) should be added in the interfaces section:
+
+.IP
+.I MULTICAST
+This parameter either enables or disables discarding packets with a multicast source address.  Available options are:
+.IP
+YES     
+Do not discard packets with a multicast source addr.
+.IP
+NO 
+Discard packets with a multicast source addr.
+
+Default is set to NO.
+
+.IP 
+.I CIR
+This parameter enables or disables Committed Information rate on the board.  
+Options are 1 - 512 kbps.  PLEASE NOTE THAT THIS VALUE REFERS TO ONLY 
+TRANSFERING DATA PACKETS.  If this parameter is commented out then CIR for that
+interface is disabled.
+
+.IP
+.I BC
+This paramater states the Committed Burst Size. Options are 1 - 512 kbits.
+
+.IP
+.I BE
+This parameter states the Excess Burst Size. Options are 0 - 512 kbits.
+  
+.IP
+.I INARP
+This parameter enables or disables transmission of Inverse Arp packets.
+
+.IP
+.I INARPINTERVAL
+This parameter sets the time interval in seconds between Inverse ARP Request. 
+Default is 10 sec 
+
+For X25 protocol the following parameter(s) should be added in the interfaces section:
+
+.IP
+.I IDLETIMEOUT
+The time in seconds before an SVC will disconnect if there is no data over the link.  The default is 90 seconds.
+
+.IP
+.I HOLDTIMEOUT
+The time in seconds to wait before retrying a failed connection.  The default is 10 seconds.
+
+
+For PPP protocol the following parameter(s) should be added in the interfaces section:
+
+.IP
+.I MULTICAST
+This parameter either enables or disables discarding packets with a multicast 
+source address.  Available options are:
+.IP
+YES
+Do not discard packets with a multicast source addr.
+.IP
+NO
+Discard packets with a multicast source addr.
+
+Default is set to NO.
+
+.IP
+.I PAP
+This parameter enables or disables the use of PAP.  Available options are:
+.IP
+YES     
+Enable PAP
+.IP
+NO
+Disable PAP
+
+This option is needed regardless of the station being an AUTHENTICATOR.
+
+.IP
+.I CHAP 
+This parameter enables or disables the use of CHAP.  Available options are:
+.IP
+YES     
+Enable CHAP
+.IP
+NO
+Disable CHAP
+
+This option is needed regardless of the station being an AUTHENTICATOR.
+
+.IP
+.I USERID
+This parameter is dependent on the AUTHENTICATOR parameter.  If AUTHENTICATOR is
+set to NO then you will simply enter in your login name that the other side 
+specified to you.
+
+If AUTHENTICATOR is set to YES then you will have to maintain a list of all the 
+users that are valid for authentication purposes. If your list contains ONLY 
+ONE MEMBER then simply enter in the login name.  If the list contains more than 
+one member then follow the below format:
+
+USERID = LOGIN1 / LOGIN2 / LOGIN3....so on
+
+The "/" separators are VERY IMPORTANT if you have more than one member to support.
+
+.IP
+.I PASSWD
+This parameter is dependent on the AUTHENTICATOR parameter.  If AUTHENTICATOR is
+set to NO then you will simply enter in your password for the login name that 
+the other side specified to you.
+
+If AUTHENTICATOR is set to YES then you will have to maintain a list of all the
+passwords for all the users that are valid for authentication purposes.  If your
+list contains ONLY ONE MEMBER then simply enter in the password for the 
+corresponding login name in the USERID parameter.  If the list contains more 
+than one member then follow the format below:
+
+PASSWD = PASS1 / PASS2 / PASS3....so on
+
+The "/" separators are VERY IMPORTANT if you have more than one member to 
+support.  The ORDER of your passwords is very important.  They correspond to the
+order of the userids.
+
+.IP
+.I SYSNAME
+This parameter is dependent on the AUTHENTICATOR parameter.  If AUTHENTICATOR is
+set to NO then you can simply ignore this parameter. (comment it )
+
+If AUTHENTICATOR is set to YES then you have to enter Challenge system name 
+which can be no longer than 31 characters.
+
+.SH FILES
+.TP 
+.I /etc/router.conf
+Configuration file for WANPIPE
+.TP
+.I /usr/lib/router/samples/router.conf
+Sample Configuration file for WANPIPE
+.SH AUTHOR
+.I Jaspreet Singh 
+<jaspreet@sangoma.com>

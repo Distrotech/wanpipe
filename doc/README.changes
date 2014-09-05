@@ -1,0 +1,87 @@
+WANPIPE OFFICIAL RELEASE CHANGE LOG
+===================================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+Wanpipe Linux Web Page:
+-------------------
+For latest docs please visit Sangoma Wiki
+Sangoma Wiki: http://wiki.sangoma.com 
+
+
+MAJOR CHANGES
+-------------
+
+	o The 2.3.4 release contains:
+	
+	  AFT A108 & A108D Drivers.
+	  Updated TDMV Channelized Driver for Asterisk
+	  with support for hardware echo cancellation.
+
+	  TDM API Drivers.
+	  Used to create custom TDM applications over
+	  sangoma AFT devices.
+
+	  Sangoma Signal Media Gateway: 
+	  SS7 Support for Asterisk
+	  
+	  LIP Protocol Layer: 
+          New protocols: ATM (AAL5), Frame Relay EEK
+
+
+	o The 2.3.3 release contains:
+
+	  AFT A104 TDMV Channelized Driver for Asterisk
+	  The A104 TDMV Driver uses the channelization feature
+	  of the A104 Card, to DMA 8byte chunks directly
+	  into Zaptel buffers.  
+
+	  AFT A104 TDMV DCHAN Feature
+	  The DCHAN PRI has hardware HDLC support.
+
+	o The 2.3.2 release contains:
+          
+	  Stable TDMV Wanpipe drivers for Asterisk.   
+          The TDMV drivers support both A102 and A104 cars.
+	  Please read wanpipe/doc/README.asterisk
+
+          Stable TE3 Drivers for AFT A301 TE3 Unchannelized Card. 
+          All WAN protocols are supported: Frame Relay, PPP, CHDLC..
+
+	  Stable LIP Network Layer:  Separates Wanpipe hardware from
+	  the Network Protocols: Frame Relay, CHDLC, 
+                                 PPP, LAPB API, XDLC  API
+
+	o The 2.3.1 contains major structural driver changes.
+	  The new Hardware Abstraction layer cleanly separates, the
+	  physical layer from the driver/protocol layers.
+
+	  Support for 2.6.X kernel.
+
+	o The 2.3.0 contains major structural driver changes 
+	  most notably the ADSL OS abstraction layer. ADLS drivers
+	  can now be compiled against any custom kernel.
+
+	o From 2.2.6 release forward the new S514-7 Dual T/E1, 
+ 	  S514-8 Single TE1 and S518 ADSL cards are supproted.
+
+	o From 2.2.4 release forward the new S514-4 T/E1 and S514-5 56K
+          cards are supported.
+   
+	o From 2.2.3 release forward ALL wanpipe modules
+          including API modules, can be recompiled from
+           ./Setup installation script! 
+           NO KERNEL RE-COMPILATION is necessary.
+           
+	o From 2.2.3 release forward, wanpipe directory
+           architecture has been changed.  New home directory
+           for wanpipe is /etc/wanpipe. 
+   
+	o All old releases are in ../old_releases/wanpipe directory. 
+
+	o Custom RPMs can be build based on current kernel image
+	  by using the ./Setup buildrpm command.
+	  Read the README.rpmbuild.
+

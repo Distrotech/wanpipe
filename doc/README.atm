@@ -1,0 +1,140 @@
+WANPIPE ATM Support
+===================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with ATM support
+-----------------------------------
+
+The ATM support is installed by default
+during WANPIPE installation process.
+
+	./Setup install 
+
+Follow the Setup installation script and choose
+all DEFAULT options.
+
+After successful installation proceed to 
+configure the card for ATM protocol /usr/sbin/wancfg 
+GUI configurator.
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Configuring ATM
+---------------
+
+Run: /usr/sbin/wancfg
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: ATM Protocol
+
+4. Hardware Section
+	Select Probe Hardware
+		Select your adapter PRI port.
+
+5. Interface Section
+	
+   Select number of PVC you wish to configure
+   (Default=1)
+	
+	Specify interface name.
+	(Leave it default)
+	
+	Specify ATM VPI, VCI values for that pvc
+	
+	Specify ATM Encapsulation Headers:
+		Ethernet over ATM (LLC/VC) (PPPoE)
+	        Classical IP over ATM (LLC/VC)
+	
+	Specify IP info for pvc
+
+6. End of configuration, exit and save
+
+
+
+Start ATM protocol
+------------------
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are dispalyed.
+
+ 	Confirm the state of Front End (T1/E1/V35)
+	Confirm the Link state
+
+	Check for any error events.
+
+
+Further Info
+------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+

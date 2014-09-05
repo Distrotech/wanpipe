@@ -1,0 +1,63 @@
+
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Tue Mar 16 11:37:06 EST 2004
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_BITSTRM, Comment
+
+[interfaces]
+wp1bstrm1 = wanpipe1, , API, Comment
+
+[wanpipe1]
+CARD_TYPE 	= S51X
+S514CPU 	= A
+AUTO_PCISLOT	= NO
+PCISLOT 	= 2
+PCIBUS		= 2
+MEDIA 		= T1
+LCODE 		= B8ZS
+FRAME 		= ESF
+TE_CLOCK 	= MASTER
+ACTIVE_CH	= ALL
+LBO 		= 0DB
+Firmware	= /etc/wanpipe/firmware/bitstrm.sfm
+CommPort	= PRI
+Interface 	= V35
+Clocking 	= External
+BaudRate 	= 1540000
+MTU 		= 1500
+UDPPORT 	= 9000
+
+sync_options 		 = 0x0010
+rx_sync_char 		 = 0x00
+monosync_tx_time_fill_char = 0x00
+max_length_tx_data_block = 1200	#For voice set to 480
+rx_complete_length 	 = 1200 #For voice set to 480
+rx_complete_timer 	 = 1500
+rbs_ch_map		 = 0   #Enable rob bit signalling
+                               #on T1 time slots
+			       #0=Disabled
+			       #1-24 or ALL = Enabled
+
+TTL 		= 255
+IGNORE_FRONT_END  = NO
+
+[wp1bstrm1]
+ACTIVE_CH	= 24
+HDLC_STREAMING	= NO
+SEVEN_BIT_HDLC	= NO
+MAX_TX_QUEUE	= 10		
+MAX_TX_UP_SIZE  = 1000	#For voice set to 200

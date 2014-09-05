@@ -1,0 +1,2 @@
+#!/bin/sh
+smg_ctrl stop

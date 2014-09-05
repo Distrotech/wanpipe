@@ -1,0 +1,14 @@
+AFT A500 Firmware Change Log
+============================
+
+Release V35
+-----------
+April 30  2009
+
+Type     	Mandatory Firmware update for A500 cards 
+		Fixes bug with PCI parity errors
+
+Changes:	Firmware bug fixes
+		Some system crashes/reboots due to parity errors
+		
+

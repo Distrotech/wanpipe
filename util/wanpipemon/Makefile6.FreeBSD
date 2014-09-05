@@ -1,0 +1,17 @@
+#
+# Tue Mar 27 09:21:49 EDT 2007
+#
+# Makefile for Sangoma WANPIPEMON utility
+#
+.PATH:	../ft1 ../lxdialog ../wan_hdlc_eng
+
+BINDIR	= /usr/local/sbin
+DESTDIR	= /
+PROG	= wanpipemon
+SRCS	= wanpipemon.c cpipemon.c fpipemon.c ppipemon.c dslpipemon.c atmpipemon.c aftpipemon.c fe_lib.c unixio.c xml_lib.c wangui.c checklist.c menubox.c  inputbox.c util.c prot_trace.c wanpipe_hdlc.c
+CFLAGS	+= -DWANPIPEMON_GUI -DLOCALE -DCURSES_LOC="<ncurses.h>"
+LDFLAGS	+= -s -L. -lncurses
+COPTS	+= -Wall -Wmissing-prototypes -I. -I/wanpipe/code/include -I/common/include -I../ft1 -I../lxdialog -I../wan_hdlc_eng
+NO_MAN 	=
+
+.include <bsd.prog.mk>

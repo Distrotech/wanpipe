@@ -1,0 +1,352 @@
+WANPIPE T1/E1/V35 Bitstreaming
+==============================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with BitStreaming support
+--------------------------------------------
+
+The BitStreaming support is NOT installed by default
+during WANPIPE installation process. 
+
+
+Use the CUSTOM driver compilation 
+option in 
+    ./Setup install
+script to enable BITSTRM.
+
+OR 
+
+use the --protocol option:
+ ./Setup install --protocol=BITSTRM 
+
+
+After successful installation proceed to 
+configure the card for BitStreaming protocol 
+/usr/sbin/wancfg  GUI configurator.
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Configuring BitStreaming
+------------------------
+
+Run: /usr/sbin/wancfg
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: BitStreaming Protocol
+
+4. Hardware Section
+	Select Probe Hardware
+		Select your adapter PRI port.
+
+	
+5. Interface Section
+	
+   Select number of interfaces you wish to configure
+   (Default=1)
+
+   NOTE: Each network interface can be bound to 1 or ALL
+         T1/E1 channels.
+
+   For each network interface do the following:
+   
+	Specify interface name.
+	(Leave it default)
+	
+	Operation Mode:  
+		API 	used to develop custom applications  
+	            	on top of bitstreaming
+
+		WANPIPE	used to run IP/PPP/CHDCL protocols
+		        on top of bitstreaming.
+
+	
+	HDLC Streaming: 
+		Option used to enable or disable HDLC engine.
+		
+		YES: Enable HDLC engine which will encode and
+		     decode tx/rx packets into HDLC frames.
+
+		NO : Disable HDLC engine and pass the RAW
+		     bitstream up the stack, as well as tx
+		     unmodified user data.
+
+	
+	Bound T1/E1 Channels:
+		(Only available on T1/E1 cards)
+
+		Bind any combination of T1/E1 channels to
+		this interface.
+		
+	Protocol:
+		(Only available in WANPIPE operation mode)
+
+		Specify the upper layer protocol: 
+			RAW HDLC : Use raw IP protocol
+			PPP	 : Run PPP protocol
+			CHDLC    : Run CHDLC protocol
+
+	Ignore Modem Status:
+		(Only available in WANPIPE operation mode)
+
+		Option used to monitor the front end T1/E1
+		status.  If the front end looses sync the
+		link will be declared down.
+
+		NO:  Run front end monitoring (default)
+		YES: Ignore front end state.
+		
+
+	IP Setup:
+		(Only available in WANPIPE operation mode)
+
+		Specify IP info for network interface
+
+6. End of configuration, exit and save
+
+
+
+Start Bit Streaming protocol
+---------------------------- 
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are dispalyed.
+
+ 	Confirm the state of Front End (T1/E1/V35)
+	Confirm the Link state
+
+	Check for any error events.
+
+
+
+Custom API Application
+----------------------
+
+A sample API application exists in
+/etc/wanpipe/api/bitstrm directory.
+
+To compile it run:  make
+
+Run:    ./bitstrm_api 
+
+	Refer to api options below:
+
+	BITSTRM API USAGE
+
+
+        bitstrm_api <options> <extra options>
+
+<options>:
+        -i  <ifname>     #interface name
+        -c  <card name>  #card name
+        -r               #read enable
+        -w               #write eable
+
+<extra options>
+        -txcnt   <digit>  #number of tx packets  (Dflt: 1)
+        -txsize  <digit>  #tx packet size        (Dflt: 10)
+        -txdelay <digit>  #delay in sec after each tx packet (Dflt: 0)
+        -txdata  <digit>  #data to tx <1-255>
+
+	
+Example:
+
+	#Enable read and write on wp1bistsrm1 interface
+	
+	./bitstrm_api -c wanpipe1 -i wp1bistsrm1 -r -w 
+
+Use this app as a building block for you custom
+APP.
+
+
+
+Further Info
+------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+
+APPENDIX A: Bitstrm Switching
+=============================
+
+
+
+  3 ---------------- 1
+    TE1/V35/RS232    |
+		     | TE1/Serial Kernel Driver Switch
+		     | 
+  4 ---------------- 2
+    TE1/V35/RS232
+
+
+
+Machine   Config File
+
+  1      wanpipe1.conf
+  2      wanpipe2.conf
+  3      wanpipe3.conf
+  4      wanpipe4.conf
+
+
+Wanpipes 1 and 2 have internal
+      clocking.
+
+      Wanpipes 3 and 4 have external
+      clocking.
+
+
+Important Switch Config Issues
+-------------------------------
+
+The following variables are
+citical:
+
+rx_sync_char 		 = 0x7E
+monosync_tx_time_fill_char = 0x7E
+
+max_length_tx_data_block = 500
+rx_complete_length 	 = 500
+
+
+rx_sync_char:  
+ 
+    Character used by bitsreaming 
+    receiver to sync up serial stream.
+    Should be identical to 
+    monosync_tx_time_fill_char.
+    
+
+monosync_tx_time_fill_char:
+
+    Character used by bitstreaming
+    transmitter to idle flags.
+    Should be identical to rx_sync_char
+
+
+max_length_tx_data_block:
+
+    Maximum tx size used by the
+    bitstreaming transmitter.
+
+    This value should adjust to the
+    BAUD rate used!
+          
+	  64Kbps  = 120  bytes 
+	  1.5Mbps = 1200 bytes
+    
+    This value will determine the
+    tx LATENCY from machine 3 to machine
+    4.  
+    
+    It will also lower of increase
+    number of interrupts.
+
+rx_complete_length  
+
+    Maximum rx size used by the
+    bitstreaming tramsmitter.
+
+    This value should adjust to the
+    BAUD rate used!
+          
+	  64Kbps  = 120  bytes 
+	  1.5Mbps = 1200 bytes
+    
+    This value will determine the
+    rx LATENCY from machine 3 to machine
+    4.
+
+    It will also lower of increase
+    number of interrupts.
+
+NOTE: For both SWITCH wanipe1 and wanpipe2
+      the above parameters should be IDENTICAL.
+
+
+HDLC Monitor
+------------
+
+The hdlc monitor running over
+the bitstrm SWITCH
+  
+   /etc/wanpipe/api/bistrm/datascope/ss7_monitor_api
+
+   To enable RAW hdlc use -prot 8
+
+   eg: ./ss7_monitor_api -i wp1bstrm1 -c wanpipe1 -r -prot 8 -verbose
+
+
+This will enable the hdlc monitoring over the
+bitstreaming switched interfaces.
+
+
+
+

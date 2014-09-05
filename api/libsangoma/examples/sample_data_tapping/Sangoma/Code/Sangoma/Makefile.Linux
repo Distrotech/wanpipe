@@ -1,0 +1,25 @@
+# SETTINGS
+CXX := g++ 
+CC := gcc
+CFLAGS := -g -O2 -Wall -Wsign-compare -Wdisabled-optimization -DLINUX -D__LINUX__ -D_LIB -DNDEBUG
+CFLAGS += -I. -I../../../ -I../../../../../patches/kdrivers/include -I../../../wanec -I../../../../../patches/kdrivers/wanec -I../../../../../patches/kdrivers/wanec/oct6100_api/include
+CFLAGS += -I/usr/include/wanpipe
+CPPFLAGS := $(CFLAGS) -Weffc++ -frtti
+OBJS := driver_configurator.o sangoma_interface.o PortBuffer.o SangomaPort.o SangomaCard.o libsangoma.o libsangoma_config.o libsangoma_utils.o libsangoma_hwec.o
+LIB_FILENAME := libSangoma.a
+
+# RULES
+all: Sangoma
+	@echo "Ok."
+
+Sangoma: $(OBJS)
+	ar -r -s $(LIB_FILENAME) $(OBJS)
+
+%.o: %.cpp
+	$(CXX) $(CPPFLAGS) -c $^ -o $@
+
+%.o: ../../../../../%.c
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+clean:
+	rm -f $(LIB_FILENAME) $(OBJS)

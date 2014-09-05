@@ -1,0 +1,51 @@
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Wed Dec  6 20:29:03 UTC 2006
+#
+# Note: This file was generated automatically
+#       by /usr/local/sbin/setup-sangoma program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipeDEVNUM = WAN_AFT, Comment
+
+[interfaces]
+wDEVNUMg1 = wanpipeDEVNUM, , TDM_VOICE_API, Comment
+
+[wanpipeDEVNUM]
+CARD_TYPE 	= AFT
+S514CPU 	= FECPU
+CommPort 	= PRI
+AUTO_PCISLOT 	= NO
+PCISLOT 	= SLOTNUM
+PCIBUS  	= BUSNUM
+FE_MEDIA	= FEMEDIA
+FE_LCODE	= FELCODE
+FE_FRAME	= FEFRAME
+FE_LINE		= 1
+TE_CLOCK 	= FECLOCK
+TE_REF_CLOCK 	= 0
+TE_HIGHIMPEDANCE	= NO
+TE_RX_SLEVEL    = RXSLEVEL
+LBO 		= FELBO
+FE_TXTRISTATE	= NO
+MTU 		= 1500
+UDPPORT 	= 9000
+TTL		= 255
+IGNORE_FRONT_END = NO
+TDMV_SPAN	= TDMVSPANNO
+TDMV_DCHAN	= 0
+
+[wDEVNUMg1]
+ACTIVE_CH	= ALL
+TDMV_ECHO_OFF	= NO
+TDMV_HWEC	= NO
+MTU             = 80

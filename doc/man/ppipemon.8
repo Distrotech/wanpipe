@@ -1,0 +1,261 @@
+
+.TH PPIPEMON 8 "MARCH 1998" Linux "User Manuals"
+.SH NAME 
+ppipemon \- PPP Monitor for Sangoma WAN Cards
+.SH SYNOPSIS
+.B ppipemon {
+.I option
+.B } ip-address upd-port  
+
+.B For flushing specific monitor statistics: 
+
+.B \tppipemon [
+.I f
+.B ] {
+.I option
+.B } ip-address udp-port 
+
+.B For running FT1 specific monitor commands:
+
+.B \tppipemon [
+.I t 
+.B ] {
+.I option
+.B } 
+.B ip-address udp-port 
+
+.SH DESCRIPTION
+.B ppipemon
+is a UDP management monitor for PPP. The above section demonstrates the different ways of running the ppipemon command.  We will discuss each method in detail below:
+
+.TP
+.I ppipemon {option} ip-address udp-port
+
+.TP
+.B ip-address
+Specify the Point-to-Point address of your defined PPP interface.  To verify this run ifconfig.
+
+.TP
+.B udp-port
+Specify the udp-port as defined in device section of the router.conf in /etc directory. No value for this defaults to 9000.
+
+.TP 
+.B option   
+The following are the different monitoring options available to the user:
+.IP
+.B g
+Display PPP general configuration.
+ 
+.IP
+.B u
+Display PPP timers and counters. 
+
+.IP 
+.B a 
+Display PPP authentication configuration.
+
+.IP 
+.B i
+Display IP configuration.
+
+.IP
+.B x
+Display IPX configuration.
+
+.IP
+.B s
+Display PPP FSM current state. 
+
+.IP
+.B n
+Display parameters negotiated on last connection or attempt.
+
+.IP
+.B c
+Display cause for last disconnection.
+
+.IP
+.B c
+Display Communications error statistics.
+
+.IP
+.B m
+Display modem status.
+
+.IP
+.B q
+Run Line trace displaying PPP data.
+
+.IP
+.B qr
+Run Line trace displaying Raw data.
+
+.IP
+.B ds
+Display If_Send Driver statistics.(mainly used for debugging purposes)
+
+.IP
+.B di
+Display Interrupt Driver statistics.(mainly used for debugging purposes)
+
+.IP
+.B dg
+Display General Driver statistics.(mainly used for debugging purposes)
+
+.IP
+.B j
+Display the time since last "router start".
+
+.IP
+.B l
+Display General statistics.
+
+.IP
+.B e
+Display Communication Error statistics.
+
+.IP
+.B p
+Display Packet statistics.
+
+.IP
+.B r
+Display LCP statistics.
+
+.IP
+.B b
+Display Loopback detection/ LCP error statistics.
+
+
+.IP
+.B o
+Display IP Control Protocol (IPCP) statistics. 
+
+.IP
+.B y
+Display IPX Control Protocol (IPXCP) statistics.
+
+.IP
+.B w
+Display Password Authentication Protocol (PAP) statistics.
+
+.IP
+.B h
+Display Challenge-Handshake Authentication Protocol (CHAP) statistics.
+
+.TP
+.I ppipemon f {option} ip-address udp-port
+
+.TP
+.B f
+This option flushes all the values associated with the command specified in the option field.
+
+.TP
+.B ip-address
+Specify the Point-to-Point address of your defined PPP interface.  To verify this run ifconfig.
+
+.TP
+.B udp-port
+Specify the udp-port as defined in device section of the router.conf in /etc directory. No value for this defaults to 9000.
+
+.TP 
+.B option   
+The following are the different options available to the user:
+
+.IP
+.B l
+Flush General statistics.
+
+.IP
+.B e
+Flush Communication Error statistics.
+
+.IP
+.B p
+Flush Packet statistics.
+
+.IP
+.B r
+Flush LCP statistics.
+
+.IP
+.B b
+Flush Loopback detection/ LCP error statistics.
+
+
+.IP
+.B o
+Flush IP Control Protocol (IPCP) statistics. 
+
+.IP
+.B y
+Flush IPX Control Protocol (IPXCP) statistics.
+
+.IP
+.B w
+Flush Password Authentication Protocol (PAP) statistics.
+
+.IP
+.B h
+Flush Challenge-Handshake Authentication Protocol (CHAP) statistics.
+
+.IP
+.B d
+Flush all driver specific statistics.
+
+
+.TP
+.I ppipemon t {option} ip-address udp-port
+
+.TP 
+.B t
+This option allows execution of FT1 specific commands specified in the option field.
+
+.TP
+.B ip-address
+Specify the Point-to-Point address of your defined PPP interface.  To verify this run ifconfig.
+
+.TP
+.B udp-port
+Specify the udp-port as defined in device section of the router.conf in /etc directory. No value for this defaults to 9000.
+
+.TP
+.B option
+The following are the different FT1 monitoring options available to the user:
+
+.IP
+.B v
+View status of the FT1 CSU/DSU.
+
+.IP
+.B s
+Perform self test on the FT1.
+
+.IP 
+.B l
+Peform Line Loop test on the FT1.
+
+.IP
+.B d
+Perform Digital Loop test on the FT1. 
+
+.IP 
+.B r
+Perform Remote test on the FT1.
+
+.IP
+.B o
+Place FT1 in Operational mode.
+
+.SH EXAMPLES
+The following are few examples to illustrate the different usage of the ppipemon command:
+.TP
+ppipemon e 192.168.1.27 9002 :  This displays the communications error statistics.
+.TP
+ppipemon f e  192.138.1.27 9005: This flushes the communications error statistics.
+.TP
+ppipemon t l 192.128.1.27 9004: This runs the line loop test on a FT1 board.
+
+.SH AUTHOR
+.I Jaspreet Singh <jaspreet@sangoma.com>
+Sangoma Technologies Inc., www.sangoma.com

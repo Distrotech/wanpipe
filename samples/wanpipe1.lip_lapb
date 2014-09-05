@@ -1,0 +1,58 @@
+
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Fri Jun 25 16:47:33 EDT 2004
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_MULTPROT, Comment
+
+[interfaces]
+wp1mp = wanpipe1, , STACK, Comment
+wp1lapb = wanpipe1, 1 ,API, lip_lapb, lapb.wp1mp, ,  
+
+
+[wanpipe1]
+CARD_TYPE 	= S51X
+S514CPU 	= A
+AUTO_PCISLOT	= YES
+PCISLOT 	= 5
+PCIBUS		= 0
+Firmware	= /etc/wanpipe/firmware/cdual514.sfm
+CommPort	= PRI
+Interface 	= V35
+Clocking 	= Internal
+BaudRate 	= 64000
+MTU 		= 1500
+UDPPORT 	= 9000
+TTL 		= 255
+IGNORE_FRONT_END  = NO
+
+[lapb.wp1mp]
+STATION	= DTE
+T1	= 2
+T2	= 0
+T3	= 6
+T4	= 3
+N2	= 5
+MODE = 8
+WINDOW  = 7
+MAX_PKT_SIZE = 1024
+
+
+[wp1mp]
+HDLC_STREAMING	= YES
+MPPP_PROT	= HDLC
+IGNORE_DCD	= YES
+IGNORE_CTS	= YES

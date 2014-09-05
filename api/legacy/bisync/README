@@ -1,0 +1,29 @@
+BISYCN API Package
+==================
+
+Author: Nenad Corbic
+Date:   Nov 10, 2001
+
+
+
+The bisync package contains the sample client and server 
+program that should be used in user application
+development.
+
+
+Contents of the API Package
+---------------------------
+
+ 1) bsc_api.c :  A sample API utility, that will send and receive
+                 data packets across a bisync line.  This program
+		 should be used as a starting point in developing
+		 a real-world bisycn application.
+
+ 2) bsc_cmd.c :  Interactive application, where user can
+  		 execute all bisycn commands.  This application
+		 should only be used as a bisync tester.
+
+ 3) /usr/share/doc/wanpipe/bisync.pdf:  
+ 		 BiSync documentation.  
+ 		 Explanation of each BiSync command.
+		 

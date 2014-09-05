@@ -1,0 +1,326 @@
+
+
+
+		Ethernet Bridging over WANPIPE Frame Relay
+
+
+
+			Author: Nenad Corbic
+		 
+
+
+
+
+			November 20, 2000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Introduction
+------------
+
+	Ethernet bridging over WANs all ows the Wide Area 
+Network to operate as an exact analog of an ordinary Ethernet 
+LAN. Traffic is not limited to IP, but any network protocol 
+supported by Ethernet can be run transparently over a bridged 
+WAN. These include IPX/SPX, AppleTalk and VINES. DHCP services 
+can be used for IP management. 
+
+Bridging has particular application over one-to-many networks 
+such as Frame Relay. ADSL networks often use a Frame Relay 
+connection from the DSLAM to an ISP, with each DLCI supporting 
+traffic from one DSL line. A Linux machine running bridged 
+Ethernet over Frame Relay can provide a very attractive 
+concentrator for such a system at the ISP end.
+
+This implementation is based on work done by Mark Wells 
+<mark@pc-intouch.com>, who did much of the original work 
+on bridging for WANPIPE.
+
+
+Bridging over Frame Relay
+-------------------------
+
+	The Linux kernel contains the Ethernet bridging module 
+that will be used to bridge the Frame Relay link to the Ethernet 
+network.  However, the Linux Bridge only supports Ethernet 
+network interfaces, not Frame Relay:  bridging is based on 
+Ethernet MAC addresses.
+	
+
+To interface WANPIPE Frame Relay network interfaces to the 
+kernel bridge, it first must be reconfigured as an Ethernet 
+network interface that will convert the Frame Relay header 
+into the Ethernet header during data transmission.  Thus, 
+from the kernel point of view, WANPIPE Frame Relay links 
+would behave like standard Ethernet connections.  
+
+Since the bridge works with MAC addresses, layer two of the 
+OSI model, not IP, all interfaces that are directly connected 
+to the bridge must not be configured for IP.  This step has 
+been automated using the wancfg configuration utility, by 
+selecting the BRIDGE option in network interface setup.   
+Thus, the Frame Relay network interface, configured for 
+bridging would look as following, in the wanpipe#.conf 
+configuration file.
+
+	Ex: 	[interfaces]
+		wp1_fr16 = wanpipe1, 16, BRIDGE, comment
+
+On the remote side of the Frame Relay link, WANPIPE network 
+interfaces should be configured as BRIDGE_NODE(s).    
+Since these interfaces will not be directly connected 
+to the kernel bridge, they must be configured with IP 
+addresses.  The wancfg configuration utility will require 
+the user to input IP addresses for each BRIDGE_NODE.
+
+Note: if a DHCP server is used, set the BRIDGE_NODE IP 
+address to a arbitrary value, since a DHCP client will 
+override it when the interface activates.
+
+
+Configuring WANPIPE for bridging
+--------------------------------
+
+	To make the WANPIPE Frame Relay bridging easier 
+to configure and install, WANPIPE configuration	utility 
+wancfg, and the wanrouter startup script will setup the 
+virtual Ethernet interfaces according to the following 
+options:
+
+	* If the WANPIPE network interfaces reside in the 
+	server where the kernel bridge is going to be implemented, 
+	then such interfaces should be configured as a BRIDGE.
+	In this case, WANPIPE virtual Ethernet interface will 
+	be configured without IP information.  Once the interface 
+	is started, the user must add the virtual interface 
+	(wp1fr16e) to the kernel bridge using the bridge 
+	configuration utility. Example of a BRIDGE interface 
+	is wpfr16e, in diagram below.
+
+	* If the WANPIPE network interface is located at the 
+	remote end of the bridge, meaning that the other side 
+	of the link is connected to a bridge, such interfaces 
+	should be configured as a BRIDGE_NODE.   
+	In this case, WANPIPE virtual Ethernet interface will 
+	be configured with IP information.  Example of such 
+	interface is wp1fr16e, on diagram below.
+		
+
+
+
+The BRIDGE Network Interface
+----------------------------
+
+	The WANPIPE virtual Ethernet network interfaces configured 
+for BRIDGE operation mode are interfaces that directly connect to 
+the Linux kernel bridge.  Example of such interface is wpfr16e, 
+in diagram above.   
+
+The WANPIPE configuration utility, wancfg, will setup the 
+wanpipe#.conf  configuration file for bridging.  During startup, 
+the wanrouter startup stcript will load the appropriate kernel 
+modules and configure the virtual Ethernet network interfaces 
+without IP information.  
+
+	
+The BRIDGE NODE Network Interface
+---------------------------------
+
+The WANPIPE virtual Ethernet network interfaces configured as 
+BRIDGE NODES are interfaces that are remotely connected to the 
+Linux kernel bridge.  Example of such interface is wp1fr16, in 
+diagram above.   
+
+The WANPIPE configuration utility, wancfg, will setup the 
+wanpipe#.conf  configuration file for bridging.  During startup, 
+the wanrouter startup script will load the appropriate kernel 
+modules and configure the virtual Ethernet network interfaces 
+with IP information.  
+
+	Since the bridge is on the remote end, no further 
+configuration is needed.  Assuming that the remote side has 
+been successfully configured, the Remote Host would be able 
+to ping the LAN.
+
+
+Example WANPIPE Bridge Configuration
+-------------------------------------
+
+	In this example we'll assume configuration as in diagram 
+above.  The configuration will be split into three parts:  
+	* Configuring the WANPIPE on the bridge, 
+	* Linux Kernel Bridge  
+	* WANPIPE remotely connected to the bridge.  
+
+This example assumes that WANPIPE drivers and utilities were 
+installed properly on each system. 
+
+
+Setting up Linux for Wanpipe and Bridging
+-----------------------------------------
+
+	* For WANPIPE installation instructions please 
+	  refer to the WanpipeForLinux.pdf document.
+
+	* The WANPIPE setup utility will patch the new 
+	  kernel with the latest WANPIPE drivers that 
+	  include the WANPIPE bridging support.  
+	  However, before recompiling the kernel, the 
+	  Linux kernel must also be update with the latest 
+	  bridging code.
+
+	* The latest bridging patches and utilities can be 
+	  downloaded from http://projects.openrock.net/bridge/.  
+
+	* The bridge patch should be applied to the kernel 
+	  using the patch command
+		
+		- copy the patch into the linux source 
+		  directory /usr/src/linux
+		  
+		- patch the kernel :  patch -p1 < patch_name.diff
+
+	* Once both the WANPIPE drivers and the kernel 
+	  bridge have been updated proceed with WanpipdForLinux.pdf 
+	  instructions on how to recompile the kernel.
+
+
+WANPIPE on the bridge server
+----------------------------
+
+	* Create the WANPIPE configuration file using the 
+	  /usr/sbin/wacfg utility.  The wancfg 
+	  utility contains all the help files necessary to 
+	  lead you through the protocol and hardware configuration.  
+	  However, for each Frame Relay interface setup, the 
+	  operation mode must be set to BRIDGE.  Note: There will 
+	  be no option for IP setup.
+
+	* Once the configuration file (wanpipe1.conf) is complete, 
+	  start the WANPIPE device using the wanrouter start command.  
+	  This command will load all necessary WANPIPE modules and 
+	  setup all network interfaces.  In this case all WANPIPE 
+	  interfaces are configured without IP information.
+	
+		wanrouter start
+
+	* Run ifconfig and confirm the encapsulation type of each 
+	  Frame relay link configured.
+	  	
+		Ifconfig
+
+	* Using the ifconfig command, set the eth0 IP address 
+	  to 0.0.0.0 if not already done so.
+	
+		ifconfig eth 0.0.0.0 
+   
+   
+Linux Kernel Bridge
+-------------------
+
+	The Linux kernel bridge must be compiled, usually as a 
+module, in the kernel. The bridging option can be selected from 
+the Networking Option menu of the kernel configurator.  
+
+	* Assuming the bridge support has been compiled as 
+	  modules, proceed to load the kernel bridge as follows: 
+	  
+		modprobe -v bridge
+
+	Note: If the bridge has been compiled directly into the kernel, 
+	      this step is not necessary.  However, if the module load 
+	      fails, then the kernel has not been configured properly, 
+	      please refer to the http://projects.openrock.net/bridge/ 
+	      for more information or check the kernel compilation. 
+
+	* Use the brctrl utility to create a bridge and add network interfaces to it.
+	  (http://bridge.sourceforge.net/download.html)
+
+		Ex:  
+		Create the Bridge called "br0"
+			brctl addbr br0 
+
+		Add an interface into the bridge "br0"
+			brctl addif br0 eth0
+			brctl addif br0 wpfr16e
+		     	brctl addif br0 wpfr17e
+			brctl addif br0 wpfr18e
+
+	* Once all interfaces are added, make sure that eth0 
+	  interface is not setup with IP addresses. If so, zero the 
+	  eth0 IP addresses.
+	
+		ifconfig eth0 0.0.0.0
+
+	* To add IP support to the bridge server, configure the 
+	  bridge network interface br0 with appropriate IP addresses.
+	
+		ifconfig br0 192.168.1.1 netmask 255.255.255.0 up
+
+		Since we cannot configure IP addresses to any network 
+		interfaces that are directly connected to the bridge, 
+		currently there is no way of accessing the bridge 
+		server itself using IP.   Therefore, an IP address must 
+		be defined for the bridge itself.  The kernel bridge 
+		has a special network interface that can be configured 
+		with IP.  This network interface has the same name as 
+		the bridge; In the case above the interface name would 
+		be br0.  Using the ifconfig() command an IP address must 
+		be manually applied to the bride network interface.
+
+
+WANPIPE Bridge Node
+-------------------
+
+	* Create the WANPIPE configuration file using the 
+	  /usr/sbin/wacfg utility.  The wancfg utility 
+	  contains all the help files necessary to lead you through 
+	  the protocol and hardware configuration.  However, for each
+	  Frame Relay interface setup, the operation mode must be 
+	  set to BRIDGE_NODE and IP information must be setup. 
+
+	Note: When setting IP information, make sure that the 
+	      IP network address is the same as the LAN network 
+	      address.  Bridge cannot connect two different networks.
+
+	* Once the configuration file (wanpipe1.conf) is complete, 
+	  start the WANPIPE device using the wanrouter start command.  
+	  This command will load all necessary WANPIPE modules and 
+	  setup all network interfaces.  In this case all WANPIPE 
+	  interfaces are configured without IP information.
+	
+		wanrouter start
+
+	Note: if a DHCP server is used, set the BRIDGE_NODE IP 
+	      address to a arbitrary value, since a DHCP client 
+	      will override it when the interface activates.
+
+Assuming that the other end has been configured, 
+one should be able to ping the remote LAN.

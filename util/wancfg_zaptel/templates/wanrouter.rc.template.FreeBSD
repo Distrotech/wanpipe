@@ -1,0 +1,34 @@
+
+# /usr/local/etc/wanpipe/wanrouter.rc	WAN router meta-configuration file.
+#
+#		This file defines variables used by the router shell scripts
+#		and should be located in /usr/local/etc/wanpipe directory.  These are:
+#
+#               ROUTER_BOOT=    	Boot flag (YES/NO).
+#               WAN_CONF_DIR=   	Directory of wanpipe config files.
+#		WAN_INTR_DIR=		Where to put wanpipe interface files.
+#		WAN_FIRMWARE_DIR=	Where to put protocol firmware files.
+#               WAN_LOG=       		Where to put start-up log file.
+#               WAN_LOCK_DIR=   	Directory of wanpipe device lock files.
+#               WAN_DEVICES=    	Name of the wanpipe devices to be
+#                               	loaded on 'wanrouter start'
+#                               	(ex: "wanpipe1 wanpipe2 wanpipe3...")
+#
+#                    	Note: Name of wanpipe devices correspond
+#                             to the configuration files in
+#                             /usr/local/etc/wanpipe directory:
+#                             (ex. /usr/local/etc/wanpipe/wanpipe1.conf )
+#
+#               Note:   This file is 'executed' by the shell script, so
+#                       the usual shell syntax must be observed.        
+ROUTER_BOOT=YES
+WAN_BIN_DIR=/usr/local/sbin
+WAN_CONF_DIR=/usr/local/etc/wanpipe
+WAN_INTR_DIR=/usr/local/etc/wanpipe/interfaces
+WAN_MODULE_DIR=/usr/local/lib/wanpipe
+WAN_FIRMWARE_DIR=/usr/local/etc/wanpipe/firmware
+WAN_LOG=/var/log/wanrouter
+WAN_LOCK_DIR=/var/lock
+WAN_LIB_DIR=/usr/local/etc/wanpipe/lib
+WAN_ADSL_LIST=/usr/local/etc/wanpipe/wan_adsl.list
+WAN_DEVICES="WPSTARTUP"

@@ -1,0 +1,330 @@
+WANPIPE ADSL Support
+====================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+Current WANPIPE Package
+-----------------------
+
+Location: ftp.sangoma.com/linux/current_wanpipe
+
+Package:  Choose the current latest
+	  eg: wanpipe-beta7-2.3.0.tgz (or greater)
+
+Changes:  README
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with ADSL support
+-----------------------------------
+
+The ADSL support is installed by default
+during WANPIPE installation process.
+
+	./Setup install 
+
+Follow the Setup installation script and choose
+all DEFAULT options.
+
+After successful installation proceed to 
+configure the card for ADSL protocol /usr/sbin/wancfg 
+GUI configurator.
+
+
+For full installation instructions please refer to
+ftp.sangoma.com/linux/current_wanpipe/README-1.install.  
+
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+Configuring ADSL
+----------------
+
+Run: /usr/sbin/wancfg
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: ADSL Protocol
+
+4. Hardware Section
+	Select Probe Hardware
+		Select your S518 adapter.
+
+	Encapsulation Mode (ATM):
+		Bridged Ethernet LLC over ATM: (PPPoE)
+		Bridged Ethernet VC over ATM
+		Classical IP LLC over ATM
+	      	Router IP VC over ATM
+		PPP LLC over ATM
+		PPP VC over ATM: (PPPoA)
+			
+        ATM Auto Configuration Option:
+		If set to yes:
+			ADSL driver will autodetect VPI/VCI 
+			values on ADSL line.
+
+		If set to no:	
+			Manually set the VPI and VCI
+	
+
+	        Note: Use the auto-configuration only if you
+		      don't konw your VPI/VCI numbers.
+
+	ADSL Watchdog: 
+		Enable adsl watchdog, that will monitor the
+		line using ATM OAM Loopback requests, every
+		10 seconds.
+
+		If 4 consecutive requests are not responded
+		to, the ADSL line will be re-trained.
+		      
+		If the remote side doesn't support ATM OAM 
+		loopback protocol, the Watchdog will 
+		automatically turn off !
+		     
+	Leave the rest of the options DEFAULT
+
+
+5. Interface Section
+	
+	Specify interface name.
+	(Leave it default)
+
+	Operation Mode:
+		PPPoE: This interface will be used by the PPPoE
+		       daemon, thus no ip information is needed.
+
+		WANPIPE: This interface will be used by IP or Ethernet
+		         layer, thus IP information is required.
+
+	PAP:	
+		Enable PPP PAP authentication       (PPPoA only)
+	CHAP:	
+		Enable PPP CHAP authenticaiton      (PPPoA only)
+	USERID: 
+		User id used for PPP authentication (PPPoA only)
+	PASSWD: 
+		User password used for PPP auth.    (PPPoA only)
+	
+	
+	DYN_INTR_CFG: Enable dynamic IP addressing  (PPPoA only)
+                      If enabled set, all IP addresses to 0.0.0.0
+			
+	IP Address Setup: (WANPIPE mode only)
+
+		Specify your telco supplied IP addresses
+
+		DYN_INTR_CFG: Enable dynamic IP addressing  (PPPoA only)
+                              If enabled set, all IP addresses to 0.0.0.0
+
+
+6. End of configuration, exit and save
+
+
+For full configuration instructions please refer to
+ftp.sangoma.com/linux/current_wanpipe/README-2.config 
+
+
+
+Start ADSL protocol
+-------------------
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+For full operation instructions please refer to
+ftp.sangoma.com/linux/current_wanpipe/README-3.operation 
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are displayed.
+
+	Confirm the Link state: Link connected
+		Note the down and up stream baud rates.
+		
+		eg: ADSL Link connected (Down 1728 kbps, Up 384 kbps)
+
+	Check for any error events.
+
+
+For full debugging instructions please refer to
+ftp.sangoma.com/linux/current_wanpipe/README-4.debugging 
+
+
+Further Info
+------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+
+
+Configuring WANPIPE ADSL Drivers for PPPoE
+------------------------------------------
+
+	1.Run /usr/sbin/wancfg  
+
+	2.Select ADSL Protocol
+
+	3.Select Hardware Option
+
+		4.Probe for ADSL card (S518) and select it
+		
+		5.Select EncapMode=ETH_LLC_OA
+		  ie: Bridged Ethernet LLC over ATM encapsulation
+
+		6.If you have ATM VPI/VCI information, disable ATM auto 
+		  configuration and specify the VPI/VCI combination. 
+	  	  Otherwise, try to autodetect the VPI/VCI numbers.
+	  
+	7.Select Network Interface Setup
+	
+	8.Specify PPPoE operation mode
+	
+	9.Save and Exit
+	
+	10.Start Wanpipe:  wanrouter start
+
+
+  The next step is to configure PPPoE over the newly created WANPIPE interface.
+
+	1. Download PPPoE utility from sangoma web site
+		ftp.sangoma.com/linux/utilities/rp-pppoe-3.4.tar.gz
+	
+	2. Untar the rp-pppoe-3.4.tar.gz in tmp/ directory
+           Read the README file
+
+		3. Install rp-pppoe: ./go
+		   Configure rp-pppoe: adsl_setup
+		   
+		   Use the WANPIPE network interface as the Ethernet 
+		   interface connected to a modem.  Specify username and 
+		   password as well as DNS info.
+		   
+	4. Start PPPoE:  adsl-start
+
+	5. Read /var/log/messages for connection status.
+	   eg: tail -f /var/log/messages
+
+
+
+
+
+
+	
+Configurig WANPIPE ADSL Drives for PPPoA
+----------------------------------------
+
+
+	1.Run /usr/sbin/wancfg 
+
+	2.Select ADSL Protocol
+
+	3.Select Hardware Option
+
+		4.Probe for ADSL card and select it
+		
+		5.Select EncapMode=PPP_VC_OA
+		  ie: PPP VC over ATM encapsulation
+
+		6.If you have ATM VPI/VCI information, 
+		  disable ATM auto configuration and specify 
+		  the VPI/VCI combination. 
+		  Otherwise, try to autodetect the VPI/VCI numbers.
+
+	7.Select Network Interface Setup
+	
+	8.Specify WANPIPE operation mode
+	
+	9.Enable PAP or CHAP Authentication if Required
+
+       10. Specify PPP user name and password if PAP or CHAP 
+	    has been enabled.
+
+       11. IP address setup:  By default, the IP addresses are
+	                      dynamically negotiated by the PPP 
+			      protocol.  
+		
+		DYN_INTR_CFG:  Enables dynamic PPP ip addressing
+
+		               Set all ip addresses to 0.0.0.0
+			       Set netmsak ip address to 255.255.255.255
+
+
+       14. Configure Startup Scripts (Optional)
+           
+	   When pppoa interface negotiates new IP address
+	   kernel will envoke a user space program
+	   to handle any usr space tasks associated with
+	   the new interface.
+
+	   Thus proceed to create a STARTUP, read the
+	   wancfg/wancfg_adv documentation.
+	   
+
+       13.Save and Exit
+
+       14.Start Wanpipe:  wanrouter start

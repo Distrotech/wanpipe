@@ -1,0 +1,11 @@
+#include <windows.h>
+#include <ntverp.h>
+
+#define VER_FILETYPE                VFT_DRV
+#define VER_FILESUBTYPE             VFT2_DRV_SYSTEM
+#define VER_FILEDESCRIPTION_STR     "Sangoma Telephony library"
+#define VER_INTERNALNAME_STR        "stelephony.dll"
+#define VER_ORIGINALFILENAME_STR    "stelephony.dll"
+
+#include "wanpipe_version.h"
+#include "common.ver"

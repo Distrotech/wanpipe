@@ -1,0 +1,11 @@
+--- kernel-source-2.4.5.orig/net/wanrouter/Makefile	Sat May 19 20:47:55 2001
++++ kernel-source-2.4.5/net/wanrouter/Makefile	Thu Aug 16 13:41:40 2001
+@@ -12,7 +12,7 @@
+ export-objs := wanmain.o
+ 
+ obj-y :=  wanproc.o wanmain.o
+-obj-m := $(O_TARGET)
++obj-m := $(O_TARGET) af_wanpipe.o
+ ifneq ($(CONFIG_VENDOR_SANGOMA),n)
+ 	obj-m += $(O_TARGET)
+ endif

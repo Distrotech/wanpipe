@@ -1,0 +1,571 @@
+Asterisk Open PBC/IVR Project using the Sangoma A101 and A102 cards
+===================================================================
+
+Alex Feldman: Aug 2005
+Nenad Corbic:
+
+WANPIPE supports the Asterisk Open PBX/IVR project through an interface
+of the Zaptel family of hardware devices. These devices share a common 
+driver suite, called the ZAPATA Telephony Driver Suite (zaptel).
+
+
+IMPORTANT
+---------
+	Please read the APPENDIX for IMPORTANT INFO
+
+
+------------------------------------------------------------------
+ASTERISK / ZAPTEL Installation
+------------------------------------------------------------------
+
+First install:
+	zaptel, zapata, libpri and asterisk 	
+	software on your system. 
+
+The Asterisk distributions can be found at http://www.asterisk.org.
+
+1. Download the LATEST sources from http://www.asterisk.org;
+
+2. Untar zaptel, libpri and asterisk source 
+   in /usr/src directory
+
+3. Proceed with ASTERISK/ZAPTEL installation as per
+   Asterisk instructions
+
+   Install: 	1) Zaptel
+   	       	2) LibPri
+	    	3) Asterisk
+
+Note: 
+   Zaptel kernel drivers must compiled and 
+   installed BEFORE loading WANPIPE drivers.
+
+
+-----------------------------------------------------------------
+WANPIPE Releases
+-----------------------------------------------------------------
+
+2.3.3: Latest Wanpipe Release 
+	       
+       o New channelized TDMV Driver (A104 Only)
+       	 
+	 Voice data is channelized and grouped into
+	 8 byte chunks in HARDWARE.  Each voice 
+	 channel is then DMAed directly into the ZAPTEL
+	 buffers.  Thus there is ZERO copy from HARDWARE
+	 to ZAPTEL, resulting in better performance and
+	 scalability.
+		 
+       o New DCHAN PRI Hardware HDLC support:
+       
+	 A104 Supported from beta1-2.3.3 release, 
+         A101/A102 Supported from beta6-2.3.3 release
+         
+	 Instead of using the ZAPTEL software HDLC engine,
+	 WANPIPE drivers use FPGA-based HARDWARE HDLC engine to
+	 handle the PRI HDLC traffic.  The HDLC frames are
+	 then passed directly into LIBPRI, resulting
+	 in higher reliability, better performance and scalability.
+
+       o New TDMV API  (A104 Only)
+
+         Customers that develop Voice Applications in User Space, 
+	 can now develop using Channelized TDMV API.
+
+	 The TDMV API works in the same way as standard HDLC API.
+	 Application creates a socket to a network interface and
+	 uses standard system calls to read and write.
+	 However, data received from the TDMV API socket, will be
+	 in 8,16,32 or 63 byte CHUNKS for each configured timeslot.
+	 
+	 Thus for full T1 1-23 voice channels the rx data would 
+	 look like:
+	 	__________________________________
+		| 8bytes  |  8   |     | ... | 8  |
+	 	---------------------------------- 
+	 	  Slot 1     2      3          23
+	
+	 The DCHAN PRI HDLC frames would be received as OOB messages
+	 on the same socket.
+	 
+	 OR
+	 
+	 The DCHAN PRI HDLC frames could be received using another
+	 socket that is connected to a network interface that is
+	 bound to channel 24.
+	 
+
+2.3.2: Stable Wanpipe TDMV Release
+       
+       o The ORIGINAL TDMV driver for both A101/2 and A104 cards.
+         TDMV Driver has been optimized for best Echo cancel
+	 performance.
+	
+	 This driver has been fully tested in the field and is
+	 considered stable.
+
+	 
+	      
+----------------------------------------------------------------
+WANPIPE Installation for Asterisk
+----------------------------------------------------------------
+
+1. Download the LATEST Wanpipe 2.3.3 Release or Greater!
+   
+   Note: Wanpipe does not support Asterisk in releases
+         LOWER than 2.3.2!
+
+	ftp.sangoma.com/linux/current_wanpipe
+	
+
+2. Untar wanpipe release in /usr/src/ directory
+
+	eg: tar xvfz wanpipe-beta13-2.3.3.tgz
+
+
+3. Run ./Setup install
+	
+	Proceed with installation choose YES for each option.
+
+	IMPORTANT:
+		Under compilation mode:
+			Select Option 2:  TDM Only drivers
+                        Select Option 3:  TMD and WANPIPE drivers 
+
+			Enable TDMV_DCHAN option for Hardware HDLC for
+			             DCHAN PRI.
+
+				This option will also PATCH the ZAPTEL driver.
+				Thus, ZAPTEL MUST be recompiled and installed
+				after the ./Setup is completed.
+				
+		Proceed to compile wanpipe drivers.
+
+4. To confirm successful installation run:
+
+	wanrouter hwprobe
+
+	Confirm that Sangoma cards have been found.
+
+    Note: 
+	Zaptel kernel drivers must compiled and 
+	installed BEFORE loading WANPIPE drivers.
+
+
+------------------------------------------------------------------------
+WANPIPE Configuration for the A100 series of cards
+------------------------------------------------------------------------
+
+You can use the A101 or A102 cards for both data and voice. The 
+following describes how to configure the Asterisk system for 
+voice, with an auxiliary data interface, if needed.
+
+
+1. Run the configuration utility wancfg. 
+
+	/usr/sbin/wancfg
+
+	Hardware Setup:
+	
+	    	Select Hardware: AFT
+		
+			T1/E1 CSU/DSU Setup can be configured via
+			"Advanced Physical Medium Config"
+
+			If all the 24 (T1) or 30 (E1) timeslots will 
+			be used by Asterisk then there is no need to 
+			configure the T1/E1 Channelization.
+
+			If less than the full span is used by Asterisk, 
+			set the channel span in 
+			"Advanced Timeslot Groups Configuration"
+
+
+		A104/2 TE1 Clock Synchronization:
+
+			TE1 Clock synchronization is used to propagate
+			a single clock source over the T1/E1 ports on a single card.
+
+
+			Example: 
+			wanpipe1: Port 1 receives T1 Clock from Telco
+			wanpipe2: Port 2 provides MASTER transmit clock for the link, 
+				         synchronized to the clock on Port 1
+		
+					
+			TE_CLOCK 	= MASTER   #Specify AFT card as Master clock source	
+			FE_REF_CLOCK	= 1 	   #Specify the clock source port
+
+			For more information refer to APPENDIX below.
+			
+
+	Protocol Setup:
+		Select Protocol: TDM VOICE 
+		No other options
+
+	Interface Setup:
+		Select: SPAN Number: 1-24
+			The SPAN usually starts with 1
+	
+	
+		Select: Override Asterisk Echo Enable
+		        Default: NO
+
+			This option will DISABLE/Override Asterisk 
+			ECHO Cancellation setting for this SPAN. 
+
+			Therefore, if you want to DISABLE Echo Cancellation
+			for this SPAN, ie: ignore what is configured in
+			zapata.conf, then set this option to YES.
+
+			*This is used in switching applications where one SPAN needs echo 
+			 cancellation and rest do not.  	
+		
+		Select: DCHAN PRI Timeslot:  
+		
+			Hardware HDLC support for DCHAN PRI 
+			
+			A104: Supported from beta5-2.3.3 or greater
+				Release		: beta5-2.3.3 or greater.
+				Firmware Version: V.11 or greater 
+
+			A101/2: Supported from beta6-2.3.3 or greater
+				Release		: beta6-2.3.3 or greater.
+				Firmware Version: All versions (V.24 latest) 
+
+			Options:  0    : Disable Hardware HDLC on PRI 
+			                 timeslot.
+
+			      T1  1 to 24 : Enable Hardware HDLC on PRI
+			                 timeslot. Default 24
+
+			      E1  1 to 31 : Enable Hardware HDLC on PRI
+			                 timeslot. Default 16
+	
+			Note: TDMV_DCHAN value is ALWAYS from (1-24/31).
+			(Don't confuse this with the Asterisk configuration that uses 
+			 values greater than 24/31 for the DCHAN specification)
+
+		
+			
+	No other options
+
+
+
+	Channelization Notes:
+	--------------------
+ 
+	If you are using PRI mode, channel 24 must be included in the
+        "Timeslots in Group" list for the Asterisk T1 span, and channel 
+	16 for the Asterisk E1 span. 
+
+        For the non-Asterisk data channels, if any, configure 
+	the interface as a standard WANPIPE interface, 
+	running  Frame Relay, PPP, Cisco HDLC or X.25 with IP or API 
+	access.
+
+
+
+------------------------------------------------------------------------
+Zaptel configuration
+------------------------------------------------------------------------
+
+Download the documentation how to configure Zaptel driver from
+
+(http://www.digium.com/downloads/configuring_zaptel.pdf).
+
+When configuring the Zaptel driver (/etc/zaptel.conf)
+
+ 1) Select the same span configurations as you used for WANPIPE 
+       (i.e. LBO, framing, coding parameters).
+	  
+	Otherwise the Zaptel configuration is completely 
+	standard, except that if there are data channels that 
+	will be handled by WANPIPE, those channels should be ignored, 
+	and not configured as 'nethdlc'.
+
+ 2) If you are using multiple WANPIPE devices for Asterisk
+	
+	For example, an A102 card might be configured as: 
+		
+		wanpipe1 and wanpipe2 
+	 
+	then you need to set your starting scripts to start 
+	the wanpipes in the same sequence as defined in zaptel.conf.
+
+		Run: wanrouter wanrc 
+		
+		to set the wanpipe startup order.
+
+ 3) If you are using some channels for DATA
+ 
+ 	You don't need to set the channel list for this 
+	interface under /etc/zaptel.conf because all data will go
+	through the separate WANPIPE driver to the kernel.
+
+
+
+
+-------------------------------------------------------------
+APPENDIX
+-------------------------------------------------------------
+
+
+1)HOTPLUG Conflicts with WANPIPE
+  ===============================
+
+  
+The HOTPLUG Service should be disabled because it 
+conflicts with Wanpipe interface startup.
+The HOTPLUG can conflict with startup of TDMV drivers.
+   
+Possible Solutions:
+
+	1) Insert wanpipe interface name into the hotplug
+  		 interface list, and restart hotplug.
+	
+		vi /etc/hotplug/net.agent
+		
+			Insert wanpipe interface name into 
+			the ignore list:
+		
+			...ppp*|lo*|w*)
+
+			Where w* relates to all wanpipe interfaces 
+			starting with letter "w"
+
+		Restart hotplug agent:
+		
+		/etc/init.d/hotplug restart
+
+	2) Remove the Hotplug RPM
+		rpm -qa | grep hotplug
+		rpm -e <hotplug name>
+ 
+	3) Stop hotplug:
+		/etc/init.d/hotplug stop
+	
+		However, you must do this each
+		time you boot up. Thus insert this
+		command in rc.local.
+
+
+
+-------------------------------------------------------------------
+
+
+2) Exec "ztcfg" after wanrouter start
+   ==================================
+
+The "ztcfg" tool must be executed before starting
+asterisk. WANPIPE "wanrouter" script has the capability
+to execute an external script after "wanrouter start"
+command is competed.
+
+The wanrouter looks to /etc/wanpipe/scripts directory
+for any configured bash scripts.
+
+	1) Create a file called "start" (lower case)
+		
+	   vi start
+	   ----------Cut Here----------------
+	   #!/bin/sh
+
+	   #Make sure that udev/devfs zaptel device
+	   #has come up.
+	   while [ ! -e /dev/zap ]; 
+	   do
+		echo "Waiting for zaptel device /dev/zap..."
+		sleep 2
+	   done
+
+	   sleep 1
+	
+	   ztcfg -vvvv  
+
+	   ----------Cut Here----------------
+
+	2) Copy the file "start" into /etc/wanpipe/scripts directory.
+	   (Note: the file doesn't have to have exec privileges)
+
+
+	The script "start" will execute each time the "wanrouter start"
+	command executes.
+
+
+Please Refer to README.external_scripts for more info about 
+wanrouter and external scripts.
+
+
+------------------------------------------------------------
+
+
+2) Updating FLASH on AFT Cards
+   ===========================
+
+   The AFT FLASH update utility is located in:
+   	wanpipe/util/wan_aftup directory.
+
+   The same directory contains the latest AFT
+   FLASH Firmware BIN files since the release
+   of the driver.
+
+   The latest AFT Firmware bins are located in
+   ftp.sangoma.com/linux/current_wanpipe/firmware.
+   
+
+   To update flash on ANY AFT card do the following:
+
+   1) Make sure you have the latest AFT Firmware BIN
+      The latest file necessary for the current release
+      will be in the wan_aftup/ directory.
+      One can also check the ftp site above.
+
+      The AFT Binary file must reside in wan_aftup/ directory.
+
+   2) Make sure that wanpipe drivers are NOT Loaded
+   	lsmod | grep wanpipe
+
+   3) Run ./update_aft_firm.sh
+   
+   	Specify interface name that corresponds to the
+	AFT card.
+
+	Specify the latest AFT Firmware version
+
+	Once the flashing is done, select Y to reload firmware.
+	(This step only reloads flash, not your machine!)
+
+   4) Card is ready for normal operation. (No reboot needed)	
+	
+---------------------------------------------------------------	
+
+
+3) Multiple ZAPTEL Releases AND Wanpipe Crashing
+   =============================================
+
+   On systems, where ZAPTEL has been upgraded from old
+   releases, it is possible for a kernel module directory
+   to contain MULTIPLE ZAPTEL drivers.
+
+   Old Zaptel install dir: /lib/modules/$(uname -r)/zaptel
+
+   New Zpatel install dir: /lib/modules/$(uname -r)/misc
+   
+   If old zaptel installation was NOT removed, the new installation
+   would NOT overwrite the old kernel modules.  In this case
+   the OLD modules would continue to be loaded, even though the
+   new ones were installed.  
+
+Check:
+
+   The check if this condition exists on your machine run:
+   	
+	modprobe -l  | grep zaptel.*o
+
+		If multiple zaptel modules are found
+		the problem must be fixed before starting
+		WANPIPE !!!.
+
+
+   In this scenario, if a customer starts WANPIPE drivers based
+   on NEW ZAPTEL sources, the WANPIPE would CRASH !!!
+   The WANPIPE driver shares structures with ZAPTEL, thus, a
+   result of mismatched structures is a kernel panic.
+   
+
+Solution:
+
+   The solution in this case is to REMOVE the old zaptel modules.
+   	rm -rf /lib/modules/$(uname -r)/zaptel
+	depmod -a
+
+
+---------------------------------------------------------------	
+
+
+4) Multiple ZTCFG executions on bootup
+   ====================================
+
+   On systems that have zaptel and digium drivers
+   installed, one must be careful to synchronize
+   wanpipe, digium and zaptel ztcfg on boot up.
+
+   Therefore, wanpipe and digim MUST start before ztcfg
+   is executed.
+
+   Check your /etc/rcS.d startup scripts. Make sure that
+   the startup numbers S## for zaptel are higher than those
+   of wanpipe and digium.
+
+
+---------------------------------------------------------------
+
+
+5) UDEV Conflicts with ZAPTEL
+   ==========================
+
+   UDEV is a user space daemon, which handles all /dev
+   devices.  On startup ZAPTEL schedules creation of
+   /dev/zap device. It takes about 10 seconds for the 
+   UDEV daemon to create /dev/zap and all its devices after
+   zaptel has been started (wanrouter start).
+
+   On shutdown, ZAPTEL schedules deletion of /dev/zap
+   device.  Again it takes about 1-5seconds for UDEV
+   daemon to delete /dev/zap device from user space.
+
+   A conflict can occur if one quickly starts and then stops
+   wanpipe/zaptel.  In this case UDEV daemon might be in
+   process of creating /dev/zap devices, while zaptel kernel
+   driver tries to remove them.
+
+   To prevent this please install the wanpipe external 
+   start script referenced in ITEM #2 of the APPENDIX above.
+   This script will delay wanpipe start until UDEV has
+   created the /dev/zap devices.  
+
+
+----------------------------------------------------------------
+
+
+6) A104/2 TE1 Clock Synchronization:
+   =================================
+	
+TE1 Clock synchronization is used to propagate
+a single clock source over the T1/E1 ports on a single card.
+
+Example: 
+	wanpipe1->Port 1 receives T1 Clock from Telco
+	wanpipe2->Port 2 provides MASTER transmit clock for the link, 
+		         synchronized to the clock on Port 1
+		
+
+Settings for wanpipe1, Port 1: 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using wancfg, configure as slave with TE_CLOCK=NORMAL
+	
+Settings for wanpipe2, Port 2:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+Using wancfg, configure as master with 
+	TE_CLOCK=MASTER
+	FE_REF_CLOCK=1
+	
+
+The FE_REF_CLOCK parameter refers to the source of the MASTER 
+clock for this port. On the A104 it can be any of the 4 ports. 
+On the A102, Port A=1 and Port B=2. Setting FE_REF_CLOCK=0 
+sets the clock source as the on-board oscillator, disabling 
+any synchronization.
+
+
+IMPORTANT: When starting and stopping wanpipe devices make sure 
+that the wanpipe# that provides the synchronized clock source 
+is started first and stopped last. This is normally done automatically 
+by the wanrouter startup script.
+
+If the wanpipe# that provides the synchronized clock source is 
+stopped, the other devices using the clock source will 
+behave unpredictably.
+
+

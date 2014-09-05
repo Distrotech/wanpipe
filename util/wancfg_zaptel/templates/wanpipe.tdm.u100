@@ -1,0 +1,36 @@
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Mon Jul 31 17:10:23 EDT 2006
+#
+# Note: This file was generated automatically
+#       by /usr/local/sbin/setup-sangoma program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipeDEVNUM = WAN_USB_ANALOG, Comment
+
+[interfaces]
+wIFNUMg1 = wanpipeDEVNUM, , TDM_VOICE_OP_MODE, Comment
+
+[wanpipeDEVNUM]
+CARD_TYPE 	= USB
+AUTO_DETECT 	= NO
+USB_BUSID	= BUSNUM
+FE_MEDIA	= FXO/FXS
+TDMV_LAW	= TDM_LAW
+TDMV_OPERMODE	= TDM_OPERMODE
+RM_BATTTHRESH	= 3
+RM_BATTDEBOUNCE = 16
+TDMV_SPAN	= TDMVSPANNO
+
+[wIFNUMg1]
+ACTIVE_CH	= ALL
+TDMV_HWEC	= HWECMODE

@@ -1,0 +1,134 @@
+# config file
+# lines that begin with # or newline are ignored.
+
+[settings]
+
+#When debugging set the debug flag to 10
+#When in production set the debug flag to 1
+debug_level		=> 1   
+
+#Sangoma MGD log file
+logfile_path		=> /var/log/sangoma_mgd.log
+
+#Boost (ISUP) connectio info
+#Local address/port used for boost -> mgd comm
+#Remote addres/port used for mgd -> boost comm
+boost_local_ip		=> 127.0.0.65
+boost_local_port	=> 53000
+boost_remote_ip		=> 127.0.0.66
+boost_remote_port	=> 53000
+
+
+#Woomera Server Configuration
+#Server will listen on the following
+#IP and PORT
+media_ip		=> 127.0.0.1
+woomera_port		=> 42420
+
+#Woomera UDP media ports
+#Base Port 
+#Maximum Number of Ports
+#WARNING:
+# If changing from default values
+# ensure that woomera client
+# UDP ports do not conflict.
+base_media_port         => 10000
+max_media_ports         => 5000
+
+
+#Used to play Sangoma Rocks on all
+#outbound calls, regardless of Asterisk.  
+#Test feature only.
+#Options: 0 - Disable
+#         1 - Enable
+out_tx_test		=> 0
+
+
+#Used to trace media loop
+#Used for ccr conformance testing
+#Options: 0 - Disable
+#	  1 - Enable
+loop_trace		=> 0
+
+#DTMF Timers in ms
+#Note these values should be
+#updated based on your network
+#DTMF Standard values are ON=250 OFF=50  
+#On some networks ON=60 OFF=10 worked well.
+
+dtmf_on_duration  => 250	
+dtmf_off_duration => 50
+
+#Number of chunks to wait between
+#dtmfs.  Size of chunk is dependent
+#on configuration. Default chunk size
+#is 10ms. 
+#dtmf_inter_ch_duration => 0
+
+#Enable/Disable Auto ISUP ACM 
+#response to an incoming ss7 call. 
+#0-Disable
+#1-Enable (Default)
+autoacm => 0
+
+#Strip non digits from incoming
+#calls. Removes F from incoming cid
+#when overlap signalling is used.
+#0-Disable (Default)
+#1-Enable
+strip_cid_non_digits => 0
+
+
+#Eanble Woomera UDP sequencing
+#This must be enabled on chan_woomera
+#side as well in order to work.
+#0-Disable (Default)
+#1-Enable
+udp_seq => 0
+
+
+#Timeout an outboud call, if call setup is
+#not completed in call_timeout seconds.
+#Value is in seconds
+#Terminated call will be released with cause 19
+call_timeout=100
+
+
+#Enable woomera sever
+#native bridging. On woomer to woomera
+#calls between two SMG gateways
+#Asterisk chan_woomera will indicate
+#to SMG servers to pass media directly
+#and not pass it through asterisk
+#0-Disable 
+#1-Enable (Default)
+media_pass_through => 1
+
+#Enable tdm bridge profile 1
+#Note profile number must not be zero.
+#Configure all parameters for the bridge.
+#The opposite sangoma_mgd must be configured
+#with same parameters except IP address
+#need to be swaped.
+#bridge_tdm_ip => 1
+#bridge_span => 1
+#bridge_chan => 1
+#bridge_local_ip => 192.168.1.251
+#bridge_remote_ip => 192.168.1.252
+#bridge_port => 60000
+#bridge_period => 10 #milliseconds
+
+
+#Enable tdm bridge profile 2
+#Note profile number must not be zero.
+#Configure all parameters for the bridge.
+#The opposite sangoma_mgd must be configured
+#with same parameters except IP address
+#need to be swaped.
+#bridge_tdm_ip => 2
+#bridge_span => 1
+#bridge_chan => 2
+#bridge_local_ip => 192.168.1.251
+#bridge_remote_ip => 192.168.1.252
+#bridge_port => 60001
+#bridge_period => 10 #milliseconds

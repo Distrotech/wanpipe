@@ -1,0 +1,82 @@
+WANPIPE API SAMPLE PROGRAMS
+===========================
+
+Author: Nenad Corbic
+
+
+This directory contains:
+
+libsangoma: Unified Linux/Windows API library
+
+libstelephony: Telephony API used for dtmf/callerid etc.
+
+sample_c: C sample code that uses libsangoma
+
+sample_cpp: C++ sample code that uses libsangoma + libstelephony
+
+tdm_api: Old test applications based on libsangoma
+
+legacy/ Old Legacy API
+
+legacy/aft:
+	Sample API aplications used on to of all AFT hardware.
+
+legacy/mpapi/x25:	
+	WANPIPE MAPI X25 API sample programs. These programs
+        should be used for rapid mpapi x25 api development,
+        and initial testing.
+
+legacy/fr:	
+	WANPIPE Frame Relay API sample programs. These programs
+        should be used for rapid frame relay api development,
+        and initial testing.
+
+legacy/chdlc:	
+	WANPIPE CHDLC API sample programs. These programs
+        should be used for rapid chlc api development,
+        and initial testing.
+
+legacy/bitstrm: 
+	WANPIPE BitStreaming API sample programs. These programs
+        should be used for rapid bitstreaming api development,
+        and initial testing.
+
+legacy/bisync: 
+	WANPIPE BiSync API sample programs. These programs
+        should be used for rapid BiSync api development,
+        and initial testing.
+
+
+Special Products
+----------------
+
+Note, driver for these products are not installed
+by default. They must be specfined during the
+installation process to the ./Setup script.
+
+
+BiSync_strm: 
+	WANPIPE BiSync Streaming API sample programs. These programs
+        should be used for rapid BiSync Streamin api development,
+        and initial testing. Used specificly for NASDAQ feeds.
+
+	eg: ./Setup install --protocol=BSCSTRM
+
+SS7:	WANPIPE SS7 API sample programs. These programs
+        should be used for rapid ss7 api development,
+        and initial testing.
+	
+	eg: ./Setup install --protocol=SS7
+
+MPAPI:	WANPIPE Multi-Protocol API Stacks
+        The MPAPI includes the Wanpipe X25/LapB kernel stack.
+        These programs should be used for rapid X25API 
+	development,and initial testing.  Furhtermore the kernel
+	X25API stack can run on top of MP HDLC driver or MP Frame
+	Relay driver, over PRI and SEC S514/S508 ports.
+
+
+To compile all api sample programs:
+
+1. Change directory to /etc/wanpipe/api
+2. Run 'make'

@@ -1,0 +1,65 @@
+
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Fri Oct 25 14:34:44 EDT 2002
+#
+# Note: This file was generated automatically
+#       by /usr/local/wanrouter/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_X25, Comment
+
+[interfaces]
+wp1svc1 = wanpipe1, @, API, Comment
+
+[wanpipe1]
+CARD_TYPE 	= S51X
+S514CPU 	= A
+AUTO_PCISLOT	= YES
+PCISLOT 	= 5
+PCIBUS		= 0
+Firmware	= /etc/wanpipe/firmware/x25_514.sfm
+Interface 	= V35
+Clocking 	= External
+BaudRate 	= 1540000
+MTU 		= 1024
+UDPPORT 	= 9000
+Station		= DTE
+LowestPVC	= 0
+HighestPVC 	= 0
+LowestSVC 	= 1
+HighestSVC	= 1
+HdlcWindow	= 7
+PacketWindow	= 7
+CCITTCompat	= 1988
+X25Config	= 0x0090
+LAPB_HDLC_ONLY	= NO
+CALL_SETUP_LOG 	= YES
+OOB_ON_MODEM	= NO
+T1		= 3
+T2		= 0
+T4		= 240
+N2		= 10
+T10_T20		= 30
+T11_T21		= 30
+T12_T22	 	= 30
+T13_T23		= 30
+T16_T26		= 30
+T16_T26		= 30
+T28		= 30
+R10_R20		= 5
+R12_R22		= 5
+R13_R23		= 5
+TTL 		= 255
+IGNORE_FRONT_END  = NO
+
+[wp1svc1]

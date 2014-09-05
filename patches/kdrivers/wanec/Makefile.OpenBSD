@@ -1,0 +1,33 @@
+# ============================================================================
+# Makefile	WAN Echo Canceler Chip configurator.  Make Script.
+#
+# Copyright	(c) 1995-1997 Sangoma Technologies Inc.  All Rights Reserved.
+# ----------------------------------------------------------------------------
+# Augc 25, 2005		Alex Feldman	Initial version.
+# ============================================================================
+
+####### DEFINES ##############################################################
+
+# Build Options.
+BTDIR		= ${.CURDIR}/oct6100_api/apilib/bt
+LARGMATHDIR	= ${.CURDIR}/oct6100_api/apilib/largmath
+LLMANDIR	= ${.CURDIR}/oct6100_api/apilib/llman
+OCTAPIDIR	= ${.CURDIR}/oct6100_api/octdeviceapi/oct6100api/oct6100_api
+OCTAPIMIDIR	= ${.CURDIR}/oct6100_api/octdeviceapi/oct6100api/oct6100_apimi
+.PATH:	${BTDIR} ${LARGEMATHDIR} ${LLMANDIR} ${OCTAPIDIR} ${OCTAPIMIDIR}
+
+# Project File Paths.
+KLDMOD		= true
+KMOD		= wanec
+DESTDIR		= /
+KMODDIR		= /boot/modules
+MODULE_DEPEND	= wanrouter
+SRCS		= wanec_iface.c  wanec_cmd.c wanec_utils.c wanec_dev.c octapi_bt0.c octapi_largmath.c octapi_llman.c oct6100_mask_interrupts.c oct6100_adpcm_chan.c oct6100_channel.c oct6100_chip_open.c oct6100_chip_stats.c oct6100_conf_bridge.c  oct6100_debug.c oct6100_events.c oct6100_interrupts.c oct6100_memory.c oct6100_miscellaneous.c oct6100_mixer.c oct6100_phasing_tsst.c oct6100_playout_buf.c oct6100_remote_debug.c oct6100_tlv.c oct6100_tone_detection.c oct6100_tsi_cnct.c oct6100_tsst.c
+CFLAGS 		+= -I. -Ioct6100_api -Ioct6100_api/include				\
+			-Ioct6100_api/include  -Ioct6100_api/include/apilib		\
+			-Ioct6100_api/include/apilib -Ioct6100_api/include/octrpc	\
+			-Ioct6100_api/include/oct6100api				\
+			-Ioct6100_api/octdeviceapi/oct6100api -DWAN_OCT6100_MOD
+CFLAGS 		+= -DENABLE_TONE_PLAY
+
+.include <bsd.kmod.mk>

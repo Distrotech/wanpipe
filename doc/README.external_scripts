@@ -1,0 +1,140 @@
+WANROUTER Support for External Scritps
+======================================
+
+
+At the heart of WANPIPE operation is the 'wanrouter' operation
+script.  It is used to start/stop/restart and display
+WANPIPE current status and environment.
+
+
+'wanrouter' usage
+=================
+
+	/usr/sbin/wanrouter <cr>
+
+
+WANPIPE: WAN Router startup script
+
+Usage: wanrouter: {options} <wanpipe#> <interface>
+
+	wanrouter start : Starts all devices specified in
+                          /etc/wanpipe/wanrouter.rc WAN_DEVICES
+
+	wanrouter stop  : Stops all devices specified in
+                          /etc/wanpipe/wanrouter.rc WAN_DEVICES
+
+	wanrouter start wanpipe# : Start a single device
+
+	wanrouter stop  wanpipe# : Stops a single device
+                                  (# can range from 1 to 16)
+
+	wanrouter restart	 : Restart all devices specified in
+                                 /etc/wanpipe/wanrouter.rc WAN_DEVICES
+
+	wanrouter restart wanpipe# : Restart a single device
+                                     (# can range from 1 to 16)
+
+
+	wanrouter start wanpipe# if_name   : Start a single interface on device
+
+	wanrouter stop  wanpipe# if_name   : Stops a single interface on device
+                                             (# can range from 1 to 16)
+
+	wanrouter restart wanpipe# if_name : Restart a single interface on device
+                                             (# can range from 1 to 16)
+
+
+
+
+
+External Scripts
+================
+
+The wanrouter utility will also EXECUTE any external
+script that is located in /etc/wanpipe/scripts directory.
+Furthermore wanrouter utility will execute number of
+scripts depending on what is being started or stopped.
+
+Global Start/Stop Script
+------------------------
+	
+	Global Start  : wanrouter start
+	Global Stop   : wanrouter stop
+	Global Restart: wanrouter restart
+
+	Script Location:   /etc/wanpipe/scripts
+	
+	Start Script Name: start
+	
+		Script "start" will execute after a sucessfull
+		"wanrouter start" command. The wanrouter start 
+		command	will start one or more configured 
+		wanpipe devices.
+
+	Stop Script Name : stop
+
+		Script "stop" will execute after a sucessfull
+		"wanrouter stop" command. The wanrouter stop 
+		command	will stop one or more configured 
+		wanpipe devices.
+
+
+Device Start/Stop Script
+------------------------
+
+	Device start  : wanrouter start wanpipe1
+	Device stop   : wanrouter stop wanpipe1
+	Device restart: wanrouter restart wanpipe1
+	
+	Script Location:   /etc/wanpipe/scripts
+	
+	Start Script Name: wanpipe#-start  Where #={1,2,3,4...}
+	
+		Script "wanpipe1-start" will execute after:
+			Device Start
+			Global Start (if wanpipe1 is part of the start list)
+		
+	Stop Script Name : wanpipe#-stop   Where #={1,2,3,4...}
+
+		Script "wanpipe1-stop" will execute after:
+			Device Stop
+			Global Stop (if wanpipe1 is part of the start list)
+
+
+Interface Start/Stop Script
+---------------------------
+
+	Interface start  : wanrouter start wanpipe1 w1g1
+	Interface stop   : wanrouter stop wanpipe1  w1g1
+	Interface restart: wanrouter restart wanpipe1 w1g1
+	
+	Script Location:   /etc/wanpipe/scripts
+	
+	Start Script Name: wanpipe1-w1g1-start
+	
+		Script "wanpipe1-start-w1g1" will execute after:
+			Interface Start
+			Device Start
+			Global Start (if wanpipe1 is part of the start list)
+		
+	Start Script Name: wanpipe1-w1g1-stop
+	
+		Script "wanpipe1-stop-w1g1" will execute after:
+			Interface Stop
+			Device Stop
+			Global Stop (if wanpipe1 is part of the start list)
+
+
+The bash script should be written as follows:
+
+----------CUT----------------
+#!/bin/sh
+
+#Put shell script commands here
+
+
+
+
+----------CUT-----------------
+
+

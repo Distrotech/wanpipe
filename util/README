@@ -1,0 +1,57 @@
+WANPIPE CONFIGURATION UTILITIES
+===============================
+
+Author: Nenad Corbic
+
+
+This directory contains:
+
+WANCFG:	WANPIPE configuration setup utility.
+        This is a GUI program written in, bash 
+        version 2, shell script. Wancfg will create
+        the wanpipe#.conf configuration file needed
+        to start the wanrouter.
+
+CFGFT1:	WANPIPE FT1 CSU/DSU configurator utility.
+        This is a GUI program written in, bash
+        version 2, shell script. Cfgfg1 will setup
+        the internal CSU/DSU that comes with Sangoma
+        S508/S514 FT1 cards.
+
+LXDIALOG: WANPIPE GUI utility used by both CFGFT1 and 
+ 	  WANCFG programs.  It is a modification of 
+	  Dialog program for specific use of Sangoma
+          products.	
+
+
+Environment Specific Information
+--------------------------------
+
+REDHAT
+------
+
+All utilities come pre-compiled with RedHat glib6
+libraries. Therefore, if one is running RedHat no 
+compilation is necessary. Utilities should be executed 
+from /usr/sbin directory.
+
+
+OTHER DISTRIBUTIONS
+-------------------
+
+If one is running on a NON RedHat distribution with 
+different libraries, the configurator binaries might
+fail. In this case, one can recompile all configurator
+utilities by running 'make' from wanpipe/config
+directory.
+
+Before recompiling utilities, read the:
+
+wanpipe/config/ft1/REAMDE file.
+wanpipe/config/wancfg/README file.
+ 
+
+To compile configurator utilities:
+
+1. Change directory to wanpipe/config
+2. Run 'make'

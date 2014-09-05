@@ -1,0 +1,38 @@
+#
+# wdk sources file for stelephony.dll
+# author: David Rokhvarg <davidr@sangoma.com>
+#
+TARGETNAME=stelephony
+TARGETPATH=obj
+TARGETTYPE=DYNLINK
+DLLENTRY=_DllMainCRTStartup
+
+#MSC_WARNING_LEVEL=$(SANG_WARNING_LEVEL)
+MSC_WARNING_LEVEL=-W3
+
+USE_LIBCMT=1
+
+DLLDEF=stelephony.def
+
+############################################################################################
+C_DEFINES=$(C_DEFINES) /D__WINDOWS__
+C_DEFINES=$(C_DEFINES) /DSTELEPHONY_EXPORTS
+############################################################################################
+
+
+#Note that this library does NOT need any of Sangoma header files.
+
+INCLUDES=$(SDK_INC_PATH);\
+$(MFC_INC_PATH);\
+$(SANG_WP_DEVEL)\wanpipe_common\wantools\libstelephony\stel_tone;\
+$(SANG_WP_DEVEL)\wanpipe_common\include
+
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+$(SANG_WP_DEVEL)\wanpipe_common\wantools\libstelephony\stel_tone\$(O)\stel_tone.lib
+
+SOURCES=stelephony.rc \
+ libstelephony.cpp \
+ Q931EventsDecoder.cpp \
+ stelephony.cpp \
+ PToneDecoder.cpp \
+ PToneEncoder.cpp

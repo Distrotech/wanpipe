@@ -1,0 +1,179 @@
+WANPIPE T1/E1/V35 Frame Relay
+==============================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with Frame Relay support
+--------------------------------------------
+
+The Frame Relay support is installed by default
+during WANPIPE installation process. 
+
+	./Setup install 
+
+After successful installation proceed to 
+configure the card for Frame Relay Protocol 
+/usr/sbin/wancfg  GUI configurator.
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Configuring Frame Relay
+------------------------
+
+NOTE:  Wanpipe drivers support two versions
+       of frame relay:
+
+       
+       o FRAME REALAY
+         Original frame relay that runs
+         on the card and is supported
+         on a single PRIMARY port.
+
+       o MULTIPORT FRAME RELAY
+         Kernel based frame relay that
+         can run over both PRIMARY and
+         SECONDARY ports.
+
+
+
+Run: /usr/sbin/wancfg
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: Frame Relay Protocol  OR
+	                 MultiPort Frame Relay 
+
+4. Hardware Section
+	Select Probe Hardware
+	       
+       	Frame Relay Protocol
+		Select your adapter PRI port.
+
+	MultiPort Frame Relay 
+	        Select your adapter for PRI or SEC
+		port.
+	
+
+5. Interface Section
+	
+   Select number of interfaces/DLCI's you wish to configure
+   (Default=1)
+
+   For each network interface/DLCI do the following:
+   
+	Specify interface name.
+	(Leave it default)
+	
+	Operation Mode:  
+	
+		WANPIPE	used to run IP protocols
+		        on top of frame relay.
+
+		BRIDGE	used to run Bridge/Ethernet over Frame Relay
+		        The interface will have no IP addresses
+			since it should be bound into the
+			Ethernet bridge.
+
+		BRIDGE NODE
+			used to run IP/Ethernet over Frame Relay.
+			THe interface will have IP addresses.
+
+		API 	used to develop custom applications  
+	            	on top of frame relay
+
+	
+	Ignore Modem Status:
+		(Only available in WANPIPE operation mode)
+
+		Option used to monitor the front end T1/E1
+		status.  If the front end looses sync the
+		link will be declared down.
+
+		NO:  Run front end monitoring (default)
+		YES: Ignore front end state.
+		
+
+	IP Setup:
+		(Only available in WANPIPE operation mode)
+
+		Specify IP info for network interface
+
+6. End of configuration, exit and save
+
+
+
+Start Frame Relay Protocol
+---------------------------- 
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are dispalyed.
+
+ 	Confirm the state of Front End (T1/E1/V35)
+	Confirm the Link state
+
+	Check for any error events.
+
+

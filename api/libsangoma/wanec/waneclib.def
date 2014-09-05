@@ -1,0 +1,6 @@
+; 
+; DR: File is empty because exports are done via __declspec(dllexport).
+; But do NOT remove this file because it is used by WDK compiler.
+;
+LIBRARY  waneclib
+EXPORTS   

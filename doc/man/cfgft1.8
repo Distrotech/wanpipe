@@ -1,0 +1,207 @@
+
+.TH CFGFT1 8 "MARCH 1998" Linux "User Manuals"
+.SH NAME 
+cfgft1 \- Sangoma S508/FT-1 Configuration utility
+.SH SYNOPSIS
+.B cfgft1 [
+.I -p 
+.B HexPortNumber ] [
+.I -m 
+.B HexMemAddr ]
+
+.SH DESCRIPTION
+.B 
+The S508/FT-1 (Fractional T1) is Sangoma S508 adapter with an integrated
+CSU/DSU unit.  The S508/FT-1 is used to connect data terminal equipment to the 
+T1 (1.544 Mbps) or Fractional T1 digital telephone network.   This unit performs
+all Bell compatible encoding, decoding, timing and diagnostic responses.
+
+The cfgft1 utility loads the card and then allows the user to pass configuration
+commands to the adapter.  The following are the options needed for loading the
+card:
+ 
+.TP
+.B -p HexPortNumber
+The HexPortNumber represents the IO port of the card.  Please ensure that the 
+IO port specified matches the jumper settings on the board.  If this option is 
+not used then the utility tries to initialize the card at 0x360 (factory default
+setting).
+
+.TP
+.B -m HexMemAddr
+The HexMemAddr represents the Memory Address the utility uses to configure the
+card at.  If this option is not used then the utility tries to intialize the 
+0xD0000 memory area.  Valid memory addresses are: 0xA0000,0xA2000...0xAE000 / 
+0xC0000,0xC2000...0xCE000 / 0xD0000,0xD2000...0xDE000 / 0xE0000, 0xE2000...
+0xEE000 
+
+.TP
+Once the card has been loaded and intialized you are now ready to configure the
+S508/FT-1 card.
+
+.TP
+The Sangoma S508/FT-1 DSU has three memory banks:
+
+.IP
+1.      The factory default.
+.IP
+2.      The user configured bank.
+.IP
+3.      The scratch pad (working memory).
+
+To check the current settings (bank settings), type D0 <ENTER>.
+Configuration changes are made as follows:
+.IP
+1.      Type C <ENTER> to open the configuration mode.
+.IP
+2.      Change the required settings.
+.IP
+3.      After making these changes, type D1 <ENTER> to see the temporary  configuration bank.
+.IP
+4.      If these changes are correct, then type W<ENTER>  to write the configuration to the non-volatile memory.
+.IP
+5.      Type Q <ENTER> to exit the configuration mode.
+
+
+.I Commands
+.IP
++n      Add channel n (where n is 1-24) to the active list
+.IP
+-n      Delete channel n (where n is 1-24) from the active list
+.IP
+M0      Set framing mode to ESF (Extendedsuper Frame)
+.IP
+M1      Set framing mode to D4
+.IP
+K0      Set encoding mode to B8ZS
+.IP
+K1      Set encoding mode to AMI
+.IP
+L0      Set line build out to CSU (0db) or DSX-1 (0-133ft)
+.IP
+L1      Set line build out to DSX-1 (133 - 266ft)
+.IP
+L2      Set line build out to DSX-1 (266 - 399ft)
+.IP
+L3      Set line build out to DSX-1 (399 - 533ft)
+.IP
+L4      Set line build out to DSX-1 (533 - 655ft)
+.IP
+L5      Set line build out to CSU (-7.5 db)
+.IP
+L6      Set line build out to CSU (-15 db)
+.IP
+L7      Set line build out to CSU (-22.5 db)
+.IP
+P0      Set clock mode to normal (SLAVE)
+.IP
+P1      Set clock mode to master (LDM mode only)
+.IP
+W       Write configuration to non-volatile memory
+.IP
+F       Get factory default configuration
+.IP
+Q       Exit configuration mode and move temporary (scratch pad) configuration to default configuration 
+.IP
+D0      Display actual configuration
+.IP
+D1      Display configuration in temporary memory
+.IP
+E0      Unit does not echo commands sent to it
+.IP
+E1      Unit echos back commands sent to it
+.IP
+T0      User test modes enabled
+.IP
+T1      User test modes disabled
+
+NB: Whenever you have finished your changes, you MUST do a WQ in order for them
+to "take".  After that do a D0 to check that the changes have, indeed been written to permanent memory.
+
+.SH EXAMPLES
+The following are few examples to illustrate the different usage of the cfgft1 command:
+.TP 
+.I cfgft1 
+:  This tries to initialize the card at IO port 0x360 and memory D0000.
+.TP
+.I cfgft1 -p0x350 
+: This tries to initialize the card at IO port 0x350 and memory 0xD0000.
+.TP
+.I cfgft1 -m0xE0000 
+: This tries to initialize the card at IO port 0x360 and memory0xE0000.
+.TP
+.I cfgft1 -p0x350 -m0xE0000 
+: This tries to initialize the card at IO port 0x350 and memory 0xE0000.
+ 
+.TP 
+.I Configuring S508/FT-1 example.
+Required configuration: Channels 1-3 disabled, channels 22 and 23 enabled Line build set to DSX-1 (399 - 533ft) ESF framing mode Clock mode to normal (slave)
+
+Type: C-1-2-3+21+22K0L3M0P0D1WQ<ENTER>
+
+                OR
+
+C<ENTER>       Open configuration mode
+
+-1-2-3<ENTER>  Remove channels 1, 2 and 3 from the active list
+
++21+22 <ENTER> Add channels 21 and 22 to the active list
+
+K0<ENTER>      Set the encoding mode to B8ZS
+
+L3<ENTER>      Set the line build out to DSX-1 (399 - 533ft)
+
+M0<ENTER>      Set the framing to ESF
+
+P0<ENTER>      Set the clock mode to normal
+
+D1<ENTER>      Display the temporary configuration before saving
+
+W<ENTER>       Update the user memory
+
+Q<ENTER>       Close the configuration mode
+
+If you are adding or removing many D0 channels, break up the command into 2 or more commands, as the command line buffer has limited length.  For instance, to drop the line speed to 128kbps, you need to remove  channels 3 to 24.
+
+Do:
+
+C<ENTER>
+
+-3-4-5-6-7-8-9-10-11<ENTER>
+
+-12-13-14-15-16-17-18-19-20-21-22-23-24<ENTER>
+
+WQ<ENTER>
+
+D0<ENTER>
+
+and the correct configuration should be shown.  ALSO PLEASE REBOOT THE MACHINE AND RUN CFGFT1 UTILITY AGAIN WITH D0 COMMAND TO VERIFY THE CONFIGURATION. 
+
+.SH PINOUTS
+RJ-48-s Telco Connector
+.IP
+4    TTIP               Transmit
+.IP
+5    TRING              Transmit
+.IP
+1    RTIP               Receive
+.IP
+2    RRING              Recieve
+
+.TP
+For back-to-back connections, cross connect:
+.IP
+Side 1          Side 2
+.IP
+Red             Grey
+.IP
+Green           Orange
+.IP
+Grey            Red
+.IP
+Orange          Green
+
+
+.SH AUTHOR
+.I Jaspreet Singh 
+<jaspreet@sangoma.com>, Sangoma Technologies Inc., www.sangoma.com

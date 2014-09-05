@@ -1,0 +1,262 @@
+--- zaptel.c.orig	2005-12-29 11:24:30.000000000 -0500
++++ zaptel.c	2006-02-01 17:19:35.000000000 -0500
+@@ -299,6 +299,7 @@
+ #include "digits.h"
+ 
+ static int zt_chan_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long data, int unit);
++static void zt_ec_chunk_spike_store(struct zt_chan *ss, unsigned char *rxchunk);
+ 
+ #if defined(CONFIG_ZAPTEL_MMX) || defined(ECHO_CAN_FP)
+ /* XXX kernel_fpu_begin() is NOT exported properly (in 2.4), so we have to make
+@@ -1704,6 +1705,7 @@
+ 	unsigned long flags;
+ 	struct zt_chan *chan = chans[unit];
+ 	int res, amnt, oldbuf, rv,x;
++				
+ 	/* Make sure count never exceeds 65k, and make sure it's unsigned */
+ 	count &= 0xffff;
+ 	if (!chan) 
+@@ -4147,11 +4149,20 @@
+ 			tec = chan->ec;
+ 			chan->ec = NULL;
+ 			/* Attempt hardware native echo can */
+-			if (chan->span && chan->span->echocan)
++			if (chan->span && chan->span->echocan){
+ 				ret = chan->span->echocan(chan, j);
+-			else
++			}else{
+ 				ret = -ENOTTY;
+-			if (ret) {
++			}
++
++			if(!ret){
++				chan->echo_spike_struct.is_hw_ec_used = 1;
++			}else{
++				chan->echo_spike_struct.is_hw_ec_used = 0;
++			}
++
++			/* the Echo Spike code needs chan->ec to be initialized!! */
++			if (ret || 1) {
+ 				/* Use built-in echo can */
+ 				if ((j == 32) ||
+ 				    (j == 64) ||
+@@ -4171,6 +4182,8 @@
+ 				chan->echostate = ECHO_STATE_IDLE;
+ 				chan->echolastupdate = 0;
+ 				chan->echotimer = 0;
++				chan->echo_spike_struct.state_bits = ECHO_INITIAL_STATE;
++                	        chan->echo_spike_struct.sample_len_counter = 0;
+ 				echo_can_disable_detector_init(&chan->txecdis);
+ 				echo_can_disable_detector_init(&chan->rxecdis);
+ 			}
+@@ -4328,6 +4341,83 @@
+ 			return -EINVAL;
+ 		break;
+ #endif
++
++	case GET_ECHO_SPIKE_SAMPLE:
++		if(chan->echo_spike_struct.sample_buffer){
++			unsigned char *tmp_ptr = (unsigned char*)data;
++
++			chan->echo_spike_struct.return_code = ECHO_OK;
++			chan->echo_spike_struct.spanno = chan->span->spanno;
++			chan->echo_spike_struct.echocancel = chan->echocancel;
++
++			if(chan->xlaw == __zt_mulaw){
++				chan->echo_spike_struct.law = ZT_LAW_MULAW;
++			}else{
++				chan->echo_spike_struct.law = ZT_LAW_ALAW;
++			}
++
++			/* first copy the 'echo_spike_struct_t' structure */
++		        copy_to_user(tmp_ptr, &chan->echo_spike_struct, sizeof(echo_spike_struct_t));
++
++			/* second copy the data AFTER the 'echo_spike_struct_t' structure */
++		        copy_to_user	(&tmp_ptr[sizeof(echo_spike_struct_t)], 
++					chan->echo_spike_struct.sample_buffer,
++					ECHO_SPIKE_SAMPLE_LEN);
++
++			/* free the sample buffer */
++			kfree(chan->echo_spike_struct.sample_buffer);
++			/* very important to set to NULL after deallocation!! */
++			chan->echo_spike_struct.sample_buffer = NULL;
++
++			chan->echo_spike_struct.state_bits = ECHO_INITIAL_STATE;
++			chan->echo_spike_struct.sample_len_counter = 0;
++		}else{
++			unsigned char *tmp_ptr = (unsigned char*)data;
++
++			chan->echo_spike_struct.return_code = ECHO_NO_ACTIVE_CALL_OR_EC_OFF;
++			/* copy the 'echo_spike_struct_t' structure */
++		        copy_to_user(tmp_ptr, &chan->echo_spike_struct, sizeof(echo_spike_struct_t));
++		}
++		break;
++
++	case SEND_ECHO_SPIKE:
++	        copy_from_user(&chan->echo_spike_struct, (void*)data, sizeof(echo_spike_struct_t));
++
++		/* allocate EchoTest buffer. OUSIDE of spin_lock. */
++		chan->echo_spike_struct.sample_buffer = kmalloc(ECHO_SPIKE_SAMPLE_LEN, GFP_KERNEL);
++		if (chan->echo_spike_struct.sample_buffer == NULL) {
++			printk(KERN_INFO "channo: %d: Failed to allocate %d bytes for EchoTest storage!!!\n",
++				chan->channo, ECHO_SPIKE_SAMPLE_LEN);
++			return -ENOMEM;
++		}
++		
++		spin_lock_irqsave(&chan->lock, flags);
++		/* send echo spike */
++		if (chan->ec) {
++			chan->echo_spike_struct.return_code = ECHO_OK;
++
++			chan->echo_spike_struct.state_bits = ECHO_INITIAL_STATE;
++			chan->echo_spike_struct.sample_len_counter = 0;
++			/* these two lines will make zaptel to send the spike: */
++			chan->echostate = ECHO_STATE_PRETRAINING;
++			chan->echotimer = 2048;	/*Number of silence bytes to transmit before the spike.
++						  It makes the line clean from noise, so spike is easy
++						  to detect on return.*/
++		}else{
++			printk(KERN_INFO "channo: %d: SEND_ECHO_SPIKE: chan->ec is NULL!!\n",
++				chan->channo);
++
++			chan->echo_spike_struct.return_code = ECHO_NO_ACTIVE_CALL_OR_EC_OFF;
++		}
++		/* Must unlock here, BEFORE copy_to_user() call.
++		   Or will get warnings from the kernel. */
++		spin_unlock_irqrestore(&chan->lock, flags);
++
++		/* copy the 'echo_spike_struct_t' structure back to user. so return_code
++		   can be accessed. */
++	        copy_to_user((void*)data, &chan->echo_spike_struct, sizeof(echo_spike_struct_t));
++		break;
++
+ 	default:
+ 		return zt_chanandpseudo_ioctl(inode, file, cmd, data, unit);
+ 	}
+@@ -4343,6 +4433,7 @@
+ 	if (chan) {
+ 		printk("Huh?  Prechan already has private data??\n");
+ 	}
++	
+ 	switch(cmd) {
+ 	case ZT_SPECIFY:
+ 		get_user(channo,(int *)data);
+@@ -4382,10 +4473,26 @@
+ 	}
+ 	if (unit == 254) {
+ 		chan = file->private_data;
+-		if (chan)
++		if (chan){
+ 			return zt_chan_ioctl(inode, file, cmd, data, chan->channo);
+-		else
+-			return zt_prechan_ioctl(inode, file, cmd, data, unit);
++		}else{
++			int channo;
++
++			switch(cmd)
++			{
++			case GET_ECHO_SPIKE_SAMPLE:
++			case SEND_ECHO_SPIKE:
++				get_user(channo,(int *)data);
++
++				if (channo < 1 || channo > ZT_MAX_CHANNELS){
++					printk(KERN_INFO "Invalid channel %d!!\n", channo);
++					return -EINVAL;
++				}
++				return zt_chan_ioctl(inode, file, cmd, data, channo);
++			default:
++				return zt_prechan_ioctl(inode, file, cmd, data, unit);
++			}
++		}
+ 	}
+ 	if (unit == 255) {
+ 		chan = file->private_data;
+@@ -5416,7 +5523,13 @@
+ 	short rxlin, txlin;
+ 	int x;
+ 	unsigned long flags;
++
+ 	spin_lock_irqsave(&ss->lock, flags);
++
++	if(ss->echo_spike_struct.collect_sample_before_ec == 1){
++		zt_ec_chunk_spike_store(ss, rxchunk);
++	}
++
+ 	/* Perform echo cancellation on a chunk if necessary */
+ 	if (ss->ec) {
+ #if defined(CONFIG_ZAPTEL_MMX) || defined(ECHO_CAN_FP)
+@@ -5436,8 +5549,13 @@
+ 				if ((ss->echostate == ECHO_STATE_AWAITINGECHO) && (txlin > 8000)) {
+ 					ss->echolastupdate = 0;
+ 					ss->echostate = ECHO_STATE_TRAINING;
++
++					if(ss->echo_spike_struct.state_bits == ECHO_INITIAL_STATE){
++						ss->echo_spike_struct.state_bits = ECHO_BUSY_COLLECTING_SAMPLE;
++						ss->echo_spike_struct.sample_len_counter = 0;
++					}
+ 				}
+-				if (ss->echostate == ECHO_STATE_TRAINING) {
++				if (ss->echostate == ECHO_STATE_TRAINING){
+ 					if (echo_can_traintap(ss->ec, ss->echolastupdate++, rxlin)) {
+ #if 0
+ 						printk("Finished training (%d taps trained)!\n", ss->echolastupdate);
+@@ -5449,16 +5567,20 @@
+ 				rxchunk[x] = ZT_LIN2X((int)rxlin, ss);
+ 			}
+ 		} else {
+-			for (x=0;x<ZT_CHUNKSIZE;x++) {
+-				rxlin = ZT_XLAW(rxchunk[x], ss);
+-				rxlin = echo_can_update(ss->ec, ZT_XLAW(txchunk[x], ss), rxlin);
+-				rxchunk[x] = ZT_LIN2X((int)rxlin, ss);
++			if(ss->echo_spike_struct.is_hw_ec_used == 0){
++				for (x=0;x<ZT_CHUNKSIZE;x++) {
++					rxlin = ZT_XLAW(rxchunk[x], ss);
++					rxlin = echo_can_update(ss->ec, ZT_XLAW(txchunk[x], ss), rxlin);
++					rxchunk[x] = ZT_LIN2X((int)rxlin, ss);
++				}
+ 			}
+ 		}
++
+ #if defined(CONFIG_ZAPTEL_MMX) || defined(ECHO_CAN_FP)
+ 		kernel_fpu_end();
+ #endif		
+ 	}
++
+ 	spin_unlock_irqrestore(&ss->lock, flags);
+ }
+ 
+@@ -6591,3 +6713,34 @@
+ 
+ module_init(zt_init);
+ module_exit(zt_cleanup);
++
++static void zt_ec_chunk_spike_store(struct zt_chan *ss, unsigned char *rxchunk)
++{
++	int x;
++
++	if(ss->echo_spike_struct.state_bits != ECHO_BUSY_COLLECTING_SAMPLE ||
++	   ss->echo_spike_struct.sample_buffer == NULL){
++		return;
++	}
++
++	/* check input values */
++	if(ss->echo_spike_struct.sample_len_counter >= ECHO_SPIKE_SAMPLE_LEN){
++		printk(KERN_INFO "chan: %d: Invalid sample_len_counter! (%d)\n", 
++			ss->channo, ss->echo_spike_struct.sample_len_counter);
++		return;
++	}
++	
++	if(ss->echo_spike_struct.state_bits == ECHO_BUSY_COLLECTING_SAMPLE){
++		for (x = 0; x < ZT_CHUNKSIZE; x++) {
++			ss->echo_spike_struct.sample_buffer[ss->echo_spike_struct.sample_len_counter] =
++				rxchunk[x];
++			ss->echo_spike_struct.sample_len_counter++;
++			if(ss->echo_spike_struct.sample_len_counter >= ECHO_SPIKE_SAMPLE_LEN){
++				/* finished collecting the sample */
++				ss->echo_spike_struct.state_bits = ECHO_FINISHED_COLLECTING_SAMPLE;
++				break;
++			}/*if()*/
++		}/*for()*/
++	}/*if()*/
++}
++
