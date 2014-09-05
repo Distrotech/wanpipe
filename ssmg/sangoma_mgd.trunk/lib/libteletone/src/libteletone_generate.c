@@ -316,7 +316,7 @@ static char *my_strdup (const char *s)
 int teletone_run(teletone_generation_session_t *ts, char *cmd)
 {
 	char *data = NULL, *cur = NULL, *end = NULL;
-	int var = 0, LOOPING = 0;
+	int LOOPING = 0;
 	
 	if (!cmd) {
 		return -1;
@@ -330,7 +330,6 @@ int teletone_run(teletone_generation_session_t *ts, char *cmd)
 		cur = data;
 
 		while (*cur) {
-			var = 0;
 			if (*cur == ' ' || *cur == '\r' || *cur == '\n') {
 				cur++;
 				continue;
@@ -341,7 +340,6 @@ int teletone_run(teletone_generation_session_t *ts, char *cmd)
 			}
 			
 			if (*(cur + 1) == '=') {
-				var = 1;
 				switch(*cur) {
 				case 'c':
 					ts->channels = atoi(cur + 2);
