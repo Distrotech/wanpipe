@@ -393,13 +393,13 @@ static int wanpipe_listen_rcv (struct sk_buff *skb,  struct sock *sk)
 	 * processes. */
 	if (!skb){
 		sk->sk_state = WANSOCK_BIND_LISTEN;
-		sk->sk_data_ready(sk,0);
+		sk->sk_data_ready(sk);
 		return 0;
 	}
 
 	if (sk->sk_state != WANSOCK_LISTEN){
 		printk(KERN_INFO "af_wanpipe: Listen rcv in disconnected state!\n");
-		sk->sk_data_ready(sk,0);
+		sk->sk_data_ready(sk);
 		return -EINVAL;
 	}
 
@@ -493,7 +493,7 @@ static int wanpipe_listen_rcv (struct sk_buff *skb,  struct sock *sk)
 	 * the dev field in the accept function.*/ 
 
 	skb_set_owner_r(skb, sk);
-	sk->sk_data_ready(sk,skb->len);
+	sk->sk_data_ready(sk);
 	skb_queue_tail(&sk->sk_receive_queue, skb);
 	
 	return 0;
@@ -750,14 +750,14 @@ static int wanpipe_api_sock_rcv(struct sk_buff *skb, netdevice_t *dev,  struct s
 			}else{
 				if (sock_queue_rcv_skb(sk,skb)<0){
 					AF_SKB_DEC(skb->truesize);
-					sk->sk_data_ready(sk,0);
+					sk->sk_data_ready(sk);
 					return -ENOMEM;
 				}
 			}
 #else
 			if (sock_queue_rcv_skb(sk,skb)<0){
 				AF_SKB_DEC(skb->truesize);
-				sk->sk_data_ready(sk,0);
+				sk->sk_data_ready(sk);
 				return -ENOMEM;
 			}
 #endif
@@ -767,7 +767,7 @@ static int wanpipe_api_sock_rcv(struct sk_buff *skb, netdevice_t *dev,  struct s
                          * Do not set the sock lcn number here, since
          		 * cmd is not guaranteed to be executed on the
                          * board, thus Lcn could be wrong */
-			sk->sk_data_ready(sk,skb->len);
+			sk->sk_data_ready(sk);
 			KFREE_SKB(skb);
 			break;
 		case WAN_PACKET_ERR:
@@ -1761,7 +1761,7 @@ int wanpipe_notifier(struct notifier_block *this, unsigned long msg, void *data)
 					dev_put((struct net_device *)SK_PRIV(sk)->dev); 
 					SK_PRIV(sk)->dev=NULL;
 				}
-				sk->sk_data_ready(sk,0);
+				sk->sk_data_ready(sk);
 			}
 			break;
 		}
@@ -1866,7 +1866,7 @@ static int wanpipe_api_connected(struct net_device *dev, struct sock *sk)
 	DEBUG_TEST("%s: API Connected!\n",__FUNCTION__);
 	
 	sk->sk_state = WANSOCK_CONNECTED;
-	sk->sk_data_ready(sk,0);
+	sk->sk_data_ready(sk);
 	return 0;
 }
 
@@ -1881,7 +1881,7 @@ static int wanpipe_api_connecting(struct net_device *dev, struct sock *sk)
 	DEBUG_TEST("%s: API Connecting!\n",__FUNCTION__);
 	
 	sk->sk_state = WANSOCK_CONNECTING;
-	sk->sk_data_ready(sk,0);
+	sk->sk_data_ready(sk);
 	return 0;
 }
 
@@ -1896,7 +1896,7 @@ static int wanpipe_api_disconnected(struct sock *sk)
 	    sk->sk_state == WANSOCK_LISTEN) {
 		
 		sk->sk_state = WANSOCK_DISCONNECTED;
-		sk->sk_data_ready(sk,0);
+		sk->sk_data_ready(sk);
 		return 0;
 	}
 	
@@ -1909,7 +1909,7 @@ static int wanpipe_api_disconnected(struct sock *sk)
 	
 	sk->sk_state = WANSOCK_DISCONNECTED;
 
-	sk->sk_data_ready(sk,0);
+	sk->sk_data_ready(sk);
 	return 0;
 }
 
@@ -2009,7 +2009,7 @@ static int sk_poll_wake (struct sock *sk)
 	if (!wansk_is_zapped(sk))
 		return -EINVAL;
 
-	sk->sk_data_ready(sk,0);
+	sk->sk_data_ready(sk);
 	return 0;
 }
 

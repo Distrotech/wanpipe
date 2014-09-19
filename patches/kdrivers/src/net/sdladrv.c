@@ -3943,7 +3943,7 @@ unsigned int sdla_hw_bridge_probe(void)
 		//			PCI_SUBSYS_ID_WORD, 
 		//			&pci_subsystem_id);
 
-		bus = pci_bus_b(pci_dev->bus->children.next);
+		bus = list_entry(pci_dev->bus->children.next, struct pci_bus, node);
 		if (bus) DEBUG_EVENT("%s:%d:%X %X %X %X %d %d\n",
 					__FUNCTION__,__LINE__,
 					bus->self->vendor,
@@ -3952,7 +3952,7 @@ unsigned int sdla_hw_bridge_probe(void)
 					bus->self->subsystem_device,
        				 	((bus->self->devfn >> 3) & PCI_DEV_SLOT_MASK),
 					bus->number);
-		bus = pci_bus_b(pci_dev->bus->children.prev);
+		bus = list_entry(pci_dev->bus->children.prev, struct pci_bus, node);
 		if (bus) DEBUG_EVENT("%s:%d: %X %X %X %X %d %d\n",
 					__FUNCTION__,__LINE__,
 					bus->self->vendor,
@@ -3961,7 +3961,7 @@ unsigned int sdla_hw_bridge_probe(void)
 					bus->self->subsystem_device,
        				 	((bus->self->devfn >> 3) & PCI_DEV_SLOT_MASK),
 					bus->number);
-		tmp = pci_dev_b(pci_dev->bus->devices.next);
+		tmp = list_entry(pci_dev->bus->devices.next, struct pci_bus, node);
 		if (tmp) DEBUG_EVENT("%s:%d: %X %X %X %X %d %d\n",
 					__FUNCTION__,__LINE__,
 					tmp->vendor,
