@@ -1,3 +1,4 @@
+
 /*****************************************************************************
 * af_wanpipe_datascope.c
 * 		
@@ -471,7 +472,7 @@ void wanpipe_wakup_sk_attached_to_parent(struct sock *parent_sk)
 	for (i=0;i<MAX_PARENT_PROT_NUM;i++){
 		if ((sk=PPRIV(parent_sk)->sk_to_prot_map[i]) != NULL){
 			sk->sk_state = parent_sk->sk_state;
-			sk->sk_data_ready(sk,0);
+			sk->sk_data_ready(sk);
 		}
 	}
 }
@@ -637,7 +638,7 @@ static int wanpipe_rx_prot_data(void **map, unsigned short protocol, struct sk_b
 	}
 
 	if ((err=sock_queue_rcv_skb(sk,skb))<0){
-		sk->sk_data_ready(sk,0);
+		sk->sk_data_ready(sk);
 		if (net_ratelimit()){
 			DEBUG_EVENT("%s: Sock failed to rx on prot %s: sock full: err %i truesize %i sktotal %i skblen %i!\n",
 					__FUNCTION__,
