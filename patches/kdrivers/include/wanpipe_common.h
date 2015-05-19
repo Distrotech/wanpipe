@@ -2401,8 +2401,10 @@ wan_netif_alloc(unsigned char *devname, int ifType, int *err)
 # if defined(LINUX_2_6)
 #  if  (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,4))
 	return __dev_alloc(devname, err);
-#  else
+#  elif  (LINUX_VERSION_CODE < KERNEL_VERSION(3,6,17))
 	return alloc_netdev(0,devname,wan_netif_fake_init);	
+#  else
+	return alloc_netdev(0,devname,NET_NAME_UNKNOWN,wan_netif_fake_init);	
 # endif
 # elif defined(LINUX_2_4)
 	netdevice_t *dev=wan_malloc(sizeof(netdevice_t));

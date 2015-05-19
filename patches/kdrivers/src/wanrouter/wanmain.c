@@ -532,7 +532,7 @@ WAN_IOCTL_RET_TYPE WANDEF_IOCTL_FUNC(wanrouter_ioctl, struct file *file, unsigne
 	wan_device_t *wandev;
 
 #ifdef HAVE_UNLOCKED_IOCTL
-	struct inode *inode = file->f_dentry->d_inode;
+	struct inode *inode = file->f_path.dentry->d_inode;
 #endif
 	
 	if ((cmd>>8) != ROUTER_IOCTL){

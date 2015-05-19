@@ -951,7 +951,7 @@ static int wanpipe_sendmsg(struct socket *sock, struct msghdr *msg, int len,
 	wan_skb_reset_network_header(skb);
 
 	/* Returns -EFAULT on error */
-	err = memcpy_fromiovec(skb_put(skb,len), msg->msg_iov, len);
+	err = memcpy_fromiovec(skb_put(skb,len), msg->msg_iter.iov, len);
 	if (err){
 		goto out_free;
 	}
@@ -1649,7 +1649,7 @@ static int wanpipe_recvmsg(struct socket *sock, struct msghdr *msg, int len,
 	}
 
 	/* We can't use skb_copy_datagram here */
-	err = memcpy_toiovec(msg->msg_iov, skb->data, copied);
+	err = memcpy_to_msg(msg, skb->data, copied);
 	if (err)
 		goto out_free;
 	

@@ -46,7 +46,7 @@ static struct class_simple *wp_cdev_class = NULL;
 #  define class_device_destroy(a, b) class_simple_device_remove(b)
 # endif
 
-# define	UNIT(file) MINOR(file->f_dentry->d_inode->i_rdev)
+# define	UNIT(file) MINOR(file->f_path.dentry->d_inode->i_rdev)
 
 #endif/* #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0) */
 
