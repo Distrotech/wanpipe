@@ -1,0 +1,28 @@
+AFT A14X Firmware Change Log
+===============================
+
+Releaes V08
+	Added FM0, FM1, and MANCHESTER ENCODING SUPPORT, all three require 32X sampling, internal cloc
+
+Release V07
+	added nrzi_rx_clk file that recovers clock from NRZI data stream
+
+Release V06
+	removed -RxCLK from design, now RxCLK always comes from TxCLK for V.35 or X.21, need to disconnect
+	RxCLK from DTRA/DTRB from all V.35 cables, now X.21 and V.35 can use the same octopus cable
+	RS232 still has RxCLK
+
+Release V05
+	Enabled NRZI encoding
+
+Release V04
+	changed pcb version to v1.1
+	Removed iV35_TCLK_IN, now sharing iTCLK_IN with RS232
+
+Releaes V03
+	Added iTCLK enable signal just like for iRCLK
+
+Release V02
+	Added iRCLK clock enable signal in RX FIFO because ASYNC fifo
+	is giving problems(sometimes reading 4 instead of 2)
+

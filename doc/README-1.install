@@ -1,0 +1,364 @@
+WANPIPE PACKAGE INSTALLATION/UN-INSTALLATION
+============================================
+
+
+For Lates Docs Please visit
+---------------------------------------------
+http://wiki.sangoma.com
+---------------------------------------------
+
+
+
+WANPIPE PACKAGES
+================
+
+Wanpipe SOURCE packages are located in:
+	ftp.sangoma.com/linux/current_wanpipe
+
+	Download the latest SOURCE wanpipe release 
+	in ANY directory:
+	    ex: cd /tmp 
+	        tar xvfz wanpipe-<version>.tgz 
+
+        The tar will create the temporary 
+	wanpipe-<version>/ directory.
+
+
+WANPIPE SOURCE PACKAGE Installation
+====================================
+
+The 'Setup' script located in temporary wanpipe-<version>/
+directory should be used to install/un-install
+and re-configure all WANPIPE driver and utilities.
+
+The Setup installation script contains numerous
+options that can be used to customise wanpipe
+installation. Run ./Setup without any arguments
+for usage.
+
+Run the Setup script from temporary wanpipe-<version>/ directory
+(wanpipe directory was created by untaring the source package)
+
+  ./Setup install
+or
+  ./Setup zaptel 	#Compile for Zaptel/Asterisk
+
+The install option will do the following:
+    -------	
+	1. Check that all WANPIPE files are accounted for.
+	
+	2. Check/modify permissions on all WANPIPE files.
+	
+	3. Prompt the user to Install/Upgrade WANPIPE
+	   drivers into the Linux kernel source.
+
+	4. Prompt the user to re-compile all WANPIPE
+	   kernel drivers and install them as modules
+	   in the the current /lib/modules/<kernel-version>
+	   directory.  
+
+	5. Prompt the user to install bootstrap 
+	   scripts that will be used to start wanpipe
+	   during boot up.
+
+	6. Setup the ENVIRONMENT configuration file that will
+	   contain directory locations of WANPIPE configuration
+	   interface and lock files.
+
+	7. Compile all WANPIPE utilities 
+
+	8. Setup the WANPIPE working environment.
+	   i.e. Install all binary files into 
+	        linux file tree.
+
+		/etc/wanpipe : config, library, sample 
+		               and firmware files.
+
+		/usr/sbin    : user space, binary  
+		               utilites
+
+		/lib/modules/<uname-r> : wanpipe kernel 
+		                         modules
+
+		/usr/share/doc/wanpipe : doc files
+
+
+      The last message in the 'Setup install' sequence will 
+      inform you of the next step that you should take
+      in getting WANPIPE working.  
+
+
+o Read 'README-2.config' on how to configure wanpipe
+  device
+
+
+o End of Installation
+
+
+
+
+CUSTOMIZING WANPIPE  SOURCE INSTALLATION
+=========================================
+
+Installation using the '--silent' option
+--------------------------------------
+
+The '--silent' option is available to install wanpipe
+without any user interaction:
+
+      ./Setup install --silent
+
+      All defaults will be used!
+      --------------------------
+      1. Configuration directory /etc/wanpipe
+      2. Start wanpipe on boot up
+      3. Recompile modules for the kenrel source
+         in /usr/src/linux
+
+
+
+Installation using the --builddir option
+--------------------------------------
+
+When customising the wanpipe package, it is 
+useful to install the package into a 
+virtual directory so not to pollute the
+current environment.
+
+This way a user can tar up the temporary
+directory and create a custom binary
+WANPIPE package.
+
+eg ./Setup install --builddir=/tmp/wanpipe_build
+
+Note: the /tmp/wanpipe_build directory must
+      exist.
+
+
+
+Installation using the --protocol option
+--------------------------------------
+
+Standard Wanpipe installatin will only 
+include MAINSTREAM WAN protocols when building
+the kernel modules to cut down on kernel
+module size.
+
+Mainstream Protocols: 
+	Frame Relay, PPP, CHDLC, X25, API stack
+	
+
+To enable NON Mainstream protocols specify
+extra protocols with the --protocol option.
+
+Non Mainstream Protocols:
+	BSC	: API for Multipoint Bisync			 
+	BSCSTRM : API for Bisync Streaming
+	SS7	: API for Level2 SS7 protocol 
+	EDU 	: API for Educational software
+	SDLC	: API for SDLC protocol
+	POS	: API for POS (S515/S509) card.
+	BITSTRM : API for Bitstreaming protocol
+
+eg: ./Setup install --protocol=<List of Protocols>
+
+    <List of Protocols> = <PROT>-<PROT>-<PROT>
+
+eg:
+	Compile in Bitstreaming protocol
+    		./Setup install --protocol=BITSTRM	 
+    
+    	Compile in BitStreaming and POS and SDLC
+  		./Setup install --protocol=BITSTRM-POS-SDLC
+
+
+
+Building a custom RPM
+---------------------
+
+	./Setup buildrpm <extra options>
+	
+	All defaults will be used!
+      --------------------------
+      1. Configuration directory /etc/wanpipe
+      2. Start wanpipe on boot up
+      3. Recompile modules for the kernel source
+         locatd in /usr/src/linux direcotory,
+	 or directory supplied with --with-linux=<abs path>
+	 argument.
+
+
+
+Note: <extra options> start with -- and are defined above.
+
+      i.e.
+      user the --protocol filed to add in extra protocols
+      into the wanpipe kernel modules.
+	
+Refer to README.rpmbuild
+
+
+
+
+WANPIPE Kernel Driver Compile/Update
+====================================
+
+This option should be used to update the kernel 
+source tree with the latest wanpipe drivers 
+and to compile the wanpipe kernel modules 
+against the updated kernel source tree.
+
+Run the Setup script in temporary wanpipe-<version>/ directory:
+
+ex: cd wanpipe-<version>/
+
+    ./Setup drivers
+ 
+The drivers option will do the following:
+    -------	
+	1. Prompt the user to Install/Upgrade Wanpipe
+	   drivers into the Linux kernel source.
+
+	   NOTE: The kernel source must be located
+	         in /usr/src/linux
+
+		 It is always RECOMMENDED to upgrade/update
+		 the kernel source tree with the latest
+		 wanpipe source.  
+
+	2. Prompt the user to re-compile all WANPIPE
+	   kernel drivers and install the as modules
+	   in the the current /lib/modules/<kernel-version>
+	   directory.
+
+	   Compilaton Options:  Default or Custom
+
+	   Default compilation: 
+	   	option will compile the standard WANPIPE protocols 
+		into the kernel device driver: Frame Relay, PPP, CHDLC 
+		Multi-Port Frame Relay, Multi-Port PPP, and X25(API). " 
+		
+	   Custom compilation:
+	        option will offer a menu of all available WAN and 
+		API protocols. The user will be able to enable 
+		protocols individually or all at once, 
+		as desired. 
+
+
+
+
+WANPIPE Utilities Re-Compilation
+=================================
+
+This option will re-compile all WANPIPE utilities
+in temporary wanpipe-<version>/ directory.
+
+NOTE: If this is a first time install you MUST run
+      the install option: Setup install.
+
+Run the Setup script in temporary  directory:
+
+ex: cd wanpipe-<version>/
+    ./Setup utility
+ 
+The utility option will do the following:
+    -------	
+	1. Compile all WANPIPE utilities 
+           in temporary wanpipe-<version>/ directory	
+
+To install utilities into /usr/sbin
+directory one must run:
+
+    ./Setup inst
+
+
+For more info about Setup command run
+./Setup without any arguments for full usage
+info.
+
+
+
+
+WANPIPE Un-Install
+==================
+
+Run the Setup script in temporary wanpipe-<version>/ directory:
+
+ex: cd wanpipe-<version>/
+    ./Setup remove
+
+ 
+The remove option will do the following:
+    ------	
+	1. Remove all boot strap WANPIPE scripts.
+	2. Remove all utilities from /usr/sbin,
+	   /etc/wanpipe, /usr/share/doc/wanpipe 
+	   directories.
+
+After the 'Setup remove' command, it is safe
+to remove the whole temporary wanpipe-<version>/ directory.
+
+	ex:
+	    rm -rf wanpipe-<version>/
+
+
+
+
+
+
+
+
+WANPIPE RPM PACKAGE Installation
+================================
+
+Choosing an RPM:
+--------------
+
+        o Determine the Linux Distribution:
+                cat /etc/issue
+                        (eg: RedHat 7.1)
+
+        o Determine the Kernel image you are running:
+                uname -r
+                    (eg: 2.4.2-2        : it is not an smp kernel)
+                    (eg: 2.4.2-2smp     : smp kernel)
+
+        o Determine the processor type
+                uname -m
+                    (eg: i686)
+
+        o Based on the above information choose an RPM package.
+
+           wanpipe-<version>.<linux distrib>.<kernel ver>.<processor>.rpm
+
+           eg: ftp.sangoma.com/linux/RPM/redhat/7.1/i686/
+                 wanpipe-2.2.4-3.rh71up.k242-2.i686.rpm
+
+
+
+Installing RPM
+----------
+
+        o List the contents of the rpm
+
+                rpm -qipl <wanpipe rpm name>
+
+                Make sure that the /lib/modules/<kernel name> directory
+                matches your current kernel modules directory.
+
+                i.e. the output of command 'uname -r' must match the above
+                     <kernel name> directory.
+
+
+        o The rpm must be installed using the --force option, to
+           override the old modules.
+
+                rpm -i --force <wanpipe rpm name>
+
+
+	o Read 'README-2.config' on how to configure wanpipe
+          device
+
+
+
+For further info, refer to WanpipeInstallation.pdf

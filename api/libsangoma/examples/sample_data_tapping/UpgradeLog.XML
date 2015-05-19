@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="sample_data_tapping">
+</Property><Property Name="Solution File" Value="C:\Users\jschlosser\Downloads\SangomaStuff\wanpipe-win-7.0.0.0\api\sample_data_tapping\sample_data_tapping.sln">
+</Property><Property Name="Date" Value="Friday, April 05, 2013">
+</Property><Property Name="Time" Value="11:08 AM">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="sample_data_tapping.sln" Description="File successfully backed up as C:\Users\jschlosser\Downloads\SangomaStuff\wanpipe-win-7.0.0.0\api\sample_data_tapping\sample_data_tapping.sln.old">
+</Event><Event ErrorLevel="0" Project="sample_data_tapping" Source="sample_data_tapping.vcproj" Description="Converting project file 'C:\Users\jschlosser\Downloads\SangomaStuff\wanpipe-win-7.0.0.0\api\sample_data_tapping\sample_data_tapping.vcproj'.">
+</Event><Event ErrorLevel="1" Project="sample_data_tapping" Source="sample_data_tapping.vcproj" Description="VCWebServiceProxyGeneratorTool is no longer supported. The tool has been removed from your project settings.">
+</Event><Event ErrorLevel="1" Project="sample_data_tapping" Source="sample_data_tapping.vcproj" Description="Attribute 'Detect64BitPortabilityProblems' of 'VCCLCompilerTool' is not supported in this version and has been removed during conversion.">
+</Event><Event ErrorLevel="1" Project="sample_data_tapping" Source="sample_data_tapping.vcproj" Description="Attribute 'Detect64BitPortabilityProblems' of 'VCCLCompilerTool' is not supported in this version and has been removed during conversion.">
+</Event><Event ErrorLevel="1" Project="sample_data_tapping" Source="sample_data_tapping.vcproj" Description="MSB8012: $(TargetPath) ('C:\Users\jschlosser\Downloads\SangomaStuff\wanpipe-win-7.0.0.0\api\sample_data_tapping\.\objchk_wxp_x86\i386\sample_data_tapping.exe') does not match the Linker's OutputFile property value '.\objchk_wxp_x86\i386\sample_data_tapping.exe' ('C:\Users\jschlosser\Downloads\SangomaStuff\wanpipe-win-7.0.0.0\api\sample_data_tapping\objchk_wxp_x86\i386\sample_data_tapping.exe') in project configuration 'Release|Win32'. This may cause your project to build incorrectly. To correct this, please make sure that $(TargetPath) property value matches the value specified in %(Link.OutputFile).">
+</Event><Event ErrorLevel="0" Project="sample_data_tapping" Source="sample_data_tapping.vcproj" Description="Done converting to new project file 'C:\Users\jschlosser\Downloads\SangomaStuff\wanpipe-win-7.0.0.0\api\sample_data_tapping\sample_data_tapping.vcxproj'.">
+</Event><Event ErrorLevel="3" Project="sample_data_tapping" Source="sample_data_tapping.vcproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="sample_data_tapping.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="sample_data_tapping.sln" Description="Converted">
+</Event></UpgradeLog>

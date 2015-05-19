@@ -1,0 +1,60 @@
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Wed Dec  6 20:29:03 UTC 2006
+#
+# Note: This file was generated automatically
+#       by /usr/local/sbin/setup-sangoma program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_AFT_TE1, Comment
+
+[interfaces]
+w1g1 = wanpipe1, , TDM_VOICE_API, Comment
+
+[wanpipe1]
+CARD_TYPE 	= AFT
+S514CPU 	= A
+CommPort 	= PRI
+AUTO_PCISLOT 	= YES
+PCISLOT = 1
+PCIBUS = 3
+FE_MEDIA	= E1
+FE_LCODE	= HDB3
+FE_FRAME	= CRC4
+FE_LINE		= 2
+TE_CLOCK 	= NORMAL
+TE_REF_CLOCK 	= 0
+TE_HIGHIMPEDANCE	= NO
+LBO 		= 120OH
+FE_TXTRISTATE	= NO
+MTU 		= 1500
+UDPPORT 	= 9000
+TTL		= 255
+IGNORE_FRONT_END = NO
+TDMV_SPAN	= 1
+TDMV_DCHAN	= 16
+
+RTP_TAP_IP=192.168.1.1		#Remote IP Address on local network
+RTP_TAP_PORT=9000		#Remote UDP Port 
+RTP_TAP_MAC=00:04:23:B0:24:CE	#Remote MAC Address on local network
+
+RTP_TAP_SAMPLE=100		#RTP sample in millisec. (Default: 100ms)
+				#100ms = 800bytes = 100 * 8 byte/ms (ulaw/alaw) 
+
+RTP_TAP_DEV=eth0		#Ethernet device on your local machine 
+				#that is connected to the local network
+
+
+[w1g1]
+ACTIVE_CH	= ALL
+TDMV_ECHO_OFF	= NO
+TDMV_HWEC = NO

@@ -1,0 +1,25 @@
+diff -dur zaptel/zaptel.c zaptel-1.0.6/zaptel.c
+--- zaptel/zaptel.c	2005-01-16 20:58:09.000000000 -0500
++++ zaptel-1.0.6/zaptel.c	2005-03-18 15:11:37.000000000 -0500
+@@ -1742,6 +1742,10 @@
+ 			chan->outwritebuf = oldbuf;
+ 		}
+ 		spin_unlock_irqrestore(&chan->lock, flags);
++
++		if (chan->flags & ZT_FLAG_HDLC){
++			if (chan->span->ioctl) chan->span->ioctl(chan, ZT_DCHAN_TX, 0);
++		}
+ 	}
+ 	return amnt;
+ }
+diff -dur zaptel/zaptel.h zaptel-1.0.6/zaptel.h
+--- zaptel/zaptel.h	2004-09-27 15:50:03.000000000 -0400
++++ zaptel-1.0.6/zaptel.h	2005-03-18 15:11:58.000000000 -0500
+@@ -593,6 +593,7 @@
+  *  60-80 are reserved for private drivers
+  *  80-85 are reserved for dynamic span stuff
+  */
++#define ZT_DCHAN_TX _IOR (ZT_CODE, 60, int)
+ 
+ /*
+  * Create a dynamic span

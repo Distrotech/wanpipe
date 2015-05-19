@@ -1,0 +1,422 @@
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Wed Feb  9 11:09:32 EST 2005
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_AFT, Comment		#WAN_AFT_TE1 - Indicates A104   card
+					#WAN_AFT     - Indicates A101/2 card
+
+[interfaces]
+
+#-------- DRIVER INTERFACE DEFINITIONS --------------------------------
+
+w1g1 = wanpipe1, , TDM_API, Comment
+w1g2 = wanpipe1, , TDM_API, Comment
+w1g3 = wanpipe1, , TDM_API, Comment
+w1g4 = wanpipe1, , TDM_API, Comment
+w1g5 = wanpipe1, , TDM_API, Comment
+w1g6 = wanpipe1, , TDM_API, Comment
+w1g7 = wanpipe1, , TDM_API, Comment
+w1g8 = wanpipe1, , TDM_API, Comment
+w1g9 = wanpipe1, , TDM_API, Comment
+w1g10 = wanpipe1, , TDM_API, Comment
+w1g11 = wanpipe1, , TDM_API, Comment
+w1g12 = wanpipe1, , TDM_API, Comment
+w1g13 = wanpipe1, , TDM_API, Comment
+w1g14 = wanpipe1, , TDM_API, Comment
+w1g15 = wanpipe1, , TDM_API, Comment
+w1g16 = wanpipe1, , TDM_API, Comment
+w1g17 = wanpipe1, , TDM_API, Comment
+w1g18 = wanpipe1, , TDM_API, Comment
+w1g19 = wanpipe1, , TDM_API, Comment
+w1g20 = wanpipe1, , TDM_API, Comment
+w1g21 = wanpipe1, , TDM_API, Comment
+w1g22 = wanpipe1, , TDM_API, Comment
+w1g23 = wanpipe1, , TDM_API, Comment
+w1g24 = wanpipe1, , API, Comment
+
+[wanpipe1]
+
+#-------- DEVICE / DRIVER BINDING ----------------------------------
+
+CARD_TYPE 	= AFT	#AFT: Same for all aft cards must
+                        #This value must be hardcoed to AFT for all
+                        #aft cards.
+
+S514CPU 	= B 	#Used by A101/2 driver to determine T1/E1 port
+                        #A - port 1   
+                        #B - port 2
+			#For A104 driver: Always set this value to A!
+	
+AUTO_PCISLOT 	= YES	#Auto detect PCI/BUS info for this card type
+                        #NO - disable this option
+                        #YES- enable this option
+                        #     if enabled bottom two options 
+			#     PCISLOT and PCIBUS will not be used. 
+                        #     Therefore one can set the to arbitrary value 
+                        #     or remove them all together.
+
+PCISLOT 	= 2     #PCI SLOT Number: 
+                        #Valid values = any number
+    
+PCIBUS  	= 2     #PCI BUS Number:
+			#Valid values = any number
+
+#--------------FRONT END SETUP -----------------------------------
+
+
+FE_MEDIA	= T1	#Front End Type: 
+			#T1 - set front end for T1 mode
+                        #E1 - set front end for E1 mode
+
+FE_LCODE	= B8ZS	#Front End Line Coding
+			#If T1:  B8ZS or AMI
+                        #   E1:  HDB3 or AMI  
+ 
+FE_FRAME	= ESF	#Front End Framing
+			#If T1:  ESF or D4 
+                        #   E1:  CRC4 or NCRC4
+
+FE_LINE		= 4	#Front End Line number.
+			#Used by A104 driver to determine T1/E1 port
+			#Valid values are: 1-4
+			#
+                        #The A101/2 driver doesn't use this option   
+                        #so one should hardcode it to 1 or 
+                        #remove it all together.
+
+
+TE_CLOCK 	= NORMAL  #T1/E1 Clock Source
+                          #NORMAL - slave clock, clock is received from telco
+                          #         This is always the DEFAULT
+                          #MASTER - master clcok, use hw oscillator clock
+                          #         Only used in back to back mode or
+                          #         when specified by telco.
+
+
+TE_REF_CLOCK 	= 0	  #T1/E1 Reference Clock Source
+                          #This option allows one to use the incoming clock
+                          #from a different port as a clock source to this
+                          #port.  FOR THIS OPTION TO WORK: TE_CLOCK=MASTER
+			  #Valid options: 0   - disable 
+                          #               1-4 - use clock from particular port
+
+
+ACTIVE_CH	= ALL	#Specify T1/E1 Active channels (timeslots)
+                          #Since AFT cards support channelization this
+                          #option MUST BE HARDCODED TO:  ALL!
+	
+
+TE_HIGHIMPEDANCE = NO	#Set the Front Ent chip in High Impedance mode
+                        #used for datascoping:
+                        #NO - Disable high impedance mode (DEFAULT)
+                        #YES - Enable hight impedance mode 
+                        #      (only if you know what you are doing)
+
+LBO 		= 0DB	#Front End Line Buildout
+                        # 0db     (Default)  
+                        # 7.5dB     
+                        # 15dB      
+                        # 22.5dB     
+                        # 0-110ft    
+                        # 110-220ft  
+                        # 220-330ft  
+                        # 330-440ft  
+                        # 440-550ft  
+                        # 550-660ft 
+
+
+FE_TXTRISTATE	= NO	  #Front End Tri-State Mode
+                          #Disable front end chip TX mode
+                          #Used for datascoping or connecting multiple ports
+                          #together where one port is operating normally and others
+                          #are tristated, thus only receiving.
+                          #NO - Disable tristae mode
+                          #YES- Enable tristate mode
+
+
+#------------ MISC DRIVER OPTIONS --------------------------
+
+
+MTU 		= 1500    #Global MTU Value
+                          #Note: This value is overwritten by the 
+                          #      interface MTU value below if it exists.
+                          #Values: any number [ suggested 128 - 4086 ]
+
+IGNORE_FRONT_END = NO	  #Ignore Fronte End State
+                          #NO - Do not ignore front end state,
+                          #     therefore if state changes, change the
+                          #     state of the above protocol.
+                          #YES- Igonore front end state
+                          #     Thus if front end goes down, the protocol
+                          #     will not know.
+
+
+
+#------------ VOICE INTERFACE CONFIG --------------------------
+#Each interface corresponds to a specific T1/E1 timeslot
+#For T1: Interface 24 must be configured for PRI
+#For E1: Interface 16 must be configured for PRI
+
+[w1g1]
+PROTOCOL	= HDLC	#Protocol: HDLC : Hardcoded Value
+
+HDLC_STREAMING	= NO	#HDLC Engine Control
+			#NO:  Disable HDLC Engine: Transparet (VOICE) mode
+			#YES: Enable HDLC Engine: PRI mode
+
+ACTIVE_CH	= 1	#Hardware Timeslot Number
+			#For T1: 1-24
+			#For E1: 1-31
+
+IDLE_FLAG	= 0x7E	#Idle Flag to be transmitted 
+	                #in Tx underrun condition.
+
+MTU		= 80	#Maximum Tx Size
+			#API will/must transmit in MTU chunks
+			#1ms  = 8
+			#10ms = 80 (Default)
+
+MRU		= 80	#Maximum Rx Size
+			#API will receive data in MRU chunks
+			#1ms  = 8
+			#10ms = 80 (Default)	
+
+
+[w1g2]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 2 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g3]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 3 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+
+[w1g4]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 4 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+
+[w1g5]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 5 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+
+[w1g6]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 6 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g7]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 7 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g8]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 8 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g9]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 9 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g10]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 10 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g11]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 11 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g12]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 12 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g13]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 13 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g14]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 14 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g15]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 15 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g16]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 16 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g17]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 17 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g18]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 18 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g19]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 19 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g20]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 20 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g21]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 21 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g22]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 22
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+[w1g23]
+PROTOCOL	= HDLC
+HDLC_STREAMING	= NO
+ACTIVE_CH	= 23 
+IDLE_FLAG	= 0x7E
+MTU		= 80
+MRU		= 80
+
+
+#--------------- PRI/DCHAN CONFIGURATION ---------------
+
+[w1g24]
+
+PROTOCOL	= HDLC	#Protocol: HDLC : Hardcoded Value
+
+HDLC_STREAMING	= YES	#HDLC Engine Control
+			#NO:  Disable HDLC Engine: Transparet (VOICE) mode
+			#YES: Enable HDLC Engine: PRI mode
+
+ACTIVE_CH	= 24	#Hardware PRI Timeslot Number
+			#For T1: 24
+			#For E1: 16 
+
+IDLE_FLAG	= 0x7E	#Idle Flag to be transmitted 
+	                #in Tx underrun condition.
+			#Used in VOICE mode only.
+
+MTU		= 1500	#Maximum Tx Size
+			#Corresponds to maximum TX HDLC packet size
+
+MRU		= 1500	#Maximum Rx Size
+			#Corresponds to maximum RX HDLC packet size
+

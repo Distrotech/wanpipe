@@ -1,0 +1,6 @@
+Channel: 	WOOMERA/GROUP/LOCAL_EXT
+Callerid:       "CALLERIDNAME" <CALLERID>
+priority: 	1
+MaxRetries:	1
+Extension:	LOCAL_EXT
+Context:	CONTEXT

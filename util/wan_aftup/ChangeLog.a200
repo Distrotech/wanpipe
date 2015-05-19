@@ -1,0 +1,124 @@
+AFT A200 Firmware Change Log
+============================
+
+
+Release V13
+-----------
+Feb 22 2010
+Type:	    Recommended A200d Firmware
+		Fixed PCIe dma timeouts.  On some new Dell/HP servers the PCIe timeouts
+	   	on dma transactions were causing PCI fatal error messages
+		in the logs.  This has now been fixed.
+						                                                       
+
+Release V12
+-----------
+Nov 12 2009
+
+Type     	Recommended update for A200d cards
+		Fixes the interrupt ack issue due to invalid 
+		fifo error status bit.
+
+Changes:	Firmware bug fixes for A200d cards
+		The new firmware will correcly display fifo interrupt
+		status bit. Note no extra interrupts were generated
+		by this bug, just that driver was acking each interrupt
+		it got.
+
+Release V11
+-----------
+Sep 27 2007
+
+Type     	Recommended update for A200d cards
+		Fixes bug with echo canceller chip security. 
+		Supports DTMF detection without hardware echo cancellation
+		operation. 
+
+Changes:	Firmware bug fixes for A200d cards
+		Card fail to load due to echo canceller chip secutiry.
+		Note: This bug only affects A200 with HWEC
+		      DTMF detecion support only applies to AFT card with
+		      HWEC.
+
+Release V10
+-----------
+Jun 10 2007
+
+Type            Mandatory for A200 cards
+		Update to echo canceler code.
+
+Changes:        Firmware bug fix.
+
+
+
+Release V08
+-----------
+Dec 2006
+
+Type		Mandatory for PCI-Express Cards
+	
+  		A serious bug exists in A200 Firmware for PCI-E cards.
+		On each front end access the next pci transaction can
+		become corrupted, and if the next pci transaction is dma
+		transaction, then an invalid memory can be written to.
+
+Changes:	Firmware bug fix for PCI-E cards.
+		This bug can cause hard crashes.
+		
+		Note: This bug only affects DATA operation of A200 PCI
+		Express Card. The TDM Voice operation is not affected.  
+		
+
+Release V07
+-----------
+Oct 18 2006
+
+Type:		Optional
+
+Changes:	This release fixes a bug when A200 card is used with
+	        Octasic Echo Chip that has lower than 256 echo channels.
+		Bug is machine based and only occurs on some pci buses 
+		when hardware echo cancellation is being used.   
+			 
+Symptoms:	Non funcioning Echo Canceler. 
+		Driver fails to load A200 card due to Echo Chip startup failure.
+
+		This version has more logic than verion 06 to combat the 
+	    	same Echo Chip startup failure.       
+
+
+Release V06
+-----------
+
+Type:		Optional
+
+Changes:	This release fixes a bug when A200 card is used with
+	        Octasic Echo Chip that has lower than 256 echo channels.
+		Bug is machine based and only occurs on some pci buses 
+		when hardware echo cancellation is being used.   
+			 
+Symptoms:	Non funcioning Echo Canceler. 
+		Driver fails to load A200 card due to Echo Chip startup failure.
+
+		This version has more logic than verion 05 to combat the 
+	    	same Echo Chip startup failure.
+
+
+
+Release V05
+-----------
+Feb 06 2005
+
+Type:  		Mandatory/Critical
+
+Changes:	This release fixes a bug when A200 card is used with
+	        Octasic Echo Chip that has lower than 256 echo channels.
+		Bug is machine based and only occurs on some pci buses 
+		when hardware echo cancellation is being used.   
+			 
+Symptoms:	Non funcioning Echo Canceler. 
+		Driver fails to load A200 card due to Echo Chip startup failure.
+
+
+
+		    

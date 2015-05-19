@@ -1,0 +1,115 @@
+#! /bin/sh
+set -e
+
+# summary of how this script can be called:
+#        * <postinst> `configure' <most-recently-configured-version>
+#        * <old-postinst> `abort-upgrade' <new version>
+#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+#          <new-version>
+#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+#          <failed-install-package> <version> `removing'
+#          <conflicting-package> <version>
+# for details, see http://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+#
+# quoting from the policy:
+#     Any necessary prompting should almost always be confined to the
+#     post-installation script, and should be protected with a conditional
+#     so that unnecessary prompting doesn't happen if a package's
+#     installation fails and the `postinst' is called with `abort-upgrade',
+#     `abort-remove' or `abort-deconfigure'.
+
+install_init()
+{
+	PROD=wanrouter
+	START_SCRIPT=20
+	STOP_SCRIPT=10
+	PROD_INIT=/usr/sbin/wanrouter
+
+    # Examine system bootstrap files.
+    if [ -d /etc/rc0.d ]; then
+        RC_DIR=/etc
+    elif [ -d /etc/rc.d/rc0.d ]; then
+        RC_DIR=/etc/rc.d
+    else
+        return 0
+    fi
+
+    # Create Symbolic Link to Wanrouter binary
+    if [ ! -f "/etc/init.d/wanrouter" ]; then
+        ln -sf $PROD_INIT $RC_DIR/init.d/wanrouter
+        echo "Created SymLink of $PROD_INIT to $RC_DIR/init.d/wanrouter"
+        echo
+    fi
+
+	# Install start/stop scripts.
+    update-rc.d wanrouter defaults $START_SCRIPT $STOP_SCRIPT
+
+    return 0
+}
+
+case "$1" in
+    configure)
+
+        if [ -d "/usr/local/wanrouter" ]; then
+	        cat <<EOM
+
+*** Previous installation of Wanpipe detected.
+    Please use /usr/sbin/wancfg instead of /usr/local/wanrouter/wancfg
+    for Wanpipe configuration.
+    The new configuration files will be saved in /etc/wanpipe
+    and /etc/wanpipe/interfaces directories.
+
+EOM
+        else
+        	echo 'no old wanpipe detected' > /dev/null
+        fi
+
+        cat <<EOM
+
+*** Sangoma Wanpipe was successfully installed.
+    Run wancfg command to configure wanpipe.
+    Refer to /usr/share/doc/wanpipe for documentation.
+
+    Docs: README-2.config
+          README-3.operation
+	  README-4.debugging
+
+    Hardware Probe: /usr/sbin/wanrouter hwprobe
+    Wanpipe Config: /usr/sbin/wancfg
+    Wanpipe Start : /usr/sbin/wanrouter start
+
+EOM
+
+        install_init;
+
+        # check dependancies for the new modules
+        echo "Executing depmod to check dependancies and new kernel modules"
+        eval "depmod -a > /dev/null 2>&1"
+        echo
+
+        eval "modprobe wanrouter"
+        if [ $? -eq 0 ]; then
+        	eval "modprobe -r wanrouter"
+        	if [ $? -eq 0 ]; then
+        	    echo "Module loaded/unloaded to test"
+        	fi
+        else
+            echo "Failed to load wanpipe modules!"
+            echo
+            echo "Make sure you are installing correct DEBS for your system!"
+            echo
+            echo "Otherwise call Sangoma Tech Support"
+        fi
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+exit 0

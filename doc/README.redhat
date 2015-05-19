@@ -1,0 +1,13 @@
+Table Of Contents
+
+How to enable ip_forwarding on RedHat 8.0
+
+
+
+Q: How to enable ip_forwarding on RedHat 8.0
+
+A: In /etc/sysctl.conf
+
+   To enable ip forwarding on boot up set variable net.ipv4.ip_forward to 1. 
+   eg: net.ipv4.ip_forward = 1
+   

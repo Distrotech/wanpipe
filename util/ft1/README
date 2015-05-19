@@ -1,0 +1,329 @@
+CFGFT1
+------
+
+Author: Nenad Corbic
+
+
+
+IMPORTANT:
+ 	The CFGFT1 Utility is not supported for
+	2.0.X kernels. To configure the CSU/DSU on
+	such kernels, please use the cpipemon 
+	debugger.  For further informatino run cpipemon
+	without arguments and read the help files.
+
+
+Requirements
+------------
+
+1) The cfgft1 utility requires bash version 2.0 or 
+   greater.  Please install the new bash version
+   before proceeding.
+
+   The cfgft1 utility requires the /bin/bash2 executable.
+	eg: bash --version 
+
+
+Running FT1 Configurator
+------------------------
+
+CFGFT1 is a CSU/DSU configurator for the S508FT1 and
+S514FT1 cards. 
+
+1) Get the WANPIPE wanrouter up and running using
+   'wanrouter start wanpipe#' command. 
+
+   (Use the /usr/sbin/wancfg GUI utility 
+    to setup the WANPIPE configuration file)
+
+2) Once wanrouter starts up successfully,
+   shut it down using 'wanrouter stop wanpipe#'command 
+   and start the /usr/sbin/cfgft1 configurator.
+
+3) To start the cfgft1 configurator, change directory
+   to /usr/sbin/wanrouter and  run
+   '/usr/sbin/cfgft1 wanpipe#' where # = 1,2,3 ...
+
+   Note: Make sure to use the same wanpipe device name as  
+         in step 1.
+
+
+
+IMPORTANT:
+----------
+
+2)  Cfgft1 uses the lxdialog GUI libraries.  The lxdialog
+    libraries depend on the following:
+
+	i) libtermcap-devel-2.0.8-13, or greater 	
+       ii) ncurses-devel-4.2-18, or greater
+
+    Note: These packages are usually installed by default
+          on Linux systems.	
+    
+    The above packages are located on the Sangoma ftp site: 
+    ftp.sangoma.com: in  /linux/lib/ directory.
+
+
+Installing RPM's
+----------------
+
+1) Copy the RPM package into an arbitrary directory
+
+2) run 'rpm -Uvh <package_name.rpm>' to install the package
+
+
+Installing Source Distribution
+------------------------------
+
+1) Refer to installation instructions
+
+
+
+
+
+CUSTOMIZING CFGFT1 : ADVANCED OPTIONS
+=======================================
+
+   This section describes how to use the 
+cfgft1 components in building a customized
+CSU/DSU configurator.
+
+NOTE: 	This section can be skipped if one is happy with
+	running ./cfgft1 GUI utility.
+
+
+NOTE:   cpipemon debugger has the ability to configure
+        the CSU/DSU. However, in that case one has to load
+	the CHDLC protocol first. For further information
+	please run cpipemon without any arguments and read
+	the help info.
+
+
+The cfgfg1 GUI utility consists of three parts:
+
+1) /usr/sbin/cfgft1:
+	Shell script, written in bash version 2.
+
+2) /usr/sbin/wanpipe_ft1exec:
+	C executable, that performs ioctl calls to 
+        the FT1 driver.  This program performs the
+        actual CSU/DSU configuration.
+
+
+	Syntax:  (All options are mandatory)
+ 
+	wanpipe_ft1exec <wanpipe#> <#> <OPTIONS>
+
+		wanpipe#:	Wanpipe device (ex wanpipe1, wanpipe2 ...)
+		0:		Configuration Commands. 
+
+	a) STANDARD CONFIGURATION:
+	   ----------------------
+		wanpipe_ft1exec <wanpipe#> 0 <FRAMING> <ENCODING> <LINE_BUILD> \
+				      <CHANNEL> <BAUD> <CLOCK> 
+
+	b) READ CONFIGURATION:
+	   ------------------
+		wanpipe_ft1exec <wanpipe#> 3	"No options"
+
+
+	c) AUTO CONFIGURATION:
+	   ------------------
+		wanpipe_ft1exec <wanpipe#> 1	"No options"
+	
+		Note: Auto configuration can only be used 
+		      if ENCODING is B8ZS and FRAMING is ESF.
+
+
+
+	<STANDARD CONFIGURATION OPTIONS>
+	--------------------------------
+
+	wanpipe#:	Wanpipe device (ex wanpipe1, wanpipe2 ...)
+
+	0:		Internal wanpipe_ft1exec option that enables 
+			Standard Configuration. 
+
+	FRAMING: 	0 = ESF ,  	1 = D4
+
+			Please select one of the above options as specified by
+			your FT1 provider.
+
+	ENCODING: 	0 = B8ZS ,	1 = AMI
+			
+			Please select one of the above options as specified by
+			your FT1 provider.
+
+	LINE_BUILD:	0 = CSU: 0db, DSX: 0-133ft  
+			1 = DSX: 266-399ft
+			2 = DSX: 399-533ft
+			3 = DSX: 399-533ft	
+			4 = DSX: 533-655ft
+			5 = CSU -7dB
+			6 = CSU -15dB
+			7 = CSU -22.5dB
+
+			For WANPIPE FT1 Card setup, select the first option: 
+			* CSU 0dB DSX1 0-133ft (option 0)
+
+			For any other setup, select an option as specified by 
+			your FT1 provider.
+
+
+	CHANNEL:	Number between 1 to 24.
+			Represents the first active channel.
+			(Default = 1)
+
+			The T1 line consists of 24 channels, each 64 or 56
+			Kbps. If this is a full T1 line, then the first
+			active channel is 1.  Otherwise, set the first 
+			active channel as specified by your FT1 provider.
+
+	
+	BAUD:		Line baud rate (speed).
+
+			For B8ZS Encoding:
+				Full T1 baud rate is: 1536 Kbps.
+				Each T1 channel runs at: 64 Kbps.
+			For AMI Encoding:
+				Full T1 baud rate is: 1344 Kbps.
+				Each T1 channel runs at: 56 Kbps.
+
+			Enter the speed of your connection in Kbps, as 
+			specified by your FT1 provider.
+
+			To calculate your baud rate, find out how many
+			active T1 channels you have.  Then multiply that
+ 			number to ether 64 (for B8ZS) or 56 (for AMI).	
+			Note, that first active channel should be set to
+			1 in most cases.  (Note: CHANNEL option)
+
+	CLOCK:		0 = NORMAL,	1 = MASTER
+
+			Default is always Normal.
+
+			Select clocking options as specified by your FT1
+			provider.
+
+3) /usr/sbin/wanrouter:
+	WANPIPE startup script that is use to 
+	startup the FT1 driver.
+
+
+
+Configuration Process
+---------------------
+
+Make sure that all WANPIPE configuration
+files have been created.  Repeat these
+steps for each WANPIPE FT1 CARD.
+
+In this example I will use wanpipe1 as 
+a device that I want to configure.
+
+1. Make sure that WANPIPE card can startup
+   properly, and that there are no configuration
+   or resource problems.
+
+   Start wanpipe:  'wanrouter start wanpipe1'
+
+2. If the card loaded without any problems,
+
+   Stop wanpipe:  'wanrouter stop wanpipe1' 
+
+3. Now start the FT1 driver
+
+   'wanrouter start ft1_wanpipe1'
+    
+   Note: Add "ft1_" in front of the device name.
+         (If we were starting up FT1 driver for wanpipe2
+	  we would run: wanrouter start ft1_wanpipe2.)
+
+   The wanrouter script will parse the wanpipe1.conf file
+   and create a ft1.conf file which will be use to 
+   startup the FT1 driver. That is why it is so important
+   that we test the wanpipe1.conf first.
+
+   Once the FT1 driver loads, check /var/log/messages
+   for "FT1 Config Ready!" message. This message indicates
+   that the FT1 driver is configured and ready to accept
+   commands.   
+
+
+STANDARD CONFIGURATION
+----------------------
+
+4. Now we can run the wanpipe_ft1exec application to configure
+   the CSU/DSU. Refer to wanpipe_ft1exec syntax above.
+
+   In this example uses STANDARD configuration.
+
+   To configure a CSU/DSU for:
+		* Full T1 
+		* B8ZS Encoding and ESF Framing
+
+   wanpipe_ft1exec wanpipe1 0 0 0 0 1 1536 0
+
+   When wanpipe_ft1exec concludes the configuration, it will
+   clear the screen and dump its results into the FT1_CONFIG
+   text file.
+  
+5. Open the FT1_CONFIG text file and read out the 
+   CSU/DSU configuration.    	    
+
+   Example of FT1_CONFIG:
+	0	#FRAMING
+	0	#ENCODING
+	0	#LINE BUILD
+	1	#CHANNEL
+	1536	#BAUD RATE
+	0  	#CLOCKING
+   
+
+6. To make sure that configuration took place
+   run a read configuration command.
+
+	wanpipe_ft1exec wanpipe2 3
+
+   When the wanpipe_ft1exec finishes, read the FT1_CONFIG
+   file.
+
+
+AUTO CONFIGURATION
+------------------
+
+4. The T1 line must be set for B8ZS encoding and 
+   ESF framing. Also, the WANPIPE FT1 card must
+   be connected.
+
+   run: wanpipe_ft1exec wanpipe2 1
+
+   After wanpipe_ft1exec finishes read the FT1_CONFIG
+   file for configuration results.
+
+   
+
+
+    
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+

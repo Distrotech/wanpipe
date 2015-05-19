@@ -1,0 +1,53 @@
+BISYCN API Package
+==================
+
+Author: Nenad Corbic
+Date:   May 29, 2004
+
+
+
+The sdlc package contains the sample sdlc client 
+program that should be used in user application
+development.
+
+
+Contents of the API Package
+---------------------------
+
+ 1) sdlc_api.c :  A sample API utility, that will send and receive
+                  data packets across a sdlc line.  This program
+		  should be used as a starting point in developing
+		  a real-world sdlc application.
+
+
+		  Development Note:
+
+			  SDLC driver only supports single socket interface
+			  for multiple SDLC channels. 
+
+			  This complicates the TX part of the application.
+			  Application MUST enable its own Tx delay in order
+			  to throttle the tx data. 
+
+			  Since single socket is provided, for multiple
+			  SDLC channels, one can only have TWO processes,
+			  one for Tx and other for Rx paths.  
+			  Thus, TX throttling problem cannot be solved by 
+			  just using multiple processes.
+
+			  The sdlc_api implements tx throttling :)
+
+		  Note: wanpipe1.conf interface (eg: sdlc0) must
+		        be configured for API mode.
+
+
+
+Usage: sdlc_api <router name> <interface name> <num of stations>
+
+   eg: sdlc_api wanpipe1 sdlc0 2
+
+       Tx/Rx data on Station Station 1 and 2 
+
+       To enable Tx send a SIGUSR1 signal to sdlc_api
+       kill -SIGUSR1 $(pidof sdlc_api) or run ./tx_test
+

@@ -1,0 +1,231 @@
+WANPIPE V35/RS2323 SDLC
+=========================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with SDLC support
+--------------------------------------------
+
+The SDLC support is NOT installed by default
+during WANPIPE installation process. 
+
+
+Use the CUSTOM driver compilation 
+option in 
+    ./Setup install
+script to enable SDLC.
+
+After successful installation proceed to 
+configure the card for SDLC protocol.
+
+
+Configure SDLC
+--------------
+
+
+Sample Configuration File:
+
+/etc/wanpipe/api/samples/wanpipe1.sdlc
+
+
+1. Copy the above sample file to /etc/wanpipe
+   and rename it to wanpipe1.conf
+   
+   cp /etc/wanpipe/api/samples/wanpipe1.sdlc \
+      /etc/wanpipe/api/samples/wanpipe1.conf
+
+
+2. Run w 
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Configuring SDLC
+----------------
+
+NOTE: SDLC is not supported by /usr/sbin/wancfg :(
+
+
+Sample Configuration File:
+
+/etc/wanpipe/api/samples/wanpipe1.sdlc
+
+
+1. Copy the above sample file to /etc/wanpipe
+   and rename it to wanpipe1.conf
+   
+   cp /etc/wanpipe/api/samples/wanpipe1.sdlc \
+      /etc/wanpipe/api/samples/wanpipe1.conf
+
+
+2. Hardware Config
+
+   SINGLE CARD:
+
+	The config file is setup to auto detect
+	a SINGLE sangoma adapter.  Thus, no extra
+	hardware config is necessary.
+
+   MULTIPLE CARDS:
+
+	Run:  wanrouter hwprobe 
+  
+	   Note the CPU, Slot and Bus number of
+	   the card we wish to configure.
+
+	Edit /etc/wanpipe/wanpipe1.conf
+
+	   Set: AUTO_PCISLOT = NO
+	   Set: S514CPU      = <CPU Value: A or B>
+	   Set: PCISLOT      = <To slot number from hwprobe>
+	   Set: PCIBUS       = <To bus nubmer from hwprobe>
+
+
+3. Line Config
+
+   EXTERNAL CLOCKING:
+
+   	This is setup be default.
+	In this mode, BaudRate is not used.
+
+	Clocking        = External	#<External or Internal>
+	BaudRate        = 64000
+
+   V35 or RS232
+	
+	Interface       = RS232		#<RS232 or V35>
+ 	
+
+4. SDLC Protocol Configuration
+
+   	STATION_CONFIG          = 0x00	#<0=CPE  	1=SWITCH>
+	BAUD_RATE               = 0x00	#<0=External 	1=Internal>
+	MAX_I_FIELD_LEN         = 544	#<Max tx len>
+	GEN_OP_CFG_BITS         = 0x100 #<leave default>
+	PROT_CFG_BITS           = 0x00  #<leave default> 
+	EXCEP_REPORTING         = 0x00  #<leave default>
+	MODEM_CFG_BITS          = 0x00  #<leave default>
+	STATISTICS_FRMT         = 0x00  #<leave default>
+	PRI_ST_SLOW_POLL        = 1000  #<leave default>
+	SEC_ST_RESP_TO          = 1000  #<leave default>	
+	CNSC_NRM_B4_SNRM        = 10  	#<leave default>
+	MX_LN_IFLD_P_XID        = 50	#<leave default>
+	O_FLG_BIT_DELAY         = 0	#<leave default>
+	RTS_BIT_DELAY           = 0	#<leave default>
+	CTS_TIMEOUT             = 0	#<leave default>
+	SDLC_CONFIG             = 0x00	#<leave default>
+
+
+
+5. Interface Section
+
+   Leave Default
+
+
+
+6. End of configuration, save and exit
+
+
+
+Start SDLC protocol
+---------------------------- 
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are displayed.
+
+	Confirm the SDLC comm enabled
+
+	Check for any error events.
+
+
+
+Custom API Application
+----------------------
+
+A sample API application exists in
+/etc/wanpipe/api/sdlc directory.
+
+To compile it run:  make
+
+Run:    ./sdlc_api 
+
+	Refer to usage information
+
+
+Please read the README file in 
+/etc/wanpipe/api/sdlc directory for
+usage and development info.
+
+
+Use this app as a building block for you custom
+APP.
+
+
+
+Further Info
+------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+

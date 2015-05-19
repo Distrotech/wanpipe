@@ -1,0 +1,3204 @@
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.04.01
+
+Date:		July 16, 2010
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+	
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-8031: Improved the processor check in the Oct6100InterruptServiceRoutine
+PR-8477: Improved check of BIST results in Oct6100ApiDecodeKeyAndBist function
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-8478: cOCT6100_ERR_CHANNEL_OUT_OF_MIXER_EVENTS error when calling
+         Oct6100ChannelModify
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16-bit architectures are not supported by the API.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.04.00
+
+Date:		December 15, 2009
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	Modified function:	Oct6100ChipOpen
+		Added parameter:	fAllowDynamicRecording
+
+        Added functions:	Oct6100ApiEnableChannelRecording
+				Oct6100ApiDisableChannelRecording
+		
+
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-7958: Added the possibility to enable the channel recording after the chip 
+         open
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16-bit architectures are not supported by the API.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.03.04
+
+Date:		November 25, 2009
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-7925 : Switching from cOCT6100_ECHO_OP_MODE_NORMAL to 
+          cOCT6100_ECHO_OP_MODE_NO_ECHO does not clear the echo path model.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16-bit architectures are not supported by the API.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.03.03
+
+Date:		October 22, 2009
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-7826 : Compilation error for some compilers.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16-bit architectures are not supported by the API.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.03.02
+
+Date:		October 2, 2009
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-7795 : Core Dump Causes OCT6100 Failure
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16-bit architectures are not supported by the API.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.03.01
+
+Date:		September 24, 2009
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+Custom Changes
+#ifdef cOCT6100_ADD_HUAWEI_CODE
+PR-7754 : Changed default value for lRoutNoiseReductionLevelGainDb to -12
+#endif
+
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16-bit architectures are not supported by the API.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.03.00
+
+Date:		September 10, 2009
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-7532 : Added support for the core dump mode in the Oct6100DebugGetData 
+          function (cOCT6100_DEBUG_GET_DATA_MODE_CORE_DUMP).
+
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16-bit architectures are not supported by the API.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.02.04
+
+Date:		July 30, 2009
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-7532 : Added support for special firmware with 385 channels.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16 bit architectures is not supported by the API
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.02.03
+
+Date:		March 30, 2008
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-7183 : Added processor check in the Oct6100InterruptServiceRoutine
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16 bit architectures is not supported by the API
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.02.02
+
+Date:		January 29, 2008
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16 bit architectures is not supported by the API
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.02.01
+
+Date:		December 22, 2008
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+
+- Rout Noise Reduction features are no more supported
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-6898 : Odd image size not supported properly.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16 bit architectures is not supported by the API
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.02.00
+
+Date:		September 9, 2008
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+
+- Rout Noise Reduction features are no more supported 
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-6588 : Echo artifacts heard during convergence.
+
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16 bit architectures is not supported by the API
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.01.03
+
+Date:		August 27, 2008
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+   
+- Rout Noise Reduction features are no more supported 
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+					
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+- Custom change
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16 bit architectures is not supported by the API
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.01.02
+
+Date:		March 7, 2008
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+   
+- Rout Noise Reduction features are no more supported 
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+					
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+- Custom change
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16 bit architectures is not supported by the API
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.01.01
+
+Date:		February 11, 2008
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+   
+- Rout Noise Reduction features are no more supported 
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+					
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-5674 : Modify function does not work properly for codecs
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16 bit architectures is not supported by the API
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.01.00
+
+Date:		November 29, 2007
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+   
+- Rout Noise Reduction features are no more supported 
+- Stop events on 2100Hz are only supported from firmware 01.06.00.	
+					
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-3828 : Added a better check for the firmware image when the chip is opened.
+PR-5075 : Added a specific error when the SHORT BIST mode is not supported by
+          the firmware.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-5570 : Law conversion must NOT be possible on the Rin-Rout path when a channel 
+          is in BIDIR mode.
+PR-5478 : Stop Event generated when not requested.
+PR-5431 : Two consecutive calls to Oct6100DebugGetData corrupts timestamp sequence.
+PR-3252 : Caller ID returns cOCT6100_ERR_CALLER_ID_NOT_ENOUGH_PLAYOUT_EVENTS error 
+          when it should not.	
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-5157 : 16 bit architectures is not supported by the API
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR49
+
+Date:		September 24, 2007
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+          Stop events on 2100Hz are only supported from firmware 01.06.00.
+					
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-5337 : Added check if the processor timestamps equal zero.
+PR-5283 : Changed the PCM Leak check to support firmware 01.06.00.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-5277 : DTMF Tones can not be detected when only one channel is added to a 
+          conference bridge
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+PR-5157 : 16 bit architectures not supported by API
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR48
+
+Date:		July 6, 2007
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+		Modified function:	Oct6100ChipOpen
+			Added parameter:	fEnable2100StopEvent
+
+		Modified function:	Oct6100ChipGetImageInfo
+			Removed parameters:	fAlcNoiseBleedOutTime
+						fResetAlcOnTones
+
+		Modified functions:	Oct6100ChannelOpen
+					Oct6100ChannelModify
+					Oct6100ChannelGetStats
+			Removed parameters:	fResetRinAlcOnTones
+						fResetSoutAlcOnTones
+						ulAlcNoiseBleedOutTime
+
+	Stop events on 2100Hz are only supported from firmware 01.06.00.
+					
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-4769 : Law conversion is now possible on bi-directional channel.
+PR-5037 : The only ulMemClkFreq value supported is now 133MHz.
+PR-5141 : Added fEnable2100StopEvent functionality.
+PR-5105 : Added reset of the old data when changing the selected debug channel.
+PR-5168 : Interrupt pin active after enabling H.100 interrupt.
+
+PR-5210 : AlcNoiseBleedOutTime and ResetAlcOnTones features are no more supported.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-5055 : Short glitch may be present at the first opening of a channel.
+PR-5071 : Should not use a law conversion resource when a TSST is unassigned. The
+          law conversion resource blocked the use of the conferencing feature.
+PR-5101 : lRoutNoiseReductionLevelGainDb is not set properly when modifying a channel.
+PR-5181 : Interrupts must be cleared in the chip open function.
+PR-5194 : Output is not silence when channel is muted.
+PR-5231 : NLP not disabled when a channel is closed.
+PR-5232 : Muted ports not reset when closing a channel.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR47
+
+Date:		December 18, 2006
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameter:	fRoutNoiseReductionLevel
+
+	Modified functions:	Oct6100ChannelOpen
+				Oct6100ChannelModify
+				Oct6100ChannelGetStats
+		Added parameters:	lRoutNoiseReductionLevelGainDb
+					
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-5011 : Added configurable ROUT noise reduction attenuation level.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-4853 : Fatal_5 may be generated if accesses to the chip are slow.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR46
+
+Date:		November 10, 2006
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+	New function:		Oct6100ApiGetCapacityPins
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-4854 : Added function to read capacity pin values
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR45
+
+Date:		October 17, 2006
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+	Modified function:	Oct6100ChipOpen
+		Added parameter:	ulProductionBistMode
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-4854 : Added support of a short production BIST
+PR-4837 : Added 2100Hz, 1100Hz and SS5 tone events capture before tone detection 
+          enabling.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR44
+
+Date:		October 10, 2006
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE 					
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-4842 : Disabled SCN RX SID process.
+PR-4700 : Enhanced external memory data pins BIST.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR43
+
+Date:		July 25, 2006
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE 					
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-4617 : INT8 defined as char causes problems in some architectures.
+PR-4633 : ALC not reset when a channel is closed and reopened.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR42
+
+Date:		July 17, 2006
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE 					
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-4627 : Disabling or closing debug channel causes TDM data corruption on 
+          another single channel.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR41
+
+Date:		June 01, 2006
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+	Modified function:	Oct6100DebugGetData
+		Added parameter:	ulGetDataContent 					
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-4346: Added new parameter ulGetDataContent to function Oct6100DebugGetData
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-3004 : Compiler warnings in 64-bit operating systems.
+PR-4366 : Law conversion not working when Rin tone removal activated.
+PR-4375 : Possible infinite loop in Oct6100ChipOpen function.
+PR-4512 : Debug channel TSI resource is not released when the channel is closed.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR40
+
+Date:		March 20, 2006
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-3903: UPCLK freq 66.66MHz is no longer supported.
+PR-4085: NLP off and Comfort Noise off not allowed when echo operation mode is 
+         set to speech recognition.
+PR-4284: Must allow modification of the VQE Activation Delay even if Tone 
+         Disabler is not active.
+PR-4305: Debug functions not allowed when echo operation mode is set to power 
+         down.
+PR-4340: Oct6100ChannelOpen ulPhase must be capped to a minimum of 1.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-4301: ulMaxBiDirChannels is not correctly checked in API.
+PR-4321: ISR flags such as fErrorH100OutOfSync should be initialized to FALSE.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-3004 : OCT6100 API does not support 64-bit operating systems
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR39
+
+Date:		February 08, 2006
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameters:	fAlcNoiseBleedOutTime
+					fResetAlcOnTones
+
+	Modified functions:	Oct6100ChannelOpen
+				Oct6100ChannelModify
+				Oct6100ChannelGetStats
+		Added parameters:	fResetRinAlcOnTones
+					fResetSoutAlcOnTones
+					ulAlcNoiseBleedOutTime
+
+
+New features AlcNoiseBleedOutTime and ResetAlcOnTones require firmware 
+version 01.06.00 and higher.
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-3888 : Add 2 new parameters: fResetSinAlcOnTones, fResetRinAlcOnTones
+PR-3889 : New parameter: ulAlcNoiseBleedoutTime
+
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-4111 : fIdleCodeDetection not backward compatible
+PR-4156 : Channel stays muted when cOCT6100_CHANNEL_MUTE_PORT_SIN_WITH_FEATURES 
+          mute mode is used.
+PR-4181 : Certain SDR memories may not boot correctly with standard 
+          initialization sequence
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-3004 : OCT6100 API does not support 64-bit operating systems
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR38
+
+Date:		November 21, 2005
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	NONE
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-3848 : Changed several comments.
+PR-3758 : ulToneDisablerVqeActivationDelay check must be added.
+PR-3750 : Oct6100ApiInitToneInfo is too slow because of StrStr seach.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-3842 : Bug in Oct6100ApiModifyChannelResources function when reserving Rout TSST.
+PR-3793 : TLV length field parsing might be dangerous, not checked carefully.
+PR-3779 : Remote debugging disconnect command does not work correctly.
+PR-3749 : OCT6100 Tone enable does not work for certain firmwares.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-3004 : Compiling OCT6100 on 64-bit processor platform causes warnings
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR37
+
+Date:		August 30, 2005
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameters:	fIdleCodeDetection
+					fSinLevel
+
+	Modified functions:	Oct6100ChannelOpen,
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameter:	fIdleCodeDetection					
+
+	NOTE: With this release, it is not possible to enable 
+              fSoutAdaptiveNoiseReduction and fSoutConferencingNoiseReduction
+              simultaneously
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-3701 : Added support of Idle Code Detection feature
+PR-3702 : lSinLevel and ERLE stats are no more supported in certain firmwares.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-3688 : Error should be returned if ulMaxChannels is too big
+PR-3711 : Bug when setting NLE and music protection simultaneously.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-3004 : Compiling OCT6100 on 64-bit processor platform causes warnings
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR36
+
+Date:		July 20, 2005
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameters:	fSoutNoiseBleaching
+					fDoubleTalkBehavior
+
+	Modified functions:	Oct6100ChannelOpen,
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameters:	fSoutNoiseBleaching
+					ulDoubleTalkBehavior
+
+	NOTE: With this release, it is not possible to enable 
+              fSoutAdaptiveNoiseReduction and fSoutConferencingNoiseReduction
+              simultaneously
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-3610 : Added support of Noise Bleaching VQE
+PR-3561 : Added support of double talk behavior
+PR-3548 : The default value for ulNonLinearityBehaviorA should be 1 and not 0
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-3554 : Clipping if AEC is enable in NO ECHO mode and SPEECH mode
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-3004 : Compiling OCT6100 on 64-bit processor platform causes warnings
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR35
+
+Date:		July 04, 2005
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-3368 : Caller ID allerting signal not played out correctly.
+PR-3382 : Law not set correctly in dump files for channel numbers with bit 2 
+          set to 1.
+PR-3487 : Glitch when adding a participant to a conference
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2645 : Caller ID pre-transmit delay does not work correctly.
+PR-3004 : Compiling OCT6100 on 64-bit processor platform causes warnings
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR34
+
+Date:		March 31, 2005
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-3336 : Tail displacement not configured correctly in ChannelOpen function
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2645 : Caller ID pre-transmit delay does not work correctly.
+PR-3004 : Compiling OCT6100 on 64-bit processor platform causes warnings
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR33
+
+Date:		March 04, 2005
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-3226 : Improved performance of Oct6100BufferPlayoutStart function
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2645 : Caller ID pre-transmit delay does not work correctly.
+PR-3004 : Compiling OCT6100 on 64-bit processor platform causes warnings
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR32
+
+Date:		February 28, 2005
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-3184 : Change free mixer event count check for a more precise one in 
+          channel open and modify functions.
+PR-3226 : NLP tail not set correctly in LEC with Tail Displacement.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2645 : Caller ID pre-transmit delay does not work correctly.
+PR-3004 : Compiling OCT6100 on 64-bit processor platform causes warnings
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR31
+
+Date:		February 7, 2005
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-3136 : The lDefaultErlDb parameter should also support other values -9, -12.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-3120 : Oct6100DebugGetData does not work correctly on big endian 
+          architecture.
+PR-3165 : F003_FPGA: SCN-PLC FPGA cannot be put into PASS_THRU.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2645 : Caller ID pre-transmit delay does not work correctly.
+PR-3004 : Compiling OCT6100 on 64-bit processor platform causes warnings
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR30
+
+Date:		January 24, 2005
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+
+	New functions:		Oct6100ProductionBist
+				Oct6100DebugSelectChannel
+				Oct6100DebugGetData
+	
+	Modified functions:	Oct6100ChannelOpen,
+				Oct6100ChannelGetStats
+		Added parameters:	ulAecTailLength
+					ulToneDisablerVqeActivationDelay
+					fEnableMusicProtection
+
+	Modified function:	Oct6100ChannelModify
+		Added parameter:	ulTailLength
+
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameters:	fAecTailLength
+					fPerChannelTailLength
+					fToneDisablerVqeActivationDelay
+					ulImageType
+
+	Modified function:	Oct6100ChipOpen
+		Added parameters:	fEnableProductionBist
+					ulNumProductionBistLoops
+
+	Modified define:	cOCT6100_MAX_TAIL_DISPLACEMENT
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2748 : Added new echo operation mode for speech recognition purposes.
+PR-2885 : Added ulTailLength parameter to the ChannelOpen function
+PR-2926 : Added ulToneDisablerVqeActivationDelay to the ChannelOpen function
+PR-2951 : Added hardware PLL jitter counter for debugging.
+PR-2966 : Added acoustic echo tail length parameter to ChannelOpen function
+PR-2978 : Added functionnality in the API to dump memory.
+PR-3001 : Added production BIST of the external memory support to the API
+PR-3013 : Added support of the Octasic Music Protection feature
+PR-3017 : Added reset of the ulNumEchoPathChanges channel stat
+PR-3057 : Added ulImageType parameter to Oct6100ChipGetImageInfo.
+PR-3061 : Improved performance of Oct6100BufferPlayoutGetEvent function
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2670 : fEnableToneDisabler description not completely clear
+PR-2928 : Default values missing in function Oct6100ChannelGetStatsDef
+PR-2940 : BiDir mode does not work correctly when a channel is modified.
+PR-2954 : Default value for ulMaxPlayoutEvents is incorrect
+PR-2971 : Problems when doing law conversion while in a bridge
+PR-2973 : Some instance resources might be lost if mixer events run out in the 
+          MutePorts function.
+PR-2995 : Conference bridge gets corrupted while un-muting and muting 
+          participants
+PR-2999 : After several open-close of channels, output signal gets corrupted
+          when muting the input.
+PR-3003 : Wrong level control setting after close/open channel
+PR-3048 : Code cleanup, redundant code must be removed.
+PR-3058 : F003_FPGA: Bad check for PLC SCN FPGA channel ID.
+PR-3079 : F003_FPGA: Put FPGA in pass-through when doing playout and change back
+          when playout if finished.
+PR-3087 : cOCT6100_MAX_TAIL_DISPLACEMENT must be changed from 912 to 896ms.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2645 : Caller ID pre-transmit delay does not work correctly.
+PR-3004 : Compiling OCT6100 on 64-bit processor platform causes warnings
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR29
+
+Date:		December 10, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2918 : Add possibility to retrieve more than 32 buffer playout events with 
+          Oct6100BufferPlayoutGetEvent()
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+
+PR-2920 : cOCT6100_ERR_BUFFER_PLAYOUT_ADD_EVENT_BUF_FULL when trying to add 
+          buffer on a new opened channel.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2645 : Caller ID pre-transmit delay not working correctly.
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR28
+
+Date:		November 12, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameters:	lAnrSnrEnhancementDb
+					ulAnrVoiceNoiseSegregation
+					ulSoutNaturalListenerEnhancementGainDb				
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameters:	fAnrSnrEnhancement
+					fAnrVoiceNoiseSegregation
+	Modified function:	Oct6100ChannelModify
+					fApplyToAllChannels
+
+	1.2	PRODUCT OCT6110
+
+	Modified function:	Oct6100ChannelModify
+					fDisableToneDetection
+					fStopBufferPlayout
+					fRemoveConfBridgeParticipant
+					fRemoveBroadcastTssts
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2669 : Removed unused internal functions
+PR-2675 : Added new parameters to control the ANR behavior
+PR-2676 : fUseSynchTimestamp is no more supported
+PR-2747 : ulSoutAutomaticListenerEnhancementGainDb should be limited to maximum
+          30 instead of 60.
+PR-2749 : New parameter must be added to configure NLE.
+PR-2759 : Implemented fApplyToAllChannels, fDisableToneDetection, 
+          fStopBufferPlayout and fRemoveConfBridgeParticipant features
+PR-2805 : Playout start function should return an error if the buffer list is 
+          empty.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2677 : lAecDefaultErlDb and lDefaultErlDb are not updated correctly since 
+          the ChannelModify function optimizations. 
+PR-2746 : Channel stats are not correct when channel is in bypass or reset
+PR-2803 : Define for cOCT6100_KEEP_PREVIOUS_SETTING is too large for INT32
+PR-2842 : Level control must not be called in mixer function
+PR-2845 : F003_FPGA: Kappa coefficient not initialized when opening a PLC/SCN 
+          FPGA channel.
+PR-2846 : F029_FPGA: Tone detection event type not set correctly.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2645 : Caller ID pre-transmit delay not working correctly.
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00.00.01
+
+Date:		October 08, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+First General Availability release. Internal Release.
+
+-------------------------------------------------------------------------------
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameters:	lAnrSnrEnhancementDb
+					ulAnrVoiceNoiseSegregation					
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameters:	fAnrSnrEnhancement
+					fAnrVoiceNoiseSegregation
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2675 : Added new parameters to control the ANR behavior
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+ 
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR27
+
+Date:		September 27, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2621 : The Oct6100CallerIdTransmit function should check that enough playout 
+          events are available before adding them.
+PR-2630 : Increased performance of the ChannelModify function
+PR-2656 : The buffer playout events should be differentiated between regular 
+          playout events and caller ID events
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2614 : Caller ID cleanup not done correctly in resource free function
+PR-2616 : Tone ports not initialized when tone detection not supported
+PR-2620 : In the caller id init function, check that the image loaded into the 
+          device supports 127 events.
+PR-2633 : Playout event must be check in the OCT6100 instead of a define
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR26
+
+Date:		August 31, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+
+	Modified function:	Oct6100ChannelOpen
+				Oct6100ChannelModify
+				Oct6100ChannelGetStats
+		Added parameters:	ulSoutAutomaticListenerEnhancementGainDb
+					fSoutNaturalListenerEnhancement
+					fRoutNoiseReduction					
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameters:	fListenerEnhancement
+					fRoutNoiseReduction
+					ulMaxPlayoutEvents
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2478 : Added support of ALE and NLE features
+PR-2479 : Added support of the Rout Noise Reduction feature
+PR-2581 : Added flexibility to support 31 or 127 buffers in the list
+PR-2576 : F029_FPGA: Add Channel enable Memory clear
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2515 : Mute mode that allow tone detection on SIN is not working.
+PR-2550 : Tail displacement offset bug
+PR-2558 : Wrong max tail displacement value.
+PR-2597 : Mixer events lost when modifying a channel in a bridge
+PR-2604 : SDR 32-bit must be configured as 2 SDR 16-bit
+PR-2609 : Data is modified when the operation mode is set to NO_ECHO
+PR-2612 : Some of the playout buffers for ETSI Caller ID are not loaded.
+PR-2526 : F029_FPGA: Bug of Oct6100ApiConvertToToneDetectionFpgaTsst for ROUT 
+          TSSTs
+PR-2582 : F029_FPGA: API fix for ConvertTsst functions + others
+PR-2584 : F029_FPGA: OCT6100 API Oct6100ApiWriteToneDetectEvent bug
+PR-2601 : F029_FPGA: Oct6100TransferToneDetectionFpgaEvents: Reorder events 
+          when getting two events at a time.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR25
+
+Date:		August 05, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	PRODUCT OCT6120
+
+	Added function:		Oct6100ChannelMute
+				Oct6100ChannelUnMute
+	Modified function:	Oct6100ChannelModify
+		Added parameters:	ulRinNumTssts
+					ulSinNumTssts
+					ulRoutNumTssts
+					ulSoutNumTssts	
+	Modified function:	Oct6100ChannelGetStats
+		Added parameters:	ulMutePortsMask
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2455 : Allow modification of NumTssts parameters in function 
+          Oct6100ChannelModify
+PR-2465 : Added Channel Mute and UnMute functions
+PR-2468 : Re-enable SS7 tone detection upon tone event disabling
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2439 : Noise when no input TSST assigned
+PR-2440 : Conference signal attenuated when no input TSST
+PR-2454 : F029_FPGA: For MFR1 and MFR2, we can enable a tone OF MFR1 group
+          (or MFR2) and disable an other tone of the same group.
+PR-2469:  Check missing for Extended tone detection
+PR-2457 : Tone events sometimes not generated
+PR-2473 : F003_FPGA: ulPlcScnOperationMode not behaving properly in 
+          Oct6100ModifyChannel
+PR-2474 : F003_FPGA: PLC/SCN FPGA law configuration bug.
+PR-2475 : F003_FPGA: Channel Modify for the PLC/SCN is not working
+PR-2477 : Law conversion should work when ADPCM is not supported
+PR-2501 : F003_FPGA: Law written in the PLC/SCN FPGA not correct
+PR-2512 : Error cOCT6100_ERR_CONF_BRIDGE_CHAN_NOT_ON_BRIDGE sometimes returned
+          when removing all channels from a bridge with taps.
+PR-2513 : Eliminate the compiler warnings.
+PR-2514 : F029_FPGA: Wrong TDM mapping.
+PR-2516 : cOCT6100_ERR_OPEN_EGO_TIMEOUT generated on some devices
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2515 : Mute mode that allows tone detection on SIN is not working.
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR24
+
+Date:		July 16, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+None
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2452 : Added SS7 tone events capture before tone detection enabling
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2392 : In Oct6100ChannelModify, Adpcm resource not reserve when 
+          ulEncoderPort or ulDecoderPort set to Keep previous.
+PR-2421 : F029_FPGA: The calcul of TSST for Tone Detect FPGA is not corect in 
+          the function OCT6100ApiWriteToneDetectEvent
+PR-2441 : F029_FPGA: Using wrong addresses in oct6100_interrupts.c
+PR-2442 : F029_FPGA: The SOct6100InterruptServiceRoutine doesn't clear the bit 
+          ToneDetectionFpgaOverflowToneEvents.
+PR-2453 : F029_FPGA: Syntaxe bug: In the oct6100_events.c file, at the line 815
+          and the line 990.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2439 : Noise when no input TSST assigned
+PR-2440 : Conference signal attenuated when no input TSST
+PR-2454 : F029_FPGA: For MFR1 and MFR2, we can enable a tone OF MFR1 group
+          (or MFR2) and disable an other tone of the same group.
+PR-2457 : Tone events sometimes not generated
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR23
+
+Date:		June 23, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+None
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2393 : Removed requirement for setting ulRinStream and ulRinTimeslot to 
+          cOCT6100_UNASSIGNED for the tapping feature
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2394 : Error if doing remove all bridge participants but no participant
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+None
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR22
+
+Date:		June 21, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	PRODUCTS OCT6110 and OCT6120
+		
+	Modified function:	Oct6100ConfBridgeChanAdd
+		Added parameter:	ulTappedChannelHndl
+	Modified function:	Oct6100ConfBridgeGetStats
+		Added parameter:	ulNumTappedChannels
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2381 : Added tapping feature to simple conferencing.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2378 : pulPlayoutFreeMemSize not completly accurate
+PR-2385 : When opening many flexible conferences we get an access violation
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+none
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR21
+
+Date:		June 15, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+	
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameter:	fDominantSpeaker
+	Modified function:	Oct6100ChannelGetStats
+		Added parameters:	sRinAppliedGain
+					sSoutAppliedGain
+
+	1.2	PRODUCTS OCT6110 and OCT6120
+
+	Added functions:	Oct6100ConfBridgeDominantSpeakerSetDef,
+				Oct6100ConfBridgeDominantSpeakerSet	
+	Modified function:	Oct6100ChipOpen
+		Added parameter:	ulMaxFlexibleConfParticipants
+	Modified function:	Oct6100ConfBridgeOpen
+		Added parameter:	fFlexibleConferencing
+	Modified function:	Oct6100ConfBridgeChanAdd
+		Added parameters:	ulListenerMask, 
+					ulListenerMaskIndex		
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameters:	fSoutAdaptiveNoiseReduction,
+					fSoutConferencingNoiseReduction,
+					fDtmfToneRemoval					
+	Modified function:	Oct6100ChannelGetStats
+		Added parameter:	fSinVoiceDetected
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2368 : OCT6116 and OCT6126 features must not be removed from the API
+PR-2369 : Added fDominantSpeaker parameter in GetImageInfo function
+PR-2372 : Added lRinAppliedGain and lSoutAppliedGain stats in ChannelGetStats
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2356 : Playout never stop if repeat infinitly and stop clean is used with 
+          buffer not modulo 64
+PR-2370 : No error returned when enabling dominant speaker while not available
+PR-2374 : Error returned when unmuting from flexible conference
+PR-2375 : Problem when unmuting the first participant of a flexible bridge
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2378 : pulPlayoutFreeMemSize not completly accurate
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-2379 : Problem with the cOCT6100_MIXING_0_DB mode
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR20
+
+Date:		June 02, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameters:	fHighLevelCompensation,						
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameters:	fRinAutomaticLevelControl, 
+					lRinAutomaticLevelControlTargetDb
+					fSoutAutomaticLevelControl, 
+					lSoutAutomaticLevelControlTargetDb
+					fRinHighLevelCompensation, 
+					lRinHighLevelCompensationThresholdDb			
+
+	1.2	PRODUCTS OCT6116 and OCT6126
+
+	Added function:		Oct6100ConfBridgeMaskChange
+	Modified function:	Oct6100ConfBridgeGetStats
+		Added parameter:	fFlexibleConferencing
+	Modified function:	Oct6100ChannelGetStats
+		Added parameter:	fSinVoiceDetected	
+
+	1.3	PRODUCTS OCT6110 and OCT6120
+
+	Removed functions:	Oct6100ConfBridgeDominantSpeakerSetDef,
+					Oct6100ConfBridgeDominantSpeakerSet
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Removed parameter:	fSoutConferencingNoiseReduction
+	Modified function:	Oct6100ChipOpen
+		Removed parameter:	ulMaxFlexibleConfParticipants
+	Modified function:	Oct6100ConfBridgeOpen
+		Removed parameter:	fFlexibleConferencing
+	Modified function:	Oct6100ConfBridgeChanAdd
+		Removed parameters:	ulListenerMask, 
+					ulListenerMaskIndex		
+
+	1.4	PRODUCTS OCT6100, OCT6110 and OCT6120
+
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Removed parameter:	fDtmfToneRemoval
+
+	1.5	PRODUCTS OCT611X and OCT612X
+
+	Modified function:	Oct6100BufferPlayoutAdd
+		Added parameter:	lGainDb
+	Modified function:	Oct6100BufferPlayoutStop
+		Added parameters:	pfAlreadyStopped,
+					pfNotifyOnPlayoutStop
+
+	1.6	Many error code names have been modified
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-1911 : Increased number of buffer playout from 31 to 127
+PR-2225 : Added support of gain control on buffer playout
+PR-2261 : Improved the CPU register BIST
+PR-2285 : Renamed cOCT6100_ECHO_OP_MODE_G169_ALC as cOCT6100_ECHO_OP_MODE_NO_VQE
+PR-2322 : Renamed cOCT6100_ECHO_OP_MODE_NO_VQE as cOCT6100_ECHO_OP_MODE_NO_ECHO
+PR-2289 : Added support of mixing mode 0db in playout
+PR-2310 : Implemented new conference bridge function to change the participant's 
+          mask for flexible conferencing
+PR-2314 : Implemented fSinVoiceDetected in channel stats for OCT61x6 products
+PR-2316 : Implemented Automatic level control
+PR-2317 : Implemented High Level Compensation
+PR-2318 : Changed all feature_unsupported error coded to use the same error base
+          code
+PR-2328 : Added pfAlreadyStopped and pfNotifyOnPlayoutStop parameters to 
+          Oct6100BufferPlayoutStop function
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2251 : Playout not always stopping when changing mode from normal to power 
+          down to normal
+PR-2256 : Flexible conferencing does not work on the ROUT port
+PR-2267 : Removing a muted channel from a flexible conference gives a fatal 
+          error
+PR-2268 : Can add two channels with the same index in flexible conferencing
+PR-2280 : Remove all feature is causing bridge corruption
+PR-2301 : Memory chip size of 8 megabytes must be allowed with SDR
+PR-2307 : Remote client not working with OCT610x products
+PR-2312 : fFlexibleConferencing is not implemented in function 
+          Oct6100ConfBridgeGetStats
+PR-2332 : Dominant speaker always active
+PR-2333 : Muting all participants of a bridge is causing bad behaviors
+PR-2335 : Buffer Playout duration not working properly
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR19
+
+Date:		April 30, 2004
+
+-------------------------------------------------------------------------------
+Please note that caller ID is still not supported.
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameter:	ulMaxChannels
+		Removed parameters:	fRinDcOffsetRemoval, 
+					fSinDcOffsetRemoval,
+					fNlpControl, 
+					fToneDisabler, 
+					fComfortNoise
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameters:	lAecDefaultErlDb 
+
+	1.2	PRODUCTS OCT611X and OCT612X
+
+	Modified function:	Oct6100ChipOpen
+		Added parameter:	ulMaxFlexibleConfParticipants
+	Modified function:	Oct6100ConfBridgeOpen
+		Added parameter:	fFlexibleConferencing
+	Modified function:	Oct6100ConfBridgeChanAdd
+		Added parameters:	ulListenerMask, 
+					ulListenerMaskIndex
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-1909 : Add support of flexible conferencing feature
+PR-2226 : Remove unnecessary parameters from image info and add ulMaxChannel 
+          parameter
+PR-2238 : Playout no longer supported in HT freeze mode
+PR-2237 : Improvements to AEC
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2224 : Playout not working in G.169 ALC Mode
+PR-2241 : F029_FPGA: Wrong TDM mapping.
+PR-2242 : F029_FPGA: ulUserChipId should be between 1 and 6 instead of 0 and 5.
+PR-2243 : F029_FPGA: Tone FPGA memory mapping has changed. Base addresses have 
+          changed.
+PR-2244 : PLI Comment in API code
+PR-2250 : Bridge empty list causing fatal errors
+PR-2252 : F029_FPGA: F029 FPGA should not be accessed when not enabled.
+PR-2257 : F003_FPGA: Open channel does not set all SCN-PLC fields.
+PR-2259 : Buffer playout minimum buffer size can be downsized to 64 bytes.
+PR-2260 : memcpy should not be used in OctApi llman library.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2256 : Flexible conferencing does not work on the ROUT port
+PR-2251 : Playout not always stopping when changing mode to power down
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR18
+
+Date:		April 22, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	PRODUCTS OCT611X and OCT612X	
+
+	Added files:		oct6100_caller_id.c
+				oct6100_caller_id_priv.h
+				oct6100_caller_id_pub.h
+				oct6100_caller_id_inst.h
+		Added functions:	Oct6100CallerIdInitDef, 
+					Oct6100CallerIdInit,
+					Oct6100CallerIdTransmitDef, 
+					Oct6100CallerIdTransmit,
+					Oct6100CallerIdTransmitAsDef,
+					Oct6100CallerIdTransmitAs,
+					Oct6100CallerIdAbortDef, 
+					Oct6100CallerIdAbort
+	Modified function:	Oct6100ChipOpen						
+		Added parameter:	fEnableCallerId
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameter:	fSoutConferencingNoiseReduction 
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-1964 : Implement caller ID. Please note that this features is not supported
+          yet but files have been added to the API.
+PR-2206 : Allow support of both noise reduction features.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2221 : 32 first bytes sometimes corrupted with buffer playout
+PR-2222 : Error when removing a channel from a RIN bridge
+PR-2223 : F003_FPGA: SCN/PLC requires a parameter to disable HDLC output
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR17
+
+Date:		April 20, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	PRODUCT OCT610X
+
+	Added files:		oct6100_tsi_cnct.c, 
+				oct6100_tsi_cnct_priv.h
+				oct6100_tsi_cnct_pub.h
+				oct6100_tsi_cnct_inst.h
+		Added functions:	Oct6100TsiCnctOpenDef, 
+					Oct6100TsiCnctOpen, 
+					Oct6100TsiCnctCloseDef, 
+					Oct6100TsiCnctClose
+	
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2207 : Need to reduce the API code size and the API instance size
+PR-2208 : TSI connection functions should be available to OCT610x products
+PR-2217 : F029_FPGA: OCTF029 API code needs modifications to support MFR2
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2202 : Chariot interval wrong for chips with 512 channels
+PR-2210 : Modification of the per channel tail displacement is not working
+PR-2214 : Debug channel corrupted when opening too many channels
+PR-2215 : Acoustic echo not working properly
+PR-2218 : Oct6100ApiReserveBufferPlayoutMemory sometimes returns 
+          cOCT6100_ERR_BUFFER_PLAYOUT_NO_MEMORY but there are still a lot of 
+          memory available.
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR16
+
+Date:		April 16, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1 ALL PRODUCTS
+
+	Added functions:	Oct6100FreeResourcesDef, 
+				Oct6100FreeResources
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameter:	ulTailDisplacement
+	Modified functions:	Oct6100ChipGetImageInfo
+		Added parameter:	fPerChannelTailDisplacement
+
+	1.2	PRODUCT OCT611X and OCT612X		
+
+	Modified function:	Oct6100BufferPlayoutAdd
+		Added parameters:	ulRepeatCount, 
+					ulDuration
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2160 : Add ulRepeatCount and ulDuration to the Oct6100BufferPlayoutAdd 
+          function
+PR-2166 : Need to add function that closes all open channels and frees all used 
+          ressources.
+PR-2172 : Add support of the tail displacement lentgh per channel
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2190 : Cleanup old extra code.
+PR-2191 : Image info parameters are confusing for level control
+PR-2205 : Phasing error when reusing same TSST
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-2210 : Modification of the per channel tail displacement is not working
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR15
+
+Date:		April 02, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	PRODUCT OCT611X and OCT612X
+
+	Modified function:	Oct6100BufferPlayoutLoad
+		Added parameter:	pusBufferPattern
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2075 : Increase number of TSI connections supported
+PR-2113 : Current malloc function is too slow for playout buffer loading.
+PR-2115 : CPU bandwidth too small when loading buffers
+PR-2120 : Buffer playout copies PUINT8 array into PUINT16 array. Inefficient.
+PR-2149 : F029_FPGA: Add API code to support new OCTF029 tone detection FPGA.
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-1972 : Memory allocation is causing fragmentation when loading buffers
+PR-2093 : Oct6100ChipOpen should return an error when the firmware image loaded
+	  requires more external memory then the user specified.
+PR-2123 : Create Bi-dir bad behavior when ulMaxBiDirChannels=0
+PR-2128 : ImageInfo.fAcousticEcho return TRUE even when not supported
+PR-2129 : Wrong TSST released in 16MHz mode. Causing fatal_55
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR14
+
+Date:		March 19, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2088 : Change value written into hardware for ulNonLinearityBehaviorA of 0
+PR-2117 : Mem Refresh too fast
+
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-1972 : Memory allocation is causing fragmentation when loading buffers
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR13
+
+Date:		March 03, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+
+	Modified function:	Oct6100InterruptServiceRoutine
+		Added parameter:	ulFatalGeneralFlags 
+	Modified function:	Oct6100ChannelGetStats
+		Added parameter:	fEchoCancellerConverged 
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-2016 : Add new ISR parameter to get info about fatal errors
+PR-2027 : Increase the number of supported TSI connections
+PR-2034 : Buffer Playout no more supported if NLP OFF
+PR-2035 : Implement fEchoCancellerConverged channel stats
+PR-2041 : ulMaxRwAccesses smaller than 8 should be valid
+PR-2049 : Create smaller API with less supported functions
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-2018 : Timestamps checks not good
+PR-2031 : Unset of the dominant speaker is causing a fatal error
+PR-2038 : AF CPU Timeout delay too small
+PR-2039 : Tone Disabler stays active when channel is closed
+PR-2040 : F003_FPGA: PLC FPGA channel energy not set properly.
+PR-2051 : Remove all conference participants is not working properly
+PR-2065 : ulSoftOverflowBufferPlayoutEventsCount not initialized
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-1972 : Memory allocation is causing fragmentation when loading buffers
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR12
+
+Date:		Feb. 09, 2004
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+
+	Added function:		Oct6100UserSleep
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameter:	ulNonLinearityBehaviorB 
+	
+	1.2	PRODUCT OCT611X and OCT612X
+
+	Added functions:	Oct6100BufferPlayoutGetEventDef,
+				Oct6100BufferPlayoutGetEvent,
+				Oct6100BufferPlayoutLoadBlockInitDef,
+				Oct6100BufferPlayoutLoadBlockInit,
+				Oct6100BufferPlayoutLoadBlockDef,
+				Oct6100BufferPlayoutLoadBlock,
+				Oct6100ConfBridgeDominantSpeakerSetDef,
+				Oct6100ConfBridgeDominantSpeakerSet
+
+	Modified function:	Oct6100ChipOpen						
+		Added parameter:	ulSoftBufferPlayoutEventsBufSize		
+	Modified function:	Oct6100ChipGetStats
+		Added parameters:	ulPlayoutFreeMemSize,
+					ulSoftOverflowBufferPlayoutEventsCount
+	Modified function:	Oct6100BufferPlayoutLoad
+		Added parameter:	pulPlayoutFreeMemSize
+	Modified function:	Oct6100BufferPlayoutAdd
+		Added parameter:	ulBufferLength
+	Modified function:	Oct6100BufferPlayoutStart
+		Added parameters:	fNotifyOnPlayoutStop, 
+					ulUserEventId, 
+					fAllowStartWhileActive
+	Modified function:	Oct6100InterruptServiceRoutine	
+		Added parameter:	fBufferPlayoutEventsPending
+	Modified function:	Oct6100ConfBridgeChanAdd
+		Added parameter:	ulInputPort
+	Modified function:	Oct6100ToneDetectionDisable
+		Added parameter:	fDisableAll
+			 
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-1870 : Implement ulNonLinearityBehaviorB in Oct6100ChannelOpen
+PR-1896 : Give size of memory available for buffer playout to the user
+PR-1908 : Add support of conferencing on RIN ports
+PR-1910 : Add new functions to allow loading of the buffer playout in multiple 
+		  blocks
+PR-1912 : Add new parameter to specify the length of the buffer that must be 
+		  played
+PR-1931 : Fatal error cOCT6100_ERR_FATAL_14 should be replaced by 
+		  cOCT6100_ERR_OPEN_INVALID_FIRMWARE_OR_CAPACITY_PINS
+PR-1942 : Implement End of Playout Event in the API
+PR-1946 : Add TLV fields for buffer playout enable and dominant conference 
+		  speaker.
+PR-1953 : Implement the dominant speaker feature for conferencing.
+PR-1970 : Add UserSleep function in the API
+PR-1990 : Add support of acoustic echo cancellation
+PR-1991 : Add disabling of all tone detection with one command
+PR-1996 : F003_FPGA: Add parameter to set the SCN/PLC operation mode
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-1872 : Law conversion not working for OCT610X and OCT611X products
+PR-1882 : F003_FPGA: Tsst configuration not correct in SCN/PLC
+PR-1886 : Buffer Playout size must be limited to modulo 16
+PR-1887 : F003_FPGA: Precedence Bug with SCN/PLC
+PR-1897 : F003_FPGA: Tsst Phasing mapping bug with SCN/PLC
+PR-1915 : Write Access Errors in external memories
+PR-1917 : API spec does not match API code with respect to the buffer playout 
+		  load function.
+PR-1919 : Playout pointers not reset properly in Oct6100ChannelOpen
+PR-1920 : Too many reads done in the buffer playout functions
+PR-1926 : F003_FPGA: User must specified the compression rate when using the 
+          PLC/SCN FPGA.
+PR-1941 : The API must not allowed ulMaxChannels to be greater than the 
+		  capacity of the chip
+PR-1952 : ANR enable check not good
+PR-1969 : ulFirstEmptyIndex not set properly in Oct6100ApiRetrieveNlpConfDword.
+PR-1976 : fToneEventsPending not working
+PR-1980 : Tone Event Overflow may cause error cOCT6100_ERR_FATAL_2D
+PR-1981 : Capacity pins are not always in tri-state
+PR-1982 : Bidirectionnal channels in a conference erroneously permitted, and 
+		  vice versa.
+PR-2001 : F003_FPGA: fEnableScnPlcFpga check not good
+PR-2006 : Internal memory register not set properly
+PR-2012 : Customer ID no more used and replaced by Build ID
+PR-2015 : Channel 0 corruption when closing/opening other channels
+PR-2021 : TSI index for closed channels are not good
+PR-2022 : Conversion structures not cleared properly
+PR-2023 : NLP structure not cleared when closing a channel
+PR-2024 : F003_FPGA: Phase type for SCN_PLC not set properly
+PR-2025 : Channel resources closure order not good
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+NONE
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-1972 : Memory allocation is causing fragmentation when loading buffers
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+			RELEASE NOTES
+
+Version:	OCT6100API-01.00-PR11
+
+Date:		Dec. 09, 2003
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+1.0 BACKWARD COMPATIBILITY NOTICE
+
+	1.1	ALL PRODUCTS
+
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Added parameters:	lDefaultErlDb, 
+					fDtmfToneRemoval, 
+					fAcousticEcho, 
+					ulNonLinearityBehaviorA, 
+	Modified function:	Oct6100ChipGetImageInfo
+		Added parameter:	ulNumToneDetectors
+	Removed functions:	Oct6100DebugGetRecordInfo, 
+				Oct6100DebugGetEvent
+				Oct6100DebugSelectDebugChannel
+	
+	1.2	PRODUCTS OCT611X and OCT612X
+	
+	Modified function:	Oct6100ChipOpen						
+		Added parameter:	fEnableExtToneDetection
+	Modified functions:	Oct6100ChannelOpen, 
+				Oct6100ChannelModify,
+				Oct6100ChannelGetStats
+		Removed parameter:	ulTailLength
+		Added parameter:	fEnableExtToneDetection			
+
+-------------------------------------------------------------------------------
+
+2.0 MODIFICATIONS DONE SINCE LAST RELEASE
+
+PR-1704 : Add detection of the 1100Hz tone
+PR-1716 : Replace all cOCT6100_TONE_REFRESH ulEventType by 
+		  cOCT6100_TONE_PRESENT in Oct6100EventGetTone
+PR-1719 : Implement lDefaultErlDb, fDtmfToneRemoval, ulNonLinearityBehaviorA 
+		  and fAcousticEcho in Oct6100ChannelOpen
+PR-1745 : Add ulNumToneDetectors parameter to Oct6100ChipGetImageInfo
+PR-1795 : Add new extended Tone detection mode when opening a channel.
+PR-1797 : Remove Oct6100DebugSelectDebugChannel, Oct6100DebugGetEvent, 
+		  Oct6100DebugGetRecordInfo functions
+PR-1798 : Give access to the remote debug functions
+PR-1868 : The parameter ulTailLength must be removed from Oct6100ChannelOpen 
+		  since it is not supported
+
+-------------------------------------------------------------------------------
+
+3.0 BUGS FIXED IN THIS RELEASE
+
+PR-1707 : Misc errors found during the code inspection
+PR-1713 : The Oct6100ChipOpen function must limit ulMaxConfBridges to 448
+PR-1720 : The ulTimestamp parameter is not set properly in Oct6100EventGetTone
+PR-1724 : The output data is not good when there is no input
+PR-1729 : Multiple calls to Oct6100ConfBridgeChanAdd with the same 
+		  ulChannelHndl must return an error
+PR-1730 : Wrong defaults values for ulMaxConfBridges, ulMaxPlayoutBuffers and 
+		  ulMaxPhasingTssts in Oct6100ChipOpen
+PR-1731 : Oct6100ConfBridgeClose does not release all resources
+PR-1732 : Oct6100ConfBridgeChanRemove does not release all ressources.
+PR-1733 : Not all read burst accesses are using the ulMaxRwAccesses parameter
+PR-1734 : Wrong check on ulEncoderPort in Oct6100ChannelOpen
+PR-1736 : Wrong check on ulPhasingTsstHndl in Oct6100ChannelModify
+PR-1741 : The Oct6100InterruptServiceRoutine should report an error when the 
+		  device reset
+PR-1742 : Default values for fSinDcOffsetRemoval, fRinDcOffsetRemoval and 
+		  ulComfortNoiseMode in Oct6100ChannelOpen are not correct
+PR-1743 : Stats not correct when fResetChipStats=TRUE in Oct6100ChipGetStats
+PR-1744 : ulMaxTailDisplacement is not set properly in Oct6100ChipGetImageInfo
+PR-1748 : Call to Oct6100ChannelClose is causing a failure of the conferencing 
+		  feature
+PR-1749 : The API must return an error if fEnableNlp=FALSE and 
+		  fEnableSilenceSuppression=TRUE
+PR-1751 : The interrupt scheduling is not accurate in 
+		  Oct6100InterruptServiceRoutine
+PR-1752 : Array used in function Oct6100ApiRandomMemoryWrite is too big for 
+		  certain compilers
+PR-1821 : Buffer Playout not working after a call to Oct6100ChannelModify
+PR-1871 : Code not compiling for OCT610X and OCT611X
+
+-------------------------------------------------------------------------------
+
+4.0 KNOWN BUGS PRESENT IN THIS RELEASE
+
+PR-1872 : Law conversion not working for OCT610X and OCT611X products
+
+-------------------------------------------------------------------------------
+
+5.0 KNOWN ISSUES PRESENT IN THIS RELEASE
+
+PR-1702: The user can call Oct6100BufferPlayoutUnload while the buffer is 
+		 playing
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+

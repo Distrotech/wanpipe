@@ -1,0 +1,13 @@
+Wanpipe/Zebra Known issues
+==========================
+
+
+Oct 05 2002: OSPF inactive routes
+----------------------------------
+
+	If OSPF comes back with inactive routes it has to 
+	do with the wanpipe netmask.
+
+	Netmask has to be set to 255.255.255.255 for pointopoint
+	links.
+

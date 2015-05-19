@@ -1,0 +1,85 @@
+AFT A102dm Firmware Change Log
+=============================
+
+
+Release V39
+-----------
+Sep 28 2012
+Type:	Recommended A102dm Firmware
+		Force the unused FPGA pins to deterministic state.
+		In some cases the noise due to floating pins caused FPGA problems
+		resulting in driver failing to start.
+
+Release V37
+-----------
+Feb 22 2010
+Type:	Recommended A102dm Firmware
+		Fixed PCIe dma timeouts.  On some new Dell/HP servers the PCIe timeouts
+		on dma transactions were causing PCI fatal error messages
+		in the logs.  This has now been fixed.
+
+Release V36
+-----------
+Aug 13 2009
+Type:		Recommended A102dm Firmware
+		New Feature: Added Free Running timer for Zaptel/Dahdi
+
+Changes:	Firmware bug fix
+		Fixes on potential pci parity errors on some systems.
+
+
+
+Release V33
+-----------
+Sep 27 2007
+
+Type:		Recommended A102dm Firmware for echo cancel cards
+		Fixes issue with hardware echo canceller chip 
+		security. 
+		Supports DTMF detection without hardware echo
+		cancellation operation.
+
+Changes:	Firmware bug fix for echo canceller
+		This bug can shut down the driver.
+
+		Note: This bug only afected new Maxim AFT cards with HWEC.
+		      DTMF detection only applies AFT cards with HWEC.
+
+
+Release V31
+-----------
+Jul 10 2007
+
+Type:           Mandatory A102dm Firmware for echo cancel cards
+                Fixes a serious bug with Echo Canceler operation.
+                This bug caused a radom channel of echo canceler
+                to become corrupted.
+
+Changes:        Firmware bug fix for echo canceler
+                This bug can cause hard crashes.
+
+                Note: This bug only afected new Maxim AFT cards with HWEC.
+
+
+
+
+Release V28
+-------------
+Nov 1 2006
+
+Type:  		Mandatory
+	        Inital Firmware Relase for A102dm
+
+Changes:	This firmware release contains new feature:
+		- Global TDM Voice Interrupt:
+			It that combines all spans on a single
+		   	interrupt. This significantly reduces cpu load.
+		  
+		  This option is only used in TDM Voice Mode.
+
+
+Symptoms:	New Feature.
+
+Compatilbity:	This hardware is supported by release beta11-2.3.4 and greater.
+
+

@@ -1,0 +1,32 @@
+# 05 Jun 93
+#
+# $Id: Makefile.NetBSD,v 1.1 2005-01-13 18:24:20 sangoma Exp $
+#
+FT1_DIR=	${.CURDIR}/../ft1
+LXDIALOG_DIR=	${.CURDIR}/../lxdialog
+.PATH:	${FT1_DIR} ${LXDIALOG_DIR}
+
+top_srcdir	= ../..
+
+# Uncomment this to output debug messages
+
+#***************************************************************************
+# don't change anything below 
+
+PROG    	= wanpipemon
+LXDIR=
+#LXDIR= ../lxdialog/
+SRCS		= wanpipemon.c cpipemon.c fpipemon.c ppipemon.c dslpipemon.c \
+		  atmpipemon.c aftpipemon.c fe_lib.c unixio.c xml_lib.c \
+		  wangui.c checklist.c menubox.c  inputbox.c util.c prot_trace.c
+BINDIR  	= /usr/sbin
+CFLAGS		+= -DCONFIG_PRODUCT_WANPIPE_ADSL -DWANPIPEMON_GUI -DLOCALE -DCURSES_LOC="<ncurses.h>"
+CFLAGS 		+= -I/usr/pkg/include -Wall -Wmissing-prototypes -I${FT1_DIR} -I${LXDIALOG_DIR} 
+LDFLAGS         = -Wl,-R/usr/pkg/lib -L /usr/pkg/lib -lncurses
+.OBJDIR 	= /usr/obj${.CURDIR}
+NOMAN   	=
+
+cleanall:
+	\rm -f ${BINDIR}/${PROG}
+
+.include <bsd.prog.mk>

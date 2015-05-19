@@ -1,0 +1,36 @@
+
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Fri Oct 25 15:14:19 EDT 2002
+#
+# Note: This file was generated automatically
+#       by /usr/local/wanrouter/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_CHDLC, Comment
+
+[wanpipe1]
+CARD_TYPE 	= S51X
+S514CPU 	= A
+AUTO_PCISLOT	= YES
+PCISLOT 	= 5
+PCIBUS		= 0
+Firmware	= /etc/wanpipe/firmware/cdual514.sfm
+CommPort	= SEC
+TTY		= YES
+TTY_Minor 	= 0
+TTY_Mode	= Async
+Interface 	= RS232
+MTU 		= 1500
+UDPPORT 	= 9000
+TTL 		= 255
+IGNORE_FRONT_END  = NO

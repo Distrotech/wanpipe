@@ -1,0 +1,78 @@
+Channelized WANPIPE TDMV Driver
+===========================
+
+ftp.sangoma.com/linux/current_wanpipe directory.
+
+Release: wanpipe-beta7-2.3.3.tgz
+
+Pleases read  README.asterisk for detailed explanation of config options.
+
+
+To install it follow the recipe below:
+
+1) ./Setup install
+
+Custom compile:
+    choose TDM  (DEF will be set by default)
+    
+    If you want DCHAN option select yes for it.
+    This will enable Hardware HDLC for DCHAN PRI.
+
+    This option will also PATCH Zaptel driver.
+    Thus, Zaptel driver MUST be recompiled after
+    ./Setup is finished.
+
+2) Once wanpipe is installed go ahead and recompile
+   zaptel and install it.
+    cd ..zaptel/
+        make clean
+        make
+        make install
+
+3) Then make sure wanpipe is unloaded:
+    lsmod | grep wanpipe
+
+
+4) The new TDMV Channelized Driver works for both
+    A104 and A102 Cards.
+
+   The new TDMV  A104 drivers will fail to load if 
+   firmware version is less then V.11.  	
+
+   How to check your AFT Firmware Version:
+	1) wanrouter hwprobe
+	2) grep "HDLC.*rev" /var/log/messages
+	          Note the (HDLC rev.11) message for each card.
+
+   If you card has old firmware, proceed to upgrade to
+   new AFT 104 firmware:
+
+   	cd wanpipe/utils/wan_aftup
+ 
+        Make sure wanpipe modules are NOT loaded
+        	wanrouter modules
+		wanrouter stop
+
+
+	Run ./update_aft_firm.sh
+		Specify interface name for A104 card
+		Select version 10
+		Select Y to restart FLASH firmware.
+                   (This will not reboot your computer!)
+
+5) Create config file:
+
+    wancfg -> Protocol: TDMV Protocol
+               -> Interface:
+                    Specify SPAN number
+		    Specify DCHAN PRI Timeslot
+ 				  
+    Please read README.asterisk for more info.
+    
+    Save and Exit
+
+
+
+
+
+

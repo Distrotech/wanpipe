@@ -1,0 +1,129 @@
+Wanpipe FAQ
+===========
+
+
+Table of Contents
+-----------------
+
+1. Wanpipe is connected to a remote cisco router via
+   Frame Relay. The problem is that Pings work, but 
+   HTTP and DNS requests fail?
+
+2. Running Zebra OSPF over WANPIPE, produces
+   inactive routes?
+
+3. How to enable ip_forwarding on RedHat 8.0
+
+4. How to loadbalance multiple T1/E1/56K Wanpipe lines?
+
+5. How to bind an irq to a single or multiple CPUs?
+
+6. Wanpipe interfaces don't come up, on wanrouter start ?
+
+
+
+1.----------------------------------------------------
+ 
+ 
+  Q: Wanpipe is connected to a remote cisco router via
+     Frame Relay. The problem is that Pings work, but 
+     HTTP and DNS requests fail?
+
+  A: Make sure that Frame-Relay payload compression is
+     OFF on the Cisco Router.
+  
+2.------------------------------------------------------
+
+  Q: Running Zebra OSPF over WANPIPE. 
+     When I start zebra, OSPF has inactive routes 
+
+  A: If OSPF comes back with inactive routes, problem
+     lies with the wanpipe netmask address.
+
+     Netmask address has to be set to 
+     255.255.255.255 for pointopoint links.
+
+
+3.------------------------------------------------------
+
+  Q: How to enable ip_forwarding on RedHat 8.0
+
+  A: Edit /etc/sysctl.conf
+
+     To enable ip forwarding on boot up set variable 
+     net.ipv4.ip_forward to 1. 
+   	
+	net.ipv4.ip_forward = 1
+
+
+4.------------------------------------------------------
+
+  Q: How to loadbalance multiple T1/E1/56K Wanpipe lines?
+
+
+  A: Linux offers numberous ways to loadbalance
+     multiple WAN lines.
+
+     Available Options: TEQL, PPP Multilink, IPROUTE2
+  
+     TEQL:  Round robin packet equalization between
+            multiple links.
+     
+            Refer to README.loadbalancing 
+           
+     PPP MULTILINK:  True loadbalancing protocol.  However, 
+                     MULITLINK protocol must be supported 
+		     by both sides of the link.
+
+	    Refer to README.multilink
+
+     IPROUTE2: Equal Cost Multi-Path routing
+               Attach weights to each path, usefull when two
+	       lines are not the same baud rate.
+	       
+     
+
+5.------------------------------------------------------
+
+  Q: How to bind an irq to a single or multiple CPUs?
+
+  A: Refer to README.irq_to_cpu_smp_mapping
+
+
+6.--------------------------------------------------------
+
+Problem: HOTPLUG 
+
+The hotplug driver, automatically starts up the
+interface and then brings it down.  This conflicts
+with our driver.
+
+Possible Solutions:
+
+1) Insert wanpipe interface name into the hotplug
+   interface list, and restart hotplug.
+	
+	vi /etc/hotplug/net.agent
+	
+		Insert wanpipe interface name into 
+		the ignore list:
+	
+		...ppp*|lo*|w*)
+
+		Where w* relates to all wanpipe interfaces 
+		starting with letter "w"
+
+	Restart hotplug agent:
+	
+	/etc/init.d/hotplug restart
+
+2) Remove the Hotplug RPM
+	rpm -qa | grep hotplug
+	rpm -e <hotplug name>
+ 
+3) Stop hotplug:
+	/etc/init.d/hotplug stop
+
+	However, you must do this each
+	time you boot up.   
+

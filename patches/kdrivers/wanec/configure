@@ -1,0 +1,21 @@
+#!/bin/sh
+
+
+REL_SOFTWARE="OCT612x-01.04.01"
+REL_FIRMWARE="OCT6116FW-01.07.04"
+IMG="OCT6126-128S.ima"
+
+rm -f oct6100_api
+rm -f image/*.ima
+rm -f linux
+
+ln -s ${REL_SOFTWARE} oct6100_api
+ln -s . linux
+
+cd image
+
+ln -s ${REL_FIRMWARE}/OCT6116-32S.ima OCT6116-32S.ima
+ln -s ${REL_FIRMWARE}/OCT6116-64S.ima OCT6116-64S.ima
+ln -s ${REL_FIRMWARE}/OCT6116-16S.ima OCT6116-16S.ima
+ln -s ${REL_FIRMWARE}/OCT6116-128S.ima OCT6116-128S.ima
+ln -s ${REL_FIRMWARE}/OCT6116-256S.ima OCT6116-256S.ima

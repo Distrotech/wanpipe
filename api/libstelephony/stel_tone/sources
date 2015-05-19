@@ -1,0 +1,22 @@
+TARGETNAME=stel_tone
+TARGETPATH=obj
+TARGETTYPE=LIBRARY
+
+#MSC_WARNING_LEVEL=$(SANG_WARNING_LEVEL)
+MSC_WARNING_LEVEL=-W3
+
+USE_LIBCMT=1
+
+############################################################################################
+C_DEFINES=$(C_DEFINES) /D__WINDOWS__
+############################################################################################
+
+INCLUDES=$(SDK_INC_PATH);
+
+TARGETLIBS=$(SDK_LIB_PATH)\user32.lib
+
+SOURCES=wp_fsk.c \
+wp_libteletone_detect.c \
+wp_libteletone_generate.c \
+stel_tone.c \
+wp_uart.c

@@ -1,0 +1,68 @@
+
+#================================================
+# wanpipe1 Configuration File
+#================================================
+#
+# Date: Wed Apr  9 12:35:07 EDT 2003
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_ATM, Comment
+
+[interfaces]
+wp1atm1 = wanpipe1, , WANPIPE, Comment
+
+[wanpipe1]
+CARD_TYPE 	= S51X
+S514CPU 	= A
+AUTO_PCISLOT	= NO
+PCISLOT 	= 6
+PCIBUS		= 0
+MEDIA 		= T1
+LCODE 		= B8ZS
+FRAME 		= ESF
+TE_CLOCK 	= NORMAL
+ACTIVE_CH	= ALL
+LBO 		= 0DB
+Firmware	= /etc/wanpipe/firmware/atm514.sfm
+Interface 	= V35
+Clocking 	= External
+BaudRate 	= 1540000
+MTU 		= 1500
+UDPPORT 	= 9000
+TTL 		= 255
+IGNORE_FRONT_END  = NO
+
+ATM_SYNC_MODE	= AUTO
+ATM_SYNC_DATA	= 0x0152
+ATM_SYNC_OFFSET	= 3
+ATM_HUNT_TIMER	= 100
+
+ATM_CELL_CFG	= 0
+ATM_CELL_PT	= 0
+ATM_CELL_CLP	= 1
+ATM_CELL_PAYLOAD	= 0x6A
+
+
+[wp1atm1]
+ENCAPMODE	= IP_LLC_OA
+VPI		= 0
+VCI		= 35
+
+OAM_LOOPBACK	= NO
+OAM_LOOPBACK_INT	= 5
+OAM_CC_CHECK	= NO
+OAM_CC_CHECK_INT	= 2
+
+ATMARP		= NO
+ATMARP_INT	= 15
+DYN_INTR_CFG	= NO

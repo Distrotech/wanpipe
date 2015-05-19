@@ -1,0 +1,183 @@
+Wanpipe Debugging Manual
+========================
+
+For latest info please visit
+http://wiki.sangoma.com
+
+
+Automated Debugging:
+--------------------
+
+The wanrouter operation script can retrieve the
+most common line error statistics that can
+give the user a good idea of what is going on
+with the line.
+
+	/usr/sbin/wanrouter debug if_name
+or 
+	/usr/sbin/wanrouter debug if_name > debug_file.txt
+
+(where if_name is the name of wanpipe interface: eg: wp1fr16)
+
+
+Sangoma Tech Support:
+---------------------
+   
+   When reporting problems to Sangoma Tech Support please
+   dump the current system debug information into
+   a temporary file and send it via email.
+
+   	1. wanrouter debug wp1fr16 > sangoma_debug_file.txt
+
+	2. Wait for 2-5 minutes
+
+	3. Stop the debug by pressing ENTER
+
+	4. Email sangoma_debug_file.txt to Sangoma Tech Support
+
+
+
+Wanpipe Debugger
+----------------
+
+At the heart of WANPIPE debugging is the 'wanpipemon'
+debugging program.  It is used to display line
+traces, protocol statistics, hardware statistics
+and configuration parameters.
+
+
+	/usr/sbin/wanpipemon -g
+
+
+'wanpipemon' usage
+==================
+
+	/usr/sbin/wanpipemon
+
+Wanpipemon Verison 1.0
+Copyright (C) 2002 - Sangoma Technologies
+www.sangoma.com
+This may be freely redistributed under the terms of the GNU GPL
+
+Usage:  (Options in {} brackets are optional)
+
+        #Command prompt Local debugging
+        wanpipemon -i <interface> -c <command> { -p <protocol> }
+
+        #Command prompt Remote debugging
+        wanpipemon -i <remote IP> -u <port> -c <command> { -p <protocol> }
+
+        #GUI interface
+        wanpipemon -g { -i <interface|IP> -u <port> -p <protocol> }  
+
+        #Display usage for each protocol
+        wanpipemon -p [fr|ppp|chdlc|x25|adsl]
+
+        #Detailed usage for each option
+        wanpipemon -h
+
+
+The 'wanpipemon' utility operates in two modes.
+
+Local debugging:
+	The 'wanpipemon' utility is located on the same
+	machine as the WANPIPE card.  
+	
+	Thus, the wanpipemon utility needs only the 
+	interface name (eg: wp1_fr16) to reach the driver.
+
+	/usr/sbin/wanpipemon -i wp1_fr16 -c xm
+
+
+Remote debugging:
+	The 'wanpipemon' utility is located on a network
+	(LAN or WAN) and must use the UDP protocol to
+	reach the WANPIPE card.
+
+	In this case an IP and UDP addresses must be
+	specified, such that the packet will pass through
+	the WANPIPE driver!
+
+	Meaning a POINTOPOINT address must be used instead
+	of the LOCAL IP address.  
+	
+	The UDP port was specified in WANPIPE configuration 
+	file. (Default=9000)
+
+	/usr/sbin/wanpipemon -i 201.1.1.2 -u 9000 -c xm
+
+
+GUI Mode Operation
+==================
+
+The GUI mode is based on ncurses libraries, thus it
+will work both in Terminal or Xwindows mode.  
+
+	/usr/sbin/wanpipemon -g
+
+Without any other arguments the GUI will offer a list
+of network interfaces, for local debugging, or will
+ask for an IP/UDP address, for remote debugging.
+
+Use menu's to navigate through available commands.
+
+
+
+Common Statistics
+=================
+
+
+Modem Status (-c xm):
+
+	(wanpipemon -i if_name -c xm)	
+	
+	Must be DCD=HIGH and CTS=HIGH if not there is
+	ether a cable problem or the sync line is
+	not turned ON.
+
+Comm Error Stats (-c sc):
+
+	(wanpipemon -i if_name -c sc)
+
+	Check for CRC and Abort errors. If errors 
+	are incrementing, there is a line issue.
+	
+	Possible reasons: CSU/DSU misconfiguration
+			  on local or remote side.
+			
+			  Noisy/Bad line.
+
+
+Line trace (-c tr):
+
+	(wanpipemon -i if_name -c tr)
+
+	Make sure thare are incoming and outgoing frames.
+	
+	If frames are outgoing and none incoming:
+		
+		Frame relay: Check signalling (ANSI, LMI)
+			     
+			     Make sure ISP uses IETF or CISCO 
+			     data encapsulation.
+			     
+		Other prot:  Possible CRC errors in TX 
+		             direction. Contact your ISP.
+
+			  
+	If frames are both incoming and outgoing but 
+	protocol is still down:
+
+		Run trace in Interpreted mode (-c ti) and
+		make sure that the incoming protocol is
+		indeed the one you are configured for.
+
+
+Wanpipe Kernel Messages
+
+	/usr/sbin/wanrouter messages
+or
+	tail -f /var/log/messages
+
+	All line/protocol events will be displayed in 
+	the kernel logs.

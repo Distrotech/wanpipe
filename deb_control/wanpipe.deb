@@ -1,0 +1,28 @@
+Package: wanpipe
+Version: 7.0.14-0
+Section: networking
+Priority: optional
+Architecture: all
+Essential: no
+Depends: libncurses5,libc6,perl 
+Pre-Depends: 
+Recommends:   
+Suggests:  
+Installed-Size: 1024
+Maintainer: Nenad Corbic [ncorbic@sangoma.com]
+Conflicts: 
+Replaces: 
+Provides: wanpipe
+Description: WANPIPE Voice/WAN Routing/API solution
+ WANPIPE S-series is a family of intelligent multi-protocol WAN adapters that 
+ support data transfer rates up to 4Mbps. All WAN protocols supported by WANPIPE 
+ are implemented in firmware and run on the card. An advantage of an intelligent 
+ adapter is that it offloads the system CPU and improves stability. By adding a 
+ Sangoma WAN component to the Linux kernel, one can create a powerful multi-T1 
+ router/firewall with proven reliability of Linux. Sangoma S-series cards support 
+ an optional on board CSU/DSU that eliminates all external components of a traditional 
+ routing solution. The T1 line can be directly connected to the card. WANPIPE supports 
+ the following protocols, Frame Relay, X25(API), PPP, MULTILINK PPP and CHDLC. 
+ Furthermore, WANPIPE supports custom API development such as: Credit card verification, 
+ Voice-over IP, Satellite Comm. All device drivers are part of the standard 
+ Linux Kernel distribution. 

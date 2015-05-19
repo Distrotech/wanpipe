@@ -1,0 +1,47 @@
+TARGETNAME=octasic_user
+TARGETTYPE=DRIVER_LIBRARY
+TARGETPATH=obj
+
+TARGETLIBS=$(DDK_LIB_PATH)\ntoskrnl.lib
+
+MSC_WARNING_LEVEL=$(SANG_WARNING_LEVEL)
+
+#make sure no optimization done, even in "Free" build:
+MSC_OPTIMIZATION=/Odi
+
+C_DEFINES=$(C_DEFINES) -D__WINDOWS__ -D__KERNEL__ -DVIRTUAL_IF_DRV
+
+INCLUDES=$(DDK_INC_PATH);\
+$(SANG_WP_DEVEL)\wanpipe_windows\include;\
+$(SANG_WP_DEVEL)\wanpipe_common\include;\
+$(SANG_WP_DEVEL)\wanpipe_common\include\aft_core;\
+$(SANG_WP_DEVEL)\wanpipe_common\wanec;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\include;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\include\oct6100api;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\octdeviceapi\oct6100api;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\apilib\llman;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\include\apilib;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\include\octrpc;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\apilib\bt
+
+SOURCES= oct6100_adpcm_chan.c \
+ oct6100_channel.c \
+ oct6100_chip_open.c \
+ oct6100_chip_stats.c \
+ oct6100_conf_bridge.c \
+ oct6100_debug.c \
+ oct6100_events.c \
+ oct6100_interrupts.c \
+ oct6100_memory.c \
+ oct6100_miscellaneous.c \
+ oct6100_mixer.c \
+ oct6100_phasing_tsst.c \
+ oct6100_playout_buf.c \
+ oct6100_remote_debug.c \
+ oct6100_tlv.c \
+ oct6100_tone_detection.c \
+ oct6100_tsi_cnct.c \
+ oct6100_tsst.c \
+ oct6100_user.c
+
+

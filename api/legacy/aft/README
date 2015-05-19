@@ -1,0 +1,36 @@
+AFT API Package
+=================
+
+Author: Nenad Corbic
+Date:   Apr 12, 2004
+
+
+
+The aft package contains the sample client and server 
+program that should be used in user application
+development.
+
+
+Contents of the API Package
+---------------------------
+
+ 1) aft_api.c :  	Client application that sends and receives data.
+ 
+ 			Eg: Enable Rx and Tx:  Tx 10 frames 100 bytes 
+			
+ 			    aft_api -i wp1aft -c wanpipe1 -r -w -txsize 100 -txcnt 10 -verbose
+	
+			Eg: Rx Only 
+
+			    aft_api -i wp1aft -c wanpipe1 -r -verbose
+			
+
+			Legend: 
+			
+			wp1aft: is a network interface specified in 
+			        wanpipe config file. 
+				(Change to reflect your configuration)
+
+			wanpipe1: is the sangoma adapter card specified
+			          in wanpipe config file.
+				  (Change to reflect your configuration)

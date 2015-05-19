@@ -1,0 +1,1635 @@
+#!/bin/bash -p
+#***************************************************************
+# WANCFG :  WANPIPE(tm) Configuration Utility
+#
+# Author :  Nenad Corbic <ncorbic@sangoma.com>
+# Date   :  Jan 5, 2000
+#
+#=============================================================== 
+# Copyright:    (c) 1999-2001 Sangoma Technologies Inc.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version
+# 2 of the License, or (at your option) any later version.
+#===============================================================
+# Jan 15  2003 Nenad Corbic	Added POS Support
+# Nov 30. 2001 Nenad Corbic	Updated the options.ttyW file setup
+#				to disable all pppd compression.
+# May 12, 2001 Alex Feldman 	Added T1/E1 support (TE1).
+# Mar 12, 2001	 		Added new interface support (redhat)
+# Mar 13, 2000          	Added support for x25 protocol
+# Jan 05, 2000   		Initial Version
+#***************************************************************
+
+#============================================================
+# set_geometry 
+#
+#	Limits the geometry of the xterm window
+#
+#============================================================
+
+#Limits the geometry of the xterm window
+set_geometry () {
+	# Some distributions export these with incorrect values
+	# which can really screw up some ncurses programs.
+	LINES=  COLUMNS=
+
+	ROWS=${1:-24}  COLS=${2:-80} 
+
+	# Just in case the nasty rlogin bug returns.
+	#
+	[ $ROWS = 0 ] && ROWS=24
+	[ $COLS = 0 ] && COLS=80
+
+	if [ $ROWS -lt 24 -o $COLS -lt 80 ]
+	then
+		echo -e "\n\007Your display is too small to run WANPIPE Config!"
+		echo "It must be at least 24 lines by 80 columns."
+		cleanup
+		exit 0
+	fi 
+
+	ROWS=$((ROWS-4))  COLS=$((COLS-5))
+}
+
+
+#============================================================
+# text_area
+#
+#	Used to printout the help textarea
+#
+#============================================================
+
+function text_area () {
+
+	local ROW=$1
+	local COL=$2
+	if [ -z "$ROW" ]; then
+		ROW=20
+	fi
+	if [ -z "$COL" ]; then
+		COL=60
+	fi
+
+	$DIALOG --backtitle "$backtitle" \
+        	--textbox $TEMP $ROW $COL 
+
+	rm -f $TEMP  
+}
+
+#============================================================
+# menu_name
+#
+#
+#
+#============================================================
+
+#Creates actual menu for lxdialog
+#Uses linux version of dialg
+function menu_name () {
+
+	local ROW
+	local COL
+
+	ROW=${6:-20}  
+	COL=${7:-50}
+
+	echo "function Mycmd () {">$MYCMD
+	echo "$DIALOG --title '$1'\
+			--backtitle \"$backtitle\" \\" >> $MYCMD
+
+	if [ $5 -eq 0 ]; then
+		echo "		--menu '$4 $menuinstr_exit' \\" >> $MYCMD
+	else
+		echo "		--menuback '$4 $menuinstr_back' \\" >> $MYCMD
+	fi
+	echo "		$ROW $COL $3 '' \
+			$2 " >> $MYCMD
+	echo "return \$?">> $MYCMD
+	echo "}">>$MYCMD
+
+	echo -n "."
+	source $MYCMD
+	rm -f $MYCMD
+	Mycmd
+	return $?
+}
+
+function menu_text () {
+
+	local ROW
+	local COL
+
+	ROW=${5:-20}  
+	COL=${6:-50}
+
+	echo "function Mycmd () {">$MYCMD
+	echo "$DIALOG --title '$1'\
+			--backtitle \"$backtitle\" \
+			--menutext $TEMP \
+			$ROW $COL $3 '' \
+			$2 " >> $MYCMD
+	echo "return \$?">> $MYCMD
+	echo "}">>$MYCMD
+
+	echo -n "."
+	source $MYCMD
+	rm -f $MYCMD
+	Mycmd
+	return $?
+}
+
+
+
+#============================================================
+# start_menu
+#
+#
+#
+#============================================================
+
+#Initial menu, 
+# Create or Edit Configuration file
+start_menu () {
+
+	local menu_options
+
+	menu_options="'NEW'  'Create a new Configuration File' \
+		      'EDIT' 'Edit existing Configuration File' 2> $MENU_TMP"
+
+
+	menu_instr="Please choose to Create or Edit Wanpipe configuration file. "
+	menu_name "CONFIGURATION OPTIONS" "$menu_options" 2 "$menu_instr" "$EXIT" 
+	retval=$?
+
+	choice=`cat $MENU_TMP`
+	rm -f $MENU_TMP
+
+	case $retval in
+		0)
+			result "$choice" 
+			return 0;
+			;;
+		1)
+			return 1 
+			;;
+
+		2) 	start_menu_help
+			start_menu
+			;;
+
+		255)	exit 0
+			;;
+	esac
+}
+
+#============================================================
+# yesno 
+#
+#
+#
+#============================================================
+
+yesno () {
+	local ROW
+	local COL
+
+	ROW=${2:-10}  
+	COL=${3:-40}
+
+        ${DIALOG} --backtitle "$backtitle" --clear \
+                  --yesno "$1" $ROW $COL  
+  	case $? in
+  	0)
+		return 0;;
+  	*)
+		return 1
+		;;
+	esac       
+
+}
+
+text_yesno () {
+
+	local ROW
+	local COL
+
+	ROW=${1:-10}  
+	COL=${2:-40}
+
+        ${DIALOG} --backtitle "$backtitle" --clear \
+                  --textyesno $TEMP $ROW $COL  
+	
+	rc=$?
+	rm -f $TEMP
+
+	case $rc in
+  	0)
+		return 0;;
+  	*)
+		return 1;;
+	esac      
+}
+
+#============================================================
+# input_int 
+#
+#Gets an integer from the user
+#
+#============================================================
+
+function input_int () {
+
+	local int_input
+	local retval
+	
+	$DIALOG --backtitle "$backtitle" --clear \
+		--inputbox "$1" 10 50 "$2" 2> $PROD_HOME/inputbox.tmp.$$
+
+	retval=$?
+
+	int_input=`cat $PROD_HOME/inputbox.tmp.$$`
+	rm -f $PROD_HOME/inputbox.tmp.$$
+
+	case $retval in
+	  	0)
+			if expr "$int_input" : '[0-9][0-9]*$' > /dev/null
+                        then
+				result "$int_input"
+				return 
+                        else
+				yesno "You have choosen illegal number, would you like to try again?"
+				if [ $? -eq 0 ]; then
+					input_int "$1" "$2" "$3"
+				fi
+                        fi      
+			return;;
+		1)
+			if [ ! -z "$3" ]; then
+				$3 
+				input_int "$1" "$2" "$3" 
+			else
+				return
+			fi
+			;;
+	  	*)
+			return;;
+	esac       
+}
+
+#============================================================
+# get_num_of_devices 
+#
+#	Gets the device number from the
+#	use
+#
+#============================================================
+
+get_num_of_devices () {
+
+	local menu_options
+
+	menu_options="'1' 'wanpipe1' \
+		      '2' 'wanpipe2' \
+		      '3' 'wanpipe3' \
+		      '4' 'wanpipe4' \
+		      '5' 'wanpipe5' \
+		      '6' 'wanpipe6' \
+		      '7' 'wanpipe7' \
+		      '8' 'wanpipe8' \
+		      '9' 'wanpipe9' \
+		      '10' 'wanpipe10' \
+		      '11' 'wanpipe11' \
+		      '12' 'wanpipe12' \
+		      '13' 'wanpipe13' \
+		      '14' 'wanpipe14' \
+		      '15' 'wanpipe15' \
+		      '16' 'wanpipe16' 2> $MENU_TMP"
+
+	#menu_options="'1' 'wanpipe1' 2> $MENU_TMP"
+
+
+	if [ $EDIT_NEW_OPTION = NEW ]; then	
+		menu_instr="	Please select a NEW Wan Device Name. \
+					"
+		menu_title="NEW WANPIPE CONFIGURATION"
+	else
+		menu_instr="Editing an existing WANPIPE configuration \
+						\
+                                Please select existing Wan Device for editing. \
+									"
+		menu_title="EDITING WANPIPE CONFIGURATION"
+	fi
+	
+	menu_name "$menu_title" "$menu_options" 7 "$menu_instr" "$EXIT" 20 
+	retval=$?
+
+	choice=`cat $MENU_TMP`
+	rm -f $MENU_TMP
+
+	case $retval in
+		0)
+			DEVICE_NUM=$choice;
+			setup_name_prefix $DEVICE_NUM
+
+			if [ ! -f "$PROD_CONF/wanpipe$DEVICE_NUM.conf" ]; then
+				if [ $EDIT_NEW_OPTION = EDIT ]; then
+					warning "EDIT_NOT_EXIST"
+					if [ $? -eq 0 ]; then
+						#User wants to create 
+						EDIT_NEW_OPTION=NEW
+						return 0
+					fi
+				else
+					return 0
+				fi
+			else
+				if [ $EDIT_NEW_OPTION = NEW ]; then
+					warning "NEW_EXIST"
+					if [ $? -eq 0 ]; then
+						#User wants to create 
+						EDIT_NEW_OPTION=EDIT
+					fi
+				fi
+				return 0
+			fi	
+			get_num_of_devices		
+			;;
+		2) 	echo "No Help Available at this point" > $TEMP
+			text_area
+			get_num_of_devices	
+			;;
+
+		*)	return 1
+			;;
+	esac
+}
+
+#============================================================
+# create_menu
+#
+# 	Displays the Second Menu whith following options:
+#   	Define Device, Define Interfaces, 
+#   	Wan Device Setup, Interface Setup
+#============================================================
+create_menu () {
+
+	local menu_options
+	local intr_mess
+	local dev_mess
+	local te_mess
+	local menu_size
+	local prot_mess
+
+	NUM_OF_INTER=${NUM_OF_INTER:-1}
+	
+	if [ ${#IF_NAME[@]} -eq 0 ]; then
+		intr_mess="Undefined"
+	else
+		intr_mess="${#IF_NAME[@]} Defined"
+	fi	
+
+	dev_mess=${DEVICE_TYPE:-Undefined}
+	# TE1 Set default value 
+	DEVICE_TE1_TYPE=${DEVICE_TE1_TYPE:-NO}
+	if [ $DEVICE_TE1_TYPE = YES ]; then
+		dev_mess="T1/E1"
+	fi
+	te_mess=${MEDIA:-Undefined}
+
+
+	if [ ${#INTR_STATUS[@]} -eq 0 ]; then
+		intr_stat_mess="Undefined"
+	else
+		intr_stat_mess="${#INTR_STATUS[@]} Configured"
+	fi
+
+	if [ ${#IP_STATUS[@]} -eq 0 ]; then
+		ip_mess="Undefined"
+	else
+		ip_mess="${#IP_STATUS[@]} Configured"
+	fi
+
+	case $PROTOCOL in
+		WAN_AFT) prot_mess="AFT HDLC";;
+		WAN_AFT_TE3) prot_mess="AFT TE3 HDLC";;
+		WAN_FR)   prot_mess="Frame Relay";;
+		WAN_PPP)  prot_mess="PPP";;
+		WAN_CHDLC)prot_mess="Cisco HDLC";;
+		WAN_X25) prot_mess="X25";;
+		WAN_MULTPPP) prot_mess="MP HDLC/PPP/CHDLC/X25";;	#New Multi Protocol Driver RAW PPP CHDLC
+		WAN_MULTPROT) prot_mess="MP Protocol";;
+		WAN_MFR) prot_mess="MultiPort FR";;		#New MultiPort FR over RAW CHDLC
+		WAN_TTYPPP)  prot_mess="TTY PPP";;
+		WAN_BITSTRM) prot_mess="Bit Streaming";;
+		WAN_EDU_KIT) prot_mess="Educational Kit";;
+		WAN_BSC) prot_mess="BiSync";;
+		WAN_BSCSTRM) prot_mess="BiSync Streaming";;
+		WAN_SS7) prot_mess="SS7";;
+		WAN_ADSL) prot_mess="ADSL";;
+		WAN_POS) prot_mess="POS";;
+		WAN_ADCCP) prot_mess="ADCCP LAPB";;
+		WAN_ATM) prot_mess="ATM";;
+		WAN_MLINK_PPP) prot_mess="MultiLink PPP";;
+		*) prot_mess="Undefined";;
+	esac 
+	
+	echo "'select_protocol'   'Wan Protocol Definition------> $prot_mess' \\" > $TEMP
+	menu_size=1
+
+	if [ ! -z "$PROTOCOL" ]; then
+		echo "'again' 	       ' ' \\" >> $TEMP
+		echo "'device_setup'     'Hardware Setup --------------> $dev_mess' \\" >> $TEMP
+		menu_size=$((menu_size+2))
+ 	       	# TE1 For T1/E1 board, add new hardware configuration menu
+       	 	
+		if [ "$DEVICE_TE1_TYPE" = YES ]; then
+			echo "'again' 	       ' ' \\" >> $TEMP
+			echo "'device_te_setup'     'T1/E1 Hardware Setup --------> $te_mess' \\" >> $TEMP
+			menu_size=$((menu_size+2))
+        	fi
+		
+#		# TE1 For T1/E1 board, add new hardware configuration menu
+		if [ "$DEVICE_TE3_TYPE" = YES ]; then
+			echo "'again' 	       ' ' \\" >> $TEMP
+			echo "'device_te3_setup'     'T3/E3 Hardware Setup --------> $te_mess' \\" >> $TEMP
+			menu_size=$((menu_size+2))
+       		fi
+
+		skip_network=0;
+		if [ "$PROTOCOL" = "WAN_TTYPPP" ] || [ "$PROTOCOL" = "WAN_MLINK_PPP" ] || [ "$PROTOCOL" = "WAN_EDU_KIT" ]; then
+			skip_network=1;
+		fi
+
+#NC Used by PPPD not any more
+#		if [ $OS_SYSTEM = Linux ] && [ "$PROTOCOL" = "WAN_ADSL" ] && [ "$ADSL_EncapMode" = "PPP_LLC_OA" -o "$ADSL_EncapMode" = "PPP_VC_OA" ]; then
+#			skip_network=1
+#		fi	
+	
+		if [ $skip_network -eq 0 ]; then
+			echo "'again' 	       ' ' \\" >> $TEMP	
+			echo "'define_interface' 'Network Interface Setup -----> $intr_mess' \\">> $TEMP
+			menu_size=$((menu_size+2))
+		fi
+
+		
+		if [ -f "$WAN_SCRIPTS_DIR/wanpipe$DEVICE_NUM-start" -o -f "$WAN_SCRIPTS_DIR/wanpipe$DEVICE_NUM-stop" ]; then
+			DEVICE_SCRIPTS_CFG=Enabled
+		else
+			DEVICE_SCRIPTS_CFG=Disabled
+		fi
+		menu_size=$((menu_size+2))
+
+		echo "'again' 	       ' ' \\" >> $TEMP
+		echo "'get_cfg_scripts'          'Device Start/Stop Scripts ---> $DEVICE_SCRIPTS_CFG' \\" >> $TEMP
+
+	fi
+	echo " 2> $MENU_TMP" >> $TEMP
+
+	menu_options=`cat $TEMP` 
+	rm -f $TEMP
+
+
+	menu_instr="New Configuration for Wan Device: 'wanpipe$DEVICE_NUM' \
+					"
+	menu_name "MAIN WANPIPE CONFIGURATION" "$menu_options" "$menu_size" "$menu_instr" "$EXIT" 20 
+	retval=$?
+
+	choice=`cat $MENU_TMP`
+	rm -f $MENU_TMP
+
+	case $retval in
+		0)	case $choice in
+
+			get_cfg_scripts)
+				configure_scripts "wanpipe$DEVICE_NUM"
+				DEVICE_SCRIPTS_CFG=Enabled
+				;;
+		
+			again)
+				return 0
+				;;
+			*)
+				$choice
+				;;
+			esac
+			return 0
+			;;
+			
+		2)	choice=${choice%\"*\"}
+			choice=${choice// /} 
+			create_menu_help $choice
+			create_menu	
+			;;
+		*)
+			return 1
+			;;
+	esac
+
+}
+
+#--------------------------- DEVICE AREA OPTIONS ---------------------
+
+#============================================================
+# select_protocol
+#
+#	Option to select a desired protocol
+#
+#============================================================
+
+
+#Gets Protocol from the user
+select_protocol () {
+	
+	local choice
+	local retval
+	local menu_optonis
+	local menu_size
+	local old_prot
+
+	old_prot=${PROTOCOL:-UNDEF}
+
+	if [ $OS_SYSTEM = "Linux" ]; then
+		menu_options="'WAN_AFT' 'AFT TE1 Protocols' \
+			      'WAN_AFT_TE3' 'AFT TE3 Protocols' \
+			      'WAN_FR'    'Frame Relay Protocol' \
+			      'WAN_MFR'  'MultiPort FR' \
+			      'WAN_CHDLC' 'Cisco HDLC Protocol' \
+			      'WAN_ADSL' 'ADSL Protocol' \
+			      'WAN_ATM' 'ATM Protocol' \
+		              'WAN_PPP'   'Point to Point Protocol' \
+			      'WAN_MULTPROT' 'MP Protocol' \
+			      'WAN_TTYPPP' 'Sync/Async TTY PPP' \
+			      'WAN_X25'   'X25 Protocol' \
+			      'WAN_BITSTRM' 'Bit Streaming Protocol' \
+			      'WAN_BSC' 'BiSync API Protocol' \
+			      'WAN_BSCSTRM' 'BiSync Streaming API Protocol' \
+			      'WAN_SS7' 'SS7 API Protocol' \
+			      'WAN_POS' 'POS API Protocol' \
+			      'WAN_ADCCP' 'ADCCP LAPB API Protocol' \
+			      'WAN_EDU_KIT' 'Educational Kit Protocol' 2> $MENU_TMP"
+			      
+		menu_size=12
+	elif [ $OS_SYSTEM = "FreeBSD" ]; then
+		menu_options="'WAN_AFT' 'AFT HDLC Protocol' \
+			      'WAN_FR'    'Frame Relay Protocol' \
+			      'WAN_CHDLC' 'Cisco HDLC Protocol' \
+		              'WAN_PPP'   'Point to Point Protocol' \
+			      'WAN_MULTPROT' 'MultiPort Protocol' \
+			      'WAN_MLINK_PPP' 'MultiLink PPP Protocol' \
+			      'WAN_ADSL' 'ADSL Protocol' 2> $MENU_TMP"
+		menu_size=7
+	else
+		menu_options="'WAN_AFT' 'AFT HDLC Protocol' \
+			      'WAN_FR'    'Frame Relay Protocol' \
+			      'WAN_CHDLC' 'Cisco HDLC Protocol' \
+		              'WAN_PPP'   'Point to Point Protocol' \
+			      'WAN_MULTPROT' 'MultiPort Protocol' \
+			      'WAN_ADSL' 'ADSL Protocol' 2> $MENU_TMP"
+		menu_size=5
+	fi
+
+	menu_instr="	Please select a WAN Protocol \
+							"
+	menu_name "PROTOCOL DEFINITION" "$menu_options" "$menu_size" "$menu_instr" "$BACK"
+	retval=$?
+
+	choice=`cat $MENU_TMP`
+	rm -f $MENU_TMP
+
+	case $retval in
+		0) 	if [ $old_prot != $choice -a $old_prot != UNDEF ]; then
+				warning "PROTOCOL_CHANGE"
+				if [ $? -eq 0 ]; then
+					unset IF_NAME
+					unset DEVICE_TYPE
+					unset INTR_STATUS
+					unset PROT_STATUS
+					unset IP_STATUS
+					unset NUM_OF_INTER
+					unset DLCI_NUM
+					# TE1 Initialize T1/E1 flag.
+					unset DEVICE_TE1_TYPE
+					
+					PROTOCOL=$choice
+					if [ $PROTOCOL = WAN_X25 ]; then
+						STATION=DCE	
+					elif [ $PROTOCOL = WAN_FR ] || [ $PROTOCOL = WAN_MFR ]; then
+						STATION=CPE
+					fi
+
+				fi
+			else
+				PROTOCOL=$choice
+			fi	
+			case $choice in
+			WAN_FR) 
+			    backtitle="WANPIPE Configuration Utility: Frame Relay Setup"
+ 				;;
+			WAN_CHDLC) 
+			    backtitle="WANPIPE Configuration Utility: CHDLC Setup"
+				;;
+			WAN_PPP)
+			    backtitle="WANPIPE Configuration Utility: PPP Setup" 	
+				;;
+			WAN_X25)
+			    backtitle="WANPIPE Configuration Utility: X25 Setup" 	
+				;;
+			WAN_MULTPPP)
+			     backtitle="WANPIPE Configuration Utility: MP HDLC/PPP/CHDLC/X25 Setup" 	
+				;;
+			WAN_MULTPROT)
+			     backtitle="WANPIPE Configuration Utility: MP HDLC/PPP/CHDLC/X25 Setup" 	
+				;;
+			WAN_MFR)
+			     backtitle="WANPIPE Configuration Utility: MultiPort Frame Relay Setup" 
+				;;
+			WAN_TTYPPP)
+			     backtitle="WANPIPE Configuration Utility: Sync/Async TTY PPP Setup" 	
+				;;
+			WAN_EDU_KIT)
+			     backtitle="WANPIPE Configuration Utility: Educational Kit Setup"	 
+				;;
+			WAN_BSC)
+			     backtitle="WANPIPE Configuration Utility: BiSync Setup"	 
+				;;
+
+			WAN_BSCSTRM)
+			     backtitle="WANPIPE Configuration Utility: BiSync Streaming Setup"	 
+				;;
+			
+			WAN_SS7)
+			     backtitle="WANPIPE Configuration Utility: SS7 Setup"	 
+				;;
+
+			WAN_ADSL)
+			     backtitle="WANPIPE Configuration Utility: ADSL Setup"
+				;;
+			WAN_ATM)
+			     backtitle="WANPIPE Configuration Utility: ATM Setup"
+				;;
+			WAN_AFT)
+			     backtitle="WANPIPE Configuration Utility: AFT TE1 Setup"
+				;;
+			WAN_AFT_TE3)
+			     backtitle="WANPIPE Configuration Utility: AFT TE3 Setup"
+				;;
+			WAN_POS)
+			     backtitle="WANPIPE Configuration Utility: POS Setup"
+				;;
+			WAN_ADCCP)
+				backtitle="WANPIPE Configuration Utility: ADCCP LAPB Setup"
+				;;
+			WAN_MLINK_PPP)
+				backtitle="WANPIPE Configuration Utility: MultiLink PPP Setup"
+				;;
+			esac
+			return 0 
+			;;
+		2)	choice=${choice%\"*\"}
+			choice=${choice// /} 
+			select_protocol_help $choice
+			select_protocol
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+
+
+#============================================================
+# get_string
+#
+#	Accepts sring from the user. 
+#	Check IP Addresses.
+#	Dispays default values.
+#
+#============================================================
+
+
+function get_string () {
+
+	local is_ip=${3:-BAD_STRING}
+
+	$DIALOG --backtitle "$backtitle" --clear \
+		--inputbox "$1" 10 50 "$2" 2> $PROD_HOME/inputbox.tmp.$$
+
+	retval=$?
+
+	input=`cat $PROD_HOME/inputbox.tmp.$$`
+	rm -f $PROD_HOME/inputbox.tmp.$$
+
+	case $retval in
+	  	0)
+			if [ -z "$input" ]; then
+				result "$2" 
+				return 0	
+			fi
+
+			if expr "$input" : '[0-9a-zA-Z/@_\.\*-]*$' >/dev/null
+                        then
+				if [ $is_ip = IP_ADDR ]; then
+					expr "$input" : '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$' > /dev/null
+					if [ $? -eq 0 ];
+					then
+						result "$input"
+						return 0
+					fi
+				else
+                               		result "$input"
+					return 0
+				fi
+                       	fi 
+
+			warning "$is_ip"
+			if [ $? -ne 0 ]; then
+				result "$2"
+				return 1
+			fi
+			get_string "$1" "$2" "$3"
+			;;
+	  	1) 	result "$2"	
+			return 1
+			;;
+	  	255) 	result "$2"
+			return 1
+			;;
+	esac       
+
+}
+
+function get_long_string () {
+
+	local input
+	
+	$DIALOG --backtitle "$backtitle" --clear \
+		--inputbox "$1" 20 50 "$2" 2> $PROD_HOME/inputbox.tmp.$$
+
+	retval=$?
+
+	input=`cat $PROD_HOME/inputbox.tmp.$$`
+	rm -f $PROD_HOME/inputbox.tmp.$$
+
+	case $retval in
+		0)
+			return $input
+			;;
+		*)
+			return 0
+			;;
+	esac
+}
+
+#============================================================
+# get_integer 
+#
+# 	Accepts integer value from the user, it also
+#	check for correct entry and displays default value.
+#	Furthermore, help is also supported.
+#
+#============================================================
+
+function get_integer () {
+
+	local min="$3"
+	local max="$4"	
+	local int_ret
+
+	while true
+	do
+		input_int "$1" "$2" "$5"  
+		int_ret=$($GET_RC)
+
+		if [ $int_ret -ge 0 ]; then
+
+			if [ $max -eq 0  ]; then
+				result $int_ret
+				return
+			fi
+
+			if [ $int_ret -gt $max -o $int_ret -lt $min ]; then
+				yesno "Your selection is outside specified range: $min to $max.  Would you like to try again?"
+				if [ $? -eq 1 ]; then
+					result $2 
+				 	return
+				fi
+			else	
+				result $int_ret
+				return  
+			fi
+		fi
+	done	
+}
+
+#-------------------------- INTERFACE AREA --------------------------------
+
+function auto_intr_cfg_menu ()
+{
+
+		menu_options="'manual'               'Manual Interface Setup' \
+			      'auto_intr_config'     'Automatic Interface Setup' 2> $MENU_TMP"
+
+		menu_instr="	Please select an interface configuration option \
+								"
+		menu_name "INTERFACE CONFIG OPTIONS" "$menu_options" 2 "$menu_instr" "$BACK"
+		rc=$?
+
+		choice=`cat $MENU_TMP`
+		rm -f $MENU_TMP
+
+		case $rc in
+			0)
+				if [ $choice != manual ]; then
+					AUTO_INTR_CFG=YES
+					$choice 
+					return
+				else
+					AUTO_INTR_CFG=NO
+				fi
+			;;
+			2)
+				create_menu_help $choice
+				auto_intr_cfg_menu
+				#help
+				;;
+			3) 	return
+				;;
+		esac
+}
+
+
+
+#============================================================
+# define_interface
+#
+# 	Displays the Interface definition main menu
+# 	It loops for number of interfaces to be defined
+#
+#============================================================
+
+define_interface () {
+
+	local ret1
+	local if_num
+	local intr_mess
+	local menu_options
+	local rc
+	local write
+
+	NUM_OF_INTER=${NUM_OF_INTER:-1}
+
+	if [ $PROTOCOL = WAN_FR ] || [ $PROTOCOL = WAN_MFR ]; then
+		get_integer "Please specify the number of DLCIs supported on this Frame Relay connection. " "$NUM_OF_INTER" "1" "100" "interface_menu_help num_of_dlci" 
+		NUM_OF_INTER=$($GET_RC)
+
+	elif [ $PROTOCOL = WAN_X25 ]; then
+		get_integer "Please specify the number of LCN's supported on the X25 connection. " "$NUM_OF_INTER" "1" "255" "interface_menu_help num_of_lcn"
+		NUM_OF_INTER=$($GET_RC)
+
+	elif [ $PROTOCOL = WAN_BITSTRM ]  && [ $DEVICE_TE1_TYPE = YES ]; then
+		get_integer "Please specify the number of interfaces supported on TE1 BitStreaming connection. " "$NUM_OF_INTER" "1" "255" "interface_menu_help num_of_bitstrm"
+		NUM_OF_INTER=$($GET_RC)
+		
+	elif [ $PROTOCOL = WAN_ATM ]; then
+		get_integer "Please specify the number of interfaces (PVC's) on ATM connection. " "$NUM_OF_INTER" "1" "255" "interface_menu_help num_of_bitstrm"
+		NUM_OF_INTER=$($GET_RC)
+	
+	elif [ $PROTOCOL = WAN_AFT ]; then
+		get_integer "Please specify the number of interfaces supported on TE1 AFT connection. " "$NUM_OF_INTER" "1" "255" "interface_menu_help num_of_bitstrm"
+		NUM_OF_INTER=$($GET_RC)
+
+	else
+		NUM_OF_INTER=1
+	fi
+
+
+
+	if [ $PROTOCOL = WAN_FR ] || [ $PROTOCOL = WAN_MFR ] || [ $PROTOCOL = WAN_X25 ]; then
+		if [ $NUM_OF_INTER -gt 1 ]; then
+			auto_intr_cfg_menu
+		fi
+	fi
+
+	while true 
+	do
+		if_num=0
+		while [ $if_num -ne $NUM_OF_INTER ];
+		do
+			if_num=$((if_num+1))
+			if [ -z "${IF_NAME[$if_num]}" ]; then
+				intr_mess="Undefined"
+			else
+				intr_mess=${IF_NAME[$if_num]}
+			fi	
+			echo "'$if_num'   'Interface $if_num -----> $intr_mess' \\" >> $TEMP
+		done
+		echo " 2> $MENU_TMP" >> $TEMP
+
+		menu_options=`cat $TEMP`
+		rm -f $TEMP 2> /dev/null
+
+		interface_num_menu "INTERFACE DEFINITION" "$menu_options" 0	
+		rc=$?
+		if [ $rc -ne 0 ]; then
+			break
+		fi
+	done
+
+}
+
+#============================================================
+# interface_num_menu
+#
+#
+#
+#============================================================
+
+
+interface_num_menu () {
+
+	local choice
+
+
+
+	menu_instr="	MAIN NETWORK INTERFACE CONFIGURATION \
+				"
+
+	if [ $NUM_OF_INTER -gt 10 ]; then
+		menu_name "$1" "$2" 10 "$menu_instr" "$BACK"
+		retval=$?
+	else
+		menu_name "$1" "$2" $NUM_OF_INTER "$menu_instr" "$BACK"
+		retval=$?
+	fi
+
+	choice=`cat $MENU_TMP`
+	rm -f $MENU_TMP
+
+	case $retval in
+		0)	interface_num "$choice" "$3"
+			return 0 
+			;;
+		1) 	
+			return 1
+			;;
+		2)   	interface_num_menu_help "$3"
+			interface_num_menu "$1" "$2" "$3"				
+			;;
+		255) 	
+			return 1
+			;;
+	esac
+}
+
+#============================================================
+# interface_num
+#
+#	Repeats the interface_num menu until the user
+#	selects back button. 
+#
+#============================================================
+
+
+interface_num () {
+
+	local if_num=$1
+	local opt=$2
+	local ret1
+
+	while true
+	do
+		interface_menu "$if_num" 
+		ret1=$?
+		if [ $ret1 -eq 1 ]; then
+			break
+		fi
+	done
+	INTR_STATUS[$if_num]=setup
+}
+
+#============================================================
+# interface_setup
+#
+#	Prints out all network interfaces, from where
+#       the user has the choice to configure each one.
+#============================================================
+
+
+interface_setup () {
+
+	local ret1
+	local if_num
+	local rc
+
+	while true 
+	do
+		if_num=0
+		while [ $if_num -ne $NUM_OF_INTER ];
+		do
+			if_num=$((if_num+1))
+			if [ -z "${INTR_STATUS[$if_num]}" ]; then
+				intr_mess="Unconfigured"
+			else
+				intr_mess="Configured"
+			fi
+
+			echo "'$if_num'   'Interface: ${IF_NAME[$if_num]} -----> $intr_mess' \\" >> $TEMP
+		done
+		echo " 2> $MENU_TMP" >> $TEMP
+
+		menu_options=`cat $TEMP`
+		rm -f $TEMP 2> /dev/null
+
+		interface_num_menu "INTERFACE/PROTOCOL SETUP" "$menu_options" 1	
+		rc=$?
+		if [ $rc -ne 0 ]; then
+	 		break	
+		fi
+	done
+}
+
+
+#============================================================
+# ip_setup
+#
+#	This function repeats the ip_setup_menu until
+#  	the user selects back.
+#
+#============================================================
+
+ip_setup () {
+
+	local ret1
+	local if_num="$1"
+	local rc
+
+	while true
+	do
+		ip_setup_menu $if_num
+		rc=$?
+		if [ $rc -ne 0 ]; then
+	 		break	
+		fi
+	done
+	IP_STATUS[$if_num]="Setup Done"
+
+}
+
+#============================================================
+# prot_inter_setup 
+#
+# 	This function repeates the interface/protocol setup
+#	menu for all the protocols untill the user exits 
+#	using the back button or ESC.
+#
+#============================================================
+
+prot_inter_setup () {
+	
+	local ret1
+	local if_num="$1"
+	local rc
+
+	while true
+	do
+		case $PROTOCOL in	
+		WAN_FR) 
+			fr_interface_setup $if_num
+			rc=$?
+			;;
+		WAN_MFR)
+			fr_interface_setup $if_num
+			rc=$?
+			;;
+		WAN_MULTPPP)
+			chdlc_interface_setup $if_num
+			rc=$?
+			;;
+		WAN_MULTPROT)
+			chdlc_interface_setup $if_num
+			rc=$?
+			;;
+		WAN_CHDLC) 
+			chdlc_interface_setup $if_num
+			rc=$?
+			;;
+		WAN_TTYPPP)
+			chdlc_interface_setup $if_num
+			rc=$?
+			;;
+		WAN_PPP) 
+			ppp_interface_setup $if_num
+			rc=$?
+			;;
+		WAN_X25)
+			x25_interface_setup $if_num
+			rc=$?
+			;;
+		WAN_SS7)
+			ss7_interface_setup $if_num
+			rc=$?
+			;;
+		WAN_ATM)
+			atm_interface_setup $if_num
+			rc=$?
+			;;
+		WAN_MLINK_PPP) 
+			chdlc_interface_setup $if_num
+			rc=$?
+			;;
+		esac
+		if [ $rc -ne 0 ]; then
+	 		break	
+		fi
+	done
+	PROT_STATUS[$if_num]="Setup Done"
+}
+
+#-------------- DEVICE SETUP FUNCTIONS --------------------------------
+#============================================================
+# device_setup
+#
+#	Hardware setup function.  This function repeats the
+#       hardware menu untill the user exits using the back
+#       button.
+#============================================================
+
+
+device_setup () {
+
+	local ret1
+
+	device_init
+	
+	while true
+	do
+		gen_device_setup 
+		ret1=$?
+		if [ $ret1 -eq 1 ]; then
+			break
+		fi
+	done
+}
+
+#============================================================
+# device_te_setup
+#
+#	Hardware T1/E1 setup function.  This function repeats
+#       the hardware menu untill the user exits using the back
+#       button.
+#============================================================
+device_te_setup () {
+
+	local ret1
+
+	device_te_init
+	
+	while true
+	do
+		gen_device_te_setup 
+		ret1=$?
+		if [ $ret1 -eq 1 ]; then
+			break
+		fi
+	done
+}
+
+#============================================================
+# device_te_setup
+#
+#	Hardware T1/E1 setup function.  This function repeats
+#       the hardware menu untill the user exits using the back
+#       button.
+#============================================================
+device_te3_setup () {
+
+	local ret1
+
+	device_te3_init
+	
+	while true
+	do
+		gen_device_te3_setup 
+		ret1=$?
+		if [ $ret1 -eq 1 ]; then
+			break
+		fi
+	done
+}
+
+
+#============================================================
+# result
+#
+#	Write a return code into a file.  We use this
+#	since bash2 can only return a number from 0 to 255. 
+#
+#============================================================
+
+
+function result () {
+	echo "$1" > "$RC"
+}
+
+#============================================================
+# cleanup  
+#
+#	Remove any temporary files during the session
+#
+#============================================================
+
+
+function cleanup () {
+
+	[ -f $DEF_DEVICE ] && rm -f $DEF_DEVICE 2> /dev/null
+	[ -f $DEF_INTERFACE ] && rm -f $DEF_INTERFACE 2> /dev/null
+	[ -f $WAN_DEVICE ] && rm -f $WAN_DEVICE 2> /dev/null
+	[ -f $INTR_SETUP ] && rm -f $INTR_SETUP 2> /dev/null	
+	[ -f $RC ] && rm -f $RC 2> /dev/null
+	#clear
+}
+
+#============================================================
+# check_setup  
+#
+#  	Check that all libraries exit as well as 
+#       /etc/wanrouter.rc.  
+#       Wanpipe Package must be installed before
+#       proceeding.
+#============================================================
+
+
+function check_setup () {
+
+	local ver
+	local test=$1
+
+if [ $test -eq 1 ]; then
+
+	if [ ! -d $PROD_HOME ]; then
+		cat <<EOM
+
+	ENVIRONMENT ERROR
+
+Wanpipe working directory $PROD_HOME
+not found!  Please re-install WANPIPE
+package.
+
+EOM
+		exit 1
+	fi
+
+
+	ver=`echo $BASH_VERSION`
+	ver=${ver%%\.*} 
+	if [ $ver -lt 2 ]; then
+		cat <<EOM
+
+	BASH VERSION ERROR
+
+	This program can only run with
+bash version greater than 2. Please read
+the wancfg readme file on how to upgrade
+your bash shell.	
+	
+EOM
+		exit 1
+	fi
+
+	if [ ! -f "${META_CONF}" ]; then
+		cat << EOM
+
+	BAD CONFIGURATION - FILE MISSING
+
+	${META_CONF} file could not 
+be found. Please make sure that the wanpipe
+pacakge has been correctly installed before
+proceeding to configure a Sangoma device.
+
+EOM
+		exit 1
+	fi
+
+else
+
+	if [ ! -f "$WAN_LIB_DIR/lib.sh" ]; then
+		cat <<EOM 
+
+	BAD CONFIGURATION - LIBRARY MISSING
+
+Library lib.sh cannot be found in $WAN_LIB_DIR/lib.sh directory.
+
+Please make sure that the wanpipe
+pacakge has been correctly installed before
+proceeding to configure a Sangoma device.
+
+EOM
+		exit 1
+	fi
+
+	if [ ! -f "$WAN_LIB_DIR/fe_lib.sh" ]; then
+		cat <<EOM 
+
+	BAD CONFIGURATION - LIBRARY MISSING
+
+Library fe_lib.sh cannot be found in $WAN_LIB_DIR/ directory.
+
+Please make sure that the wanpipe
+pacakge has been correctly installed before
+proceeding to configure a Sangoma device.
+
+EOM
+		exit 1
+	fi
+
+
+	if [ ! -f "$WAN_LIB_DIR/fr_lib.sh" ]; then
+		cat <<EOM 
+
+	BAD CONFIGURATION - LIBRARY MISSING
+
+Library fr_lib.sh cannot be found in $WAN_LIB_DIR directory.
+
+Please make sure that the wanpipe
+pacakge has been correctly installed before
+proceeding to configure a Sangoma device.
+
+EOM
+		exit 1
+	fi
+
+	if [ ! -f "$WAN_LIB_DIR/chdlc_lib.sh" ]; then
+		cat <<EOM 
+
+	BAD CONFIGURATION - LIBRARY MISSING
+
+Library chdlc_lib.sh cannot be found in $WAN_LIB_DIR directory.
+
+Please make sure that the wanpipe
+pacakge has been correctly installed before
+proceeding to configure a Sangoma device.
+
+EOM
+		exit 1
+	fi
+
+	if [ ! -f "$WAN_LIB_DIR/ppp_lib.sh" ]; then
+		cat <<EOM 
+
+	BAD CONFIGURATION - LIBRARY MISSING
+
+Library ppp_lib.sh cannot be found in $WAN_LIB_DIR directory.
+
+Please make sure that the wanpipe
+pacakge has been correctly installed before
+proceeding to configure a Sangoma device.
+
+EOM
+		exit 1
+	fi
+
+	if [ ! -f "$WAN_LIB_DIR/help.sh" ]; then
+		cat <<EOM 
+
+	BAD CONFIGURATION - LIBRARY MISSING
+
+Library help.sh cannot be found in $WAN_LIB_DIR directory.
+
+Please make sure that the wanpipe
+pacakge has been correctly installed before
+proceeding to configure a Sangoma device.
+
+EOM
+		exit 1
+	fi
+fi
+
+}
+
+function read_meta_conf ()
+{
+	if [ $OSYSTEM = "Linux" ]; then
+		PROD_HOME=/etc/wanpipe
+	elif [ $OSYSTEM = "FreeBSD" -o $OSYSTEM = "OpenBSD" ]; then
+		PROD_HOME=/usr/local/etc/wanpipe
+		wanrouter_rc_file=""
+		if [ -r /etc/rc.conf ]; then
+			. /etc/rc.conf
+		fi
+		if [ -n "$wanrouter_rc_file" ]; then
+			PROD_HOME=${wanrouter_rc_file%/*}
+		fi
+	fi
+	META_CONF=$PROD_HOME/wanrouter.rc
+	return 0
+}
+
+#============================================================
+# VARIABLE DEFINITION 
+#============================================================
+
+WAN_CONF=wanpipe
+OSYSTEM=`uname -s`
+RELEASE=`uname -r`
+EXIT=0
+BACK=1
+LINUX_DISTR=unknown
+OS_SYSTEM=`uname -s`
+abc_index=(0 a b c d e f g h i j k l m n o p q r s t u v w x y z)
+
+menuinstr_exit="------------------------------------------ \
+Use arrows to navigate through the options. \
+Press <Enter> to select highlighted opt. \
+Press <Exit> to exit Wanpipe configuration. \
+Press <ESC> to go back, <Help> for help."
+
+menuinstr_back="------------------------------------------ \
+Use arrows to navigate through the options. \
+Press <Enter> to select highlighted opt. \
+Press <Back> to return to previous menu. \
+Press <ESC> to go back, <Help> for help."
+
+backtitle="WANPIPE Configuration Utility"
+
+read_meta_conf
+
+TEMP=$PROD_HOME/wacfg_temp.$$
+MYCMD=$PROD_HOME/Mycmd
+DEVOPT=$PROD_HOME/dev_options.$$
+MENU_TMP=$PROD_HOME/menu.tmp.$$
+RC=$PROD_HOME/return_code
+GET_RC="cat $RC"
+
+check_setup 1
+
+#Load the library files
+source ${META_CONF}
+
+check_setup 2
+
+source $WAN_LIB_DIR/lib.sh
+source $WAN_LIB_DIR/fr_lib.sh
+source $WAN_LIB_DIR/ppp_lib.sh
+source $WAN_LIB_DIR/chdlc_lib.sh
+source $WAN_LIB_DIR/help.sh
+source $WAN_LIB_DIR/x25_lib.sh
+source $WAN_LIB_DIR/ss7_lib.sh
+source $WAN_LIB_DIR/adsl_lib.sh
+source $WAN_LIB_DIR/atm_lib.sh
+source $WAN_LIB_DIR/annexg_lib.sh
+source $WAN_LIB_DIR/mlinkppp_lib.sh
+source $WAN_LIB_DIR/fe_lib.sh
+
+WAN_FIRMWARE_DIR=${WAN_FIRMWARE_DIR:-/etc/wanpipe/firmware}
+PROD_CONF=$WAN_CONF_DIR
+INTERFACE_DIR=$WAN_INTR_DIR
+NEW_IF=""
+WAN_LOCK=$WAN_LOCK_DIR/wanrouter
+
+if [ $OS_SYSTEM = "Linux" ]; then
+	MODULE_LOAD=modprobe
+	MODULE_UNLOAD="modprobe -r"
+	MODULE_STAT=lsmod
+	WAN_DRIVERS=wanpipe
+elif [ $OS_SYSTEM = "FreeBSD" ]; then
+	CDEV_WANROUTER=/dev/wanrouter
+	CDEV_MAJOR=139
+	CDEV_MINOR=0
+	MODULE_LOAD=kldload
+	MODULE_UNLOAD=kldunload
+	MODULE_STAT=kldstat
+	MODULE_DIR=/modules
+	WAN_DRIVERS=wanpipe
+elif [ $OS_SYSTEM = "OpenBSD" -o $OS_SYSTEM = "NetBSD" ]; then
+	POSTINSTALL=create_cdev
+	MODULE_LOAD=modload
+	MODULE_UNLOAD=modunload
+	MODULE_STAT=modstat
+	MODULE_DIR=/usr/lkm
+	WAN_DRIVERS=wanpipe
+fi
+
+if [ "$NEW_IF_TYPE" = "YES" ]; then
+	NEW_IF="ifcfg-"
+fi
+
+set_geometry `stty size 2>/dev/null`
+
+DIALOG=${DIALOG=${WAN_BIN_DIR}/wanpipe_lxdialog}
+
+if [ ! -f "$DIALOG" ]; then
+	cat <<EOM
+
+	!!! WANPIPE CONFIGURATOR FAILED !!!
+
+Error:
+------
+	Wanpipe Configurator uses the 
+lxdialog executable. This file cannot be found
+make sure you run 'make' in current directory
+before you proceed.
+
+EOM
+	exit 1
+fi
+
+PPPCONFIG=${WAN_BIN_DIR}/wp_pppconfig
+
+name_prefix="wp"
+
+#For now debian doesnt support pointopoint IP address
+#thus disable it.
+#eval "grep \"Debian\" -i /etc/issue > /dev/null"
+#if [ $? -eq 0 ]; then 
+#	LINUX_DISTR=debian	
+#fi
+#eval "grep \"Red *Hat\" -i /etc/issue > /dev/null"
+#if [ $? -eq 0 ]; then
+#	LINUX_DISTR=redhat	
+#fi
+#eval "grep \"Mandrake\" -i /etc/issue > /dev/null"
+#if [ $? -eq 0 ]; then
+#	LINUX_DISTR=redhat	
+#fi
+
+#============================================================
+# MAIN PROGRAM 
+#
+#
+#
+#============================================================
+
+#Initial menu
+
+start_menu 
+if [ $? -ne 0 ]; then
+	cleanup
+	exit 0
+fi
+EDIT_NEW_OPTION=$($GET_RC)
+
+get_num_of_devices
+if [ $? -ne 0 ]; then
+	cleanup
+	exit 0
+fi
+
+if [ "$EDIT_NEW_OPTION" = EDIT ]; then
+	parse_config_file
+else
+	if [ -d $WAN_SCRIPTS_DIR ]; then
+		rm -f $WAN_SCRIPTS_DIR/wanpipe$DEVICE_NUM*
+	fi
+fi
+
+
+while true;
+do
+	while true;
+	do
+		create_menu
+		gret=$?
+		if [ $gret -ne 0 ]; then
+			break
+		fi
+	done
+
+	warning "ARE_YOU_SURE"
+	if [ $? -eq 0 ]; then
+		warning "SAVE_CONFIG"
+		if [ $? -eq 1 ]; then
+			break
+		fi
+		check_config
+		if [ $? -eq 1 ]; then
+			continue
+		fi
+		save_configuration
+		#This is not an error, I am just using
+                #it to print out the message 
+		error "SAVE_OK"
+
+
+		configure_scripts
+
+		create_pppd_conf=0;
+		if [ $PROTOCOL = WAN_MLINK_PPP ]; then
+			create_multilink_ppp_cfg $DEVICE_NUM	
+		elif [ $PROTOCOL = WAN_TTYPPP ]; then
+			create_multilink_ppp_cfg $DEVICE_NUM	
+
+#NC Used by PPPD not any more
+#		elif [ "$OS_SYSTEM" = Linux ] && [ "$PROTOCOL" = WAN_ADSL ] && [ "$ADSL_EncapMode" = PPP_LLC_OA -o "$ADSL_EncapMode" = PPP_VC_OA ]; then
+#			create_pppd_conf=1;
+#			create_multilink_ppp_cfg $DEVICE_NUM	
+		fi	
+
+		break
+	fi	
+done
+
+cleanup
+exit 0

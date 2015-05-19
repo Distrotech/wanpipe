@@ -1,0 +1,1773 @@
+#!/bin/bash
+#====================================================================
+# CFGFT1
+#
+# Author: Nenad Corbic
+# Date:   Nov 24. 1999
+#
+# FT1 Configuration Utility: used to configure the on-board CSU/DSUs 
+# 			     on WANPIPE S508/S514 FT1 cards. 
+#
+#--------------------------------------------------------------------
+# Copyright:    (c) 1995-1999 Sangoma Technologies Inc.
+#
+#      This program is free software; you can redistribute it and/or
+#      modify it under the terms of the GNU General Public License
+#      as published by the Free Software Foundation; either version
+#      2 of the License, or (at your option) any later version.     
+#--------------------------------------------------------------------
+
+
+#============================================================
+# set_geometry 
+#
+# Limits the geometry of the xterm window
+#
+#============================================================
+
+set_geometry () {
+	# Some distributions export these with incorrect values
+	# which can really screw up some ncurses programs.
+	LINES=  COLUMNS=
+
+	ROWS=${1:-24}  COLS=${2:-80} 
+
+	# Just in case the nasty rlogin bug returns.
+	#
+	[ $ROWS = 0 ] && ROWS=24
+	[ $COLS = 0 ] && COLS=80
+
+	if [ $ROWS -lt 19 -o $COLS -lt 80 ]
+	then
+		echo -e "\n\007Your display is too small to run WANPIPE Config!"
+		echo "It must be at least 19 lines by 80 columns."
+		cleanup
+		exit 0
+	fi 
+
+	ROWS=$((ROWS-4))  COLS=$((COLS-5))
+}
+
+#============================================================
+# menu_name
+# 
+#	Creates actual menu for lxdialog
+#	Uses linux version of dialg
+#
+#============================================================
+
+function menu_name () {
+
+	echo "function Mycmd () {">Mycmd
+	echo "$DIALOG --title '$1'\
+			--backtitle \"$backtitle\" \
+			--menu '$4' \
+			20 50 $3 '' \
+			$2 " >> Mycmd
+	echo "return \$?">> Mycmd
+	echo "}">>Mycmd
+
+	echo -n "."
+	source ./Mycmd
+	rm -f Mycmd
+	Mycmd
+	return $?
+}
+
+
+#============================================================
+# get_num_of_devices
+#
+#	Check the ft1 configuration file, for wanpipe
+#	device number
+#
+#============================================================
+
+get_num_of_devices () {
+
+	local menu_options
+	local dev
+	local retval
+
+	dev=`grep "wanpipe.*= " $WAN_CONF_DIR/ft1.conf 2> /dev/null`
+	retval=$?
+	if [ $retval -ne 0 ]; then
+		cat <<EOM > $TEMP
+	!!! FT1 Configuration Error !!!
+
+Error:
+	
+    The $WAN_CONF_DIR/ft1.conf FT1 configuration file does
+    not exist or has not been configured.
+
+Solution:
+
+    Please contact your Sangoma Representative.
+EOM
+		text_area
+		cleanup
+		exit 1	
+	fi
+	dev=${dev%%=*}
+	dev=${dev// /}
+	DEVICE_NUM=${dev##wanpipe};
+	return 0;
+}
+
+#============================================================
+# text_area
+#
+#	Used to printout the help textarea
+#
+#============================================================
+
+function text_area () {
+
+	$DIALOG --backtitle "$backtitle" \
+        	--textbox $TEMP 20 60 
+
+	rm -f $TEMP  
+}
+
+
+#============================================================
+# start_menu 
+#
+# 	Initial menu, 
+# 	Create or Edit Configuration file
+#
+#============================================================
+
+start_menu () {
+
+	local menu_options
+
+	menu_options="'REG'  'Standard FT1 Configurator    (Default)' \
+		      'ADV'  'Advanced FT1 Configurator' \
+		      'AUTO' 'Automatic FT1 Configurator'  \
+		      'READ' 'Read FT1 Configuration'  2> menu.tmp.$$"
+
+	menu_instr="	Please select a configuration type. \
+			\
+		    Use arrows to navigate through the options. \
+	            Press <Exit> and <ESC> to quit. \
+		    Press <Help> for help information." 
+
+	menu_name "FT1 Config Options" "$menu_options" 4 "$menu_instr" 
+	retval=$?
+
+	choice=`cat menu.tmp.$$`
+	rm -f menu.tmp.$$
+
+	case $retval in
+		0)
+			result $choice	
+			return 0;
+			;;
+		1)
+			return 1;
+			;;
+
+		2) 	choice=${choice%\"*\"}
+			choice=${choice// /}
+			start_menu_help "$choice"
+			start_menu
+			;;
+
+		255)
+			cleanup
+			exit 1
+			;;
+	esac
+}
+
+#============================================================
+#  start_menu_help
+#
+#	Help for above menu
+#
+#============================================================
+
+start_menu_help () {
+
+	local opt=$1
+
+	case $opt in
+
+	REG) 
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	STANDARD FT1 CONFIGURATOR
+
+This is a default FT1 configuration utility
+It offers menu driven FT1 configuration for each
+option. It is very user friendly and should be used
+unless more advanced configurations are required.
+
+Limitations:
+
+This utility limits the user to linearly activate and
+deactivate FT1 channels.  Thus, one cannot activate
+channels 1-3 and 20-24 and leave the rest deactivated.
+In above scenario use the Advanced FT1 Configurator.
+EOM
+		;;
+
+	ADV)
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	ADVANCED FT1 CONFIGURATION
+
+This is a text based configurator; It offers
+maximum flexibility to perform complex CSU/DSU 
+configurations.  
+
+Please refer to the WANPIPE_USER_MANUAL.txt for
+advanced configuration command syntax. 
+
+It is recommended the Standard Configurator 
+option is used for standard CSU/DSU 
+configurations. Please read the help for
+Standard Configurator to determine pros and
+cons of each method.
+
+EOM
+		;;
+	
+	AUTO)	
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	AUTOMATIC FT1 CONFIGURATION
+
+This configuration utility can automatically
+detect the baud rate of the T1 line. 
+
+Limitations:
+ 	Framing must be  : ESF 
+	Encoding must be : B8ZS
+
+ If the above limitations are not a problem one should
+ this utility.
+EOM
+		;;	
+
+	READ)	 
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	DISPLAY CURRENT CONFIGURATION
+
+   Displays current state of the FT1 CSU/DSU.
+EOM
+		;;
+
+	*)	return 1
+		;;
+
+	esac
+
+	text_area
+
+}
+
+
+#============================================================
+# yesno 
+#
+#	Gets user input YES or NO
+#
+#============================================================
+
+yesno () {
+
+
+        ${DIALOG} --backtitle "$backtitle" --clear \
+                  --yesno "$1" 10 50  
+  	case $? in
+  	0)
+		return 0
+		;;
+	255)
+		cleanup
+		exit 1
+		;;
+  	*)
+		return 1	
+		;;
+	esac       
+
+}
+
+#============================================================
+# input_int 
+#
+#	Gets user input: accepts only integers
+#
+#============================================================
+
+#Gets an integer from the user
+function input_int () {
+
+	local int_input
+
+	$DIALOG --backtitle "$backtitle" --clear \
+		--inputbox "$1" 10 50 "$2" 2> inputbox.tmp.$$
+
+	retval=$?
+
+	int_input=`cat inputbox.tmp.$$`
+	rm -f inputbox.tmp.$$
+
+	case $retval in
+	  	0)
+			if expr "$int_input" : '[0-9][0-9]*$' >/dev/null
+                        then
+				result $int_input
+				return 
+                        else
+				yesno "You have chosen illegal number, would you like to try again?"
+                        fi      
+
+			return -1;;
+	  	1)
+			return -1;;
+	  	255)
+			cleanup
+			exit 1
+			;;
+	esac       
+}
+
+#============================================================
+# create_menu 
+#
+# 	Menu offers CSU/DSU options for Standard
+#       configuration.
+#
+#   	Define Device, Define Interfaces, 
+#   	Wan Device Setup, Interface Setup
+#
+#============================================================
+create_menu () {
+
+	local menu_options
+
+	menu_options="'get_framing'   'Framing mode ----> ${FRM[$FRAMING]}' \
+		      'get_encoding'  'Encoding mode ---> ${ENC[$ENCODING]}' \
+		      'get_linebuild' 'Line build out --> ${LIN[$LINE_BUILD]}' \
+		      'get_channel'   'Channel base ----> $CHANNEL' \
+		      'get_baud'      'Baud rate -------> $BAUD' \
+		      'get_clock'     'Clock mode ------> ${CLK[$CLOCK]}' 2> menu.tmp.$$"
+
+	menu_instr="	Select desired CSU/DSU options. \
+					\
+		    Use arrows to navigate through the options. \
+	            Press <Enter> to configure highlighted opt \
+                    Press <Exit> to run or cancel configuration. \
+                    Press <ESC> to quit.  	\
+		    Press <Help> for help information." 
+
+	menu_name "FT1 Configuration Setup" "$menu_options" 6 "$menu_instr"
+	retval=$?
+
+	choice=`cat menu.tmp.$$`
+	rm -f menu.tmp.$$
+
+	case $retval in
+		0)	case $choice in
+				get_channel)
+					get_integer "Please specify the first active channel	 Only integers between 1 and 24 are allowed"  "1" "1" "24"
+					CHANNEL=$($GET_RC)		
+					;;
+				get_baud)
+					if [ $ENCODING -eq 0 ]; then
+					get_integer "	Please specify the FT1 Baud Rate 
+	 Only integers between 64 and 1536 are allowed" "1536" "64" "1536"
+					else
+					get_integer "	Please specify the FT1 Baud Rate 
+	 Only integers between 56 and 1344 are allowed" "1344" "56" "1344"
+					fi
+					BAUD=$($GET_RC)
+					;;
+				*) 	$choice
+					;;	
+					
+			esac
+			return 0
+			;;
+		1)
+			yesno "Would you like to configure the FT1 card ?"
+			retval=$?
+			if [ $retval -eq 0 ]; then
+				return 2
+			fi
+			return 1
+			;;
+		2) 	choice=${choice%\"*\"}
+			choice=${choice// /}
+			create_menu_help "$choice"
+			create_menu
+			;;
+		255)
+			cleanup
+			exit 1
+			;;
+	esac
+
+}
+
+#============================================================
+# create_menu_help
+# 
+#	Help options for above menu
+#
+#============================================================
+
+
+create_menu_help () {
+	
+	local opt=$1
+
+	case $opt in
+
+	get_framing) 	
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	FT1 FRAMING MODE
+
+Framing Mode options: 1) ESF
+                      2) D4
+
+Please select one of the above options as specified by
+your FT1 provider.
+
+EOM
+		;;
+
+	get_encoding)	
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	FT1 ENCODING MODE
+
+Encoding Mode options: 1) B8ZS
+                       2) AMI
+
+Please select one of the above options as specified by
+your FT1 provider.
+EOM
+		;;
+
+	get_linebuild) 
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	FT1 LINE BUILD OUT 
+
+For WANPIPE FT1 Card setup, select the first option: 
+	* CSU 0dB DSX1 0-133ft
+
+For any other setup, select an option as specified by 
+your FT1 provider.
+EOM
+		;;
+
+	get_channel)
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	FT1 CHANNEL BASE 
+
+Select the first active FT1 channel.  
+
+The T1 line consists of 24 channels, each 64 or 56
+Kbps. If this is a full T1 line, then the first
+active channel is 1.  Otherwise, set the first 
+active channel as specified by your FT1 provider.
+EOM
+		;;
+
+	get_baud)
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	FT1 BAUD RATE
+
+Enter the speed of your connection in Kbps, as 
+specified by your FT1 provider.
+
+For B8ZS Encoding:
+	Full T1 baud rate is: 1536 Kbps.
+	Each T1 channel runs at: 64 Kbps.
+For AMI Encoding:
+	Full T1 baud rate is: 1344 Kbps.
+	Each T1 channel runs at: 56 Kbps.
+EOM
+		;;
+
+	get_clock)
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	FT1 CLOCKING MODE
+
+Clocking Mode options: 1) Normal
+                       2) Master
+
+Default is always Normal.
+
+Select clocking options as specified by your FT1
+provider.
+EOM
+		;;
+	esac
+
+	text_area
+
+	return 0
+
+}
+
+#============================================================
+# get_framing
+#
+# 	Gets user specifed Framing Mode
+#
+#============================================================
+
+get_framing () {
+	
+	local choice
+	local retval
+	local menu_options
+
+	menu_options="'0' 'ESF Framing' \
+		      '1' 'D4  Framing' 2> menu.tmp.$$"
+
+	menu_instr="	Please select a Framing Type \
+						\
+		    Use arrows to navigate through the options. \
+	            Press <Enter> to select highlighted opt \
+                    Press <Exit> to return to previous menu. \
+                    Press <ESC> to quit.  	\
+		    Press <Help> for help information." 
+
+	menu_name "FT1 Framing Setup" "$menu_options" 2 "$menu_instr"
+	retval=$?
+
+	choice=`cat menu.tmp.$$`
+	rm -f menu.tmp.$$
+
+	case $retval in
+		0)	FRAMING=$choice
+			return 0 
+			;;
+		1) 	return 1
+			;;
+		2)  	return 1
+			;;
+		255) 	cleanup	
+			exit 1
+			;;
+	esac
+}
+
+#============================================================
+# get_encoding  
+#
+#	Gets user specified Encoding Mode
+#
+#============================================================
+
+get_encoding () {
+	
+	local choice
+	local retval
+	local menu_options
+
+	menu_options="'0' 'B8ZS Encoding' \
+		      '1' 'AMI  Encoding' 2> menu.tmp.$$"
+
+	menu_instr="	Please select an Encoding Type \
+						\
+		    Use arrows to navigate through the options. \
+	            Press <Enter> to select highlighted opt. \
+                    Press <Exit> to return to previous menu. \
+                    Press <ESC> to quit.  	\
+		    Press <Help> for help information." 
+
+	menu_name "FT1 Encoding Setup" "$menu_options" 2 "$menu_instr"
+	retval=$?
+
+	choice=`cat menu.tmp.$$`
+	rm -f menu.tmp.$$
+
+	case $retval in
+		0)	ENCODING=$choice
+			if [ $choice -eq 0 ]; then 
+				BAUD=1536
+			else
+				BAUD=1344
+			fi
+			return 0 
+			;;
+		1) 	return 1
+			;;
+		2)  	return 1
+			;;
+		255) 	cleanup	
+			exit 1
+			;;
+	esac
+}
+
+#============================================================
+# get_linebuild
+#
+#	Gets user specified Line Build Option
+#
+#============================================================
+
+get_linebuild () {
+	
+	local choice
+	local retval
+	local menu_options
+
+	menu_options="'0' 'CSU: 0dB,  DSX1: 0 to 133ft (default)' \
+		      '1' 'DSX: 133 to 266ft' \
+		      '2' 'DSX: 266 to 399ft' \
+		      '3' 'DSX: 399 to 533ft' \
+		      '4' 'DSX: 533 to 655ft' \
+		      '5' 'CSU -7dB' \
+		      '6' 'CSU -15dB' \
+		      '7' 'CSU -22.5dB' 2> menu.tmp.$$"
+
+	menu_instr="	Please select an Line Build Type \
+					\
+		    Use arrows to navigate through the options. \
+	            Press <Enter> to select highlighted opt. \
+                    Press <Exit> to return to previous menu. \
+                    Press <ESC> to quit and <Help> for help info." 
+
+	menu_name "FT1 Line Build Setup" "$menu_options" 8 "$menu_instr"
+	retval=$?
+
+	choice=`cat menu.tmp.$$`
+	rm -f menu.tmp.$$
+
+	case $retval in
+		0)	LINE_BUILD=$choice
+			return 0 
+			;;
+		1) 	return 1
+			;;
+		2)  	return 1
+			;;
+		255) 	cleanup	
+		 	exit 1	
+			;;
+	esac
+}
+
+#============================================================
+# get_clock
+#
+#	Gets user specified Clocking Mode
+#
+#============================================================
+
+get_clock () {
+	
+	local choice
+	local retval
+	local menu_options
+
+	menu_options="'0' 'NORMAL (default)' \
+		      '1' 'MASTER' 2> menu.tmp.$$"
+
+	menu_instr="	Please select Clocking Mode \
+						\
+		    Use arrows to navigate through the options. \
+	            Press <Enter> to select highlighted opt \
+                    Press <Exit> to return to previous menu. \
+                    Press <ESC> to quit.  	\
+		    Press <Help> for help information." 
+
+
+	menu_name "FT1 Clock Mode Setup" "$menu_options" 2 "$menu_instr"
+	retval=$?
+
+	choice=`cat menu.tmp.$$`
+	rm -f menu.tmp.$$
+
+	case $retval in
+		0)	CLOCK=$choice
+			return 0 
+			;;
+		1) 	return 1
+			;;
+		2)  	return 1
+			;;
+		255) 	cleanup	
+			exit 1
+			;;
+	esac
+}
+
+#============================================================
+# get_integer
+#
+#	Uses input_int() to obtain an integer number, then
+#       it tests the number for MIN and MAX limit.
+#
+#============================================================
+
+function get_integer () {
+
+	local min="$3"
+	local max="$4"	
+	local int_ret
+
+	while true
+	do
+		input_int "$1" "$2" 
+		int_ret=$($GET_RC)
+	
+		if [ $int_ret -ge 0 ]; then
+			if [ $int_ret -gt $max -o $int_ret -lt $min ]; then
+				yesno "Your selection is outside specified range: $min to $max.  Would you like to try again?"
+				rc=$?
+				if [ $rc -eq 1 ]; then
+					result $min
+					return
+				fi
+				
+			else	
+				result $int_ret
+				return  
+			fi
+		fi
+	done	
+}
+
+#============================================================
+# result 
+#
+#	Writes the result of a function into the 
+#       a file ($RC)
+#	This is used since shell cannot use return
+#       command to pass anything else but numbers 0-255.
+#
+#============================================================
+
+function result () {
+	echo $1 > $RC
+}
+
+
+#============================================================
+# print_success_config
+#
+#	Print message upon successful configuration.
+#
+#============================================================
+
+print_success_config () {
+
+	local silent=${2:-1}
+	i=0
+
+	TMP=`echo $RESULT | grep Error | cut -d' ' -f2`
+	if [ "$TMP" != "" ]; then
+		print_fail_config $TMP 
+		cleanup
+		exit 1
+	fi
+
+	for val in $RESULT
+	do
+		conf_data[i]=$val;
+		i=$((i+1))
+	done 
+
+	FRAMING=${conf_data[0]}
+	ENCODING=${conf_data[1]}
+	LINE_BUILD=${conf_data[2]}
+	CHANNEL=${conf_data[3]}
+	BAUD=${conf_data[4]}
+	CLOCK=${conf_data[5]}  
+
+	if [ $BAUD -gt 1536 -o $BAUD -lt 56 ]; then
+		BAUD=1536
+		print_fail_config 245
+		return
+	fi
+
+	if [ $silent -ne 0 ]; then
+		echo -e "\t     $1\n" > $TEMP
+		echo  "  Framing ----> ${FRM[$FRAMING]}" >> $TEMP
+		echo  "  Encoding ---> ${ENC[$ENCODING]}" >> $TEMP
+		echo  "  Line Build -> ${LIN[$LINE_BUILD]}" >> $TEMP
+		echo  "  Channel  ---> $CHANNEL" >> $TEMP
+		echo  "  Baud   -----> $BAUD" >> $TEMP
+		echo  "  Clocking ---> ${CLK[$CLOCK]}" >> $TEMP      
+
+		$DIALOG --backtitle "$backtitle" \
+		--textbox $TEMP 20 50   
+		
+		rm -f $TEMP  
+	fi
+
+	write_config_file;
+}
+
+
+#============================================================
+# print_fail_config
+#
+#	Print message upon failed configuration
+#
+#============================================================
+
+print_fail_config () {
+
+	local rc=$1
+
+	echo -e "\t   !!! FT1 Configuration Failed !!!" > $TEMP
+        echo -e "\t  Check for errors and try again" >> $TEMP  
+
+	case $rc in
+	
+		6)	
+#-----------------help start--------------------------------
+			cat <<EOM >> $TEMP
+Error:
+
+    The selected Sangoma card is not fitted with 
+    an FT1 CSU/DSU.
+
+Solution:
+
+    This application only works with S508/FT1 or S514/FT1
+    cards. Please consult Sangoma Tech. at (905) 474-1990
+EOM
+			;;
+
+
+		8)
+#-----------------help start--------------------------------
+
+			cat <<EOM > $TEMP
+	!!! FT1 Configuration Failed !!!
+
+If Auto Configuration was previously canceled:
+  Error: 
+     The board is busy trying to detect the baud rate.  
+  Solution:
+     Restart the cfgft1 configurator.
+
+Otherwise:
+  Error:
+   The selected baud rate: $BAUD Kbps, is incompatible 
+   with the selected ${ENC[$ENCODING]} encoding mode. 
+  Solution:
+   AMI  encoding: baud rate must be divisible by 56Kbps
+   B8ZS encoding: baud rate must be divisible by 64Kbps
+EOM
+			;;
+
+		10) 
+#-----------------help start--------------------------------
+			cat <<EOM >> $TEMP
+
+Error:
+   The defined channel base $CHANNEL is invalid 
+
+Solution:
+   This error occurs, for example, if the channel 
+   base is set to 22 and the baud rate is 256Kbps 
+   In this case, there are 4 active DS-0 channels
+   (256/64), but they cannot fit between numbers 
+   22 and 24 (which is the highest valid channel)
+EOM
+			;;
+
+		11) 
+#-----------------help start--------------------------------
+			cat <<EOM >> $TEMP
+
+Error:
+
+   The FT1 asynchronous transmit buffer is currently
+   in use. 
+
+Solution:
+
+   Please try the command again 
+EOM
+
+			;;
+
+		12)
+#-----------------help start--------------------------------
+			cat <<EOM >> $TEMP
+
+Error:
+   
+   FT1 adapter not in operational mode
+
+Possible reasons:
+
+   If Auto Configuration was previously canceled, 
+restart the cfgft1 configurator. This will reset
+the board into the operational state.
+   
+   Otherwise, consult the Sangoma Technologies at
+(905) 474-1990. 
+EOM
+
+			;;
+
+
+		251)
+#-----------------help start--------------------------------
+			cat <<EOM >> $TEMP
+
+Error:
+   Communication failed between the application and
+   the FT1 driver. (ie. ioctl() call failed ) 
+
+Solution:
+   Make sure that the FT1 driver has been started 
+   correctly. Check for message:  
+   'FT1 Config Ready!' in /var/log/messages file.
+   Make sure that device wanpipe$DEVICE_NUM is indeed the
+   device loaded by the FT1 driver. Check $WAN_CONF_DIR/ft1.conf
+EOM
+
+			;;
+		234)	
+#-----------------help start--------------------------------
+			cat <<EOM >> $TEMP
+
+Error:
+   Failed to access device wanpipe$DEVICE_NUM
+
+Solution:
+   Device wanpipe$DEVICE_NUM is not supported by the 
+   kernel.
+EOM
+
+
+			;;
+
+		245)
+#-----------------help start--------------------------------
+			cat <<EOM > $TEMP
+	
+	The FT1 CSU/DSU is not configured.
+
+Please use one of the Configuration Methods
+to configure the FT1 CSU/DSU.
+
+EOM
+
+			;;
+
+		246)
+#-----------------help start--------------------------------
+			cat <<EOM > $TEMP
+
+	!!! FT1 Configuration Failed !!!
+
+	Commnunications have been corrupted between
+FT1 driver and the cfgft1 configurator.  Please 
+restart the cfgft1 configurator. 
+
+If the problem persists, contact your Sangoma
+Representative.
+EOM
+
+			;;
+
+		*) 
+#-----------------help start--------------------------------
+			cat <<EOM >> $TEMP
+
+	Unknown return code: $rc
+
+Possible reasons:
+
+   If Auto Configuration was canceled, please wait
+a few minutes, since the board is still trying to
+auto-detect the line.  If this persists, restart
+the cfgft1 configurator.
+	
+   Otherwise, consult the Sangoma Technologies at
+(905) 474-1990. 
+EOM
+
+			;;
+
+	esac  		
+
+	text_area
+}
+
+
+#============================================================
+# print_fail_auto_config
+#
+#	Print messages for failed Automatic configuration.
+#	The return codes are different than for other 
+#	configurations.
+#
+#============================================================
+
+print_fail_auto_config () {
+
+	local rc=$1
+
+	echo -e "\t   !!! Configuration Failed !!!" > $TEMP
+        echo -e "\t  Check for errors and try again" >> $TEMP  
+
+	case $rc in
+
+		8)
+#-----------------help start--------------------------------
+		cat <<EOM >> $TEMP
+
+Error:
+	Auto FT1 Configuration not complete.
+	
+Solution:
+
+	If the Auto Configuration was canceled,
+	it is recommended that cfgft1 configuration
+	is restarted.  
+
+EOM
+
+		;;
+
+
+		12)
+#-----------------help start--------------------------------
+		cat <<EOM >> $TEMP
+Error:
+
+	FT1 is not in operational mode
+
+Solution:
+
+	Make sure that the FT1 driver is loaded.
+	In order to load the FT1 driver configure the 
+	FT1 configuration file $WAN_CONF_DIR/ft1.conf and 
+	run 'wanrouter start ft1'
+EOM
+
+		;;
+	
+		13) 
+#-----------------help start--------------------------------
+		cat <<EOM >> $TEMP
+
+Error:
+	No valid line detected
+
+Solution:
+
+	Make sure that the WANPIPE FT1 board is connected 
+	to a T1 line.
+	If connection exists, the line could be down.
+EOM
+
+		;;
+	esac
+
+	text_area
+}
+
+#============================================================
+# cleanup
+#
+#	Before the program exits, this funciton is called
+# 	to remove temporary files and shutdown the FT1
+#       drivers.
+#
+#============================================================
+
+cleanup () {
+
+	[ -f "$RC" ] && rm -f $RC
+	[ -f "$FT1_CONF" ] && rm -f $FT1_CONF
+
+	if [ $WAN_LOAD = YES ]; then
+		$WANROUTER stop "ft1_$WAN_DEVICE"
+	fi
+}
+
+
+#============================================================
+#  autoconfig_ft1
+#
+#	Startup the FT1 drivers using wanpipe#.conf 
+# 	specified by the user.
+#
+#============================================================
+
+autoconfig_ft1 () {
+
+	local err
+
+	if [ ! -f $auto_config_file ]; then
+		echo "Error: File not found $auto_config_file";
+		return 1;
+	fi
+
+	cat $auto_config_file | awk '{ gsub("#.*", "") ; print }' > $WAN_HOME/tmp.$$	
+
+	ifs_orig=$IFS
+	IFS="="
+	while read ft1_mode ft1_val			
+	do
+		ft1_mode=`echo $ft1_mode | awk '{ gsub(" ", "") ; print }'`
+		ft1_mode=`echo $ft1_mode | awk '{ gsub("\t", "") ; print }'`
+
+		ft1_val=`echo $ft1_val | awk '{ gsub(" ", "") ; print }'`
+		ft1_val=`echo $ft1_val | awk '{ gsub("\t", "") ; print }'`
+
+		if [ "$ft1_mode" != "" ]; then
+			#echo "FT1Mode=$ft1_mode-:-FT1Val=$ft1_val-:-"
+
+			ft1_mode=`echo $ft1_mode | tr a-z A-Z`
+			ft1_val=`echo $ft1_val | tr a-z A-Z`
+	
+			case $ft1_mode in
+			
+			FRAMING*)
+				if [ $ft1_val = "ESF" ]; then
+					FRAMING=0
+					echo "Framing		= ESF";
+				else
+					FRAMING=1
+					echo "Framing		= D4";
+				fi
+				;;
+				
+			ENCODING*)
+				if [ $ft1_val = "B8ZS" ]; then
+					ENCODING=0
+					echo "Encoding	= B8ZS";
+				else
+					ENCODING=1
+					echo "Encoding	= AMI";
+				fi
+				;;
+
+			LINEBUILD*)
+				if [ $ft1_val = "CSU:0DB,DSX:0-133FT" ]; then
+					LINE_BUILD=0
+					echo "Line Build	= CSU:0DB,DSX:0-133FT";
+				elif [ $ft1_val = "DSX:266-399FT" ]; then
+					LINE_BUILD=1
+					echo "Line Build	= DSX:266-399FT";
+				elif [ $ft1_val = "DSX:399-533FT" ]; then
+					LINE_BUILD=2
+					echo "Line Build	= DSX:399-533FT";
+				elif [ $ft1_val = "DSX:399-533FT" ]; then
+					LINE_BUILD=3
+					echo "Line Build	= DSX:399-533FT";
+				elif [ $ft1_val = "DSX:533-655FT" ]; then
+					LINE_BUILD=4
+					echo "Line Build	= DSX:533-655FT";
+				elif [ $ft1_val = "CSU-7DB" ]; then
+					LINE_BUILD=5	
+					echo "Line Build	= CSU-7DB";
+				elif [ $ft1_val = "CSU-15DB" ]; then
+					LINE_BUILD=6
+					echo "Line Build	= CSU-15DB";
+				elif [ $ft1_val = "CSU-22.5DB" ]; then
+					LINE_BUILD=7
+					echo "Line Build	= CSU-22.5DB";
+				else
+					echo "Line Build	= CSU:0DB,DSX:0-133FT";
+					LINE_BUILD=0
+				fi
+				;;	
+			CHANNEL*)
+				echo "Channel 	= $ft1_val" 
+				CHANNEL=$ft1_val		
+				;;
+			BAUD*)
+				echo "Baud		= $ft1_val"
+				BAUD=$ft1_val
+				;;
+				
+			CLOCKING*)
+				if [ $ft1_val = "NORMAL" ]; then
+					echo "Clocking 	= Normal"
+					CLOCKING=0;
+				else
+					echo "Clocking 	= Master"
+					CLOCKING=1;
+				fi
+				;;
+			*)
+				echo "Configuration File Syntax Error!"
+				return 1;
+				;;
+			esac
+		fi
+
+	done < $WAN_HOME/tmp.$$
+	IFS=$ifs_orig;
+
+	#echo "$FRAMING $ENCODING $LINE_BUILD $CHANNEL $BAUD $CLOCKING"
+	RESULT=`$WAN_FT1EXEC wanpipe$DEVICE_NUM 0 $FRAMING $ENCODING $LINE_BUILD $CHANNEL $BAUD $CLOCK` 
+	if [ "$RESULT" != "" ]; then
+		echo
+		echo "FT1 Configure Sucessfully: "
+		err=0;
+	else
+		echo
+		echo "FT1 Configuration FAILED!"	
+		err=1;
+	fi
+
+	rm -f $WAN_HOME/tmp.$$
+
+	return $err;
+}
+
+
+
+#============================================================
+#  start_wanpipe
+#
+#	Startup the FT1 drivers using wanpipe#.conf 
+# 	specified by the user.
+#
+#============================================================
+
+start_wanpipe () {
+
+	local dev=$1
+
+	if [ -z $dev ]; then
+		cat <<EOM > $TEMP
+
+	!!! Syntax Error !!!
+
+Usage:
+wanpipe_cfgft1 <wanpipe#> <cfgft1 config file> 
+	
+	<config file> = /etc/wanpipe/wanpipe#.cfgft1
+	:where # = 1,2,3 ...
+
+	If the file is supplied the cfgft1 will run
+	in silet mode. Thus, user will not be prompted
+	for config options.
+	
+	Note: the cfgft1 file is created each time 
+	the CSU/DSU is configured in /etc/wanpipe
+	directory.
+
+	CfgFt1 File Syntax:
+
+	Framing         = [ ESF | D4 ] 
+	Encoding        = [ B8ZS | AMI ]
+	Line Build      = CSU: 0db, DSX: 0-133ft
+	Channel         = [ 1 - 24 ]
+	Baud            = [ 0 - 1536 ] 
+	Clocking        = [ Normal | Master ] 
+
+	Return: 0 = success  1 = failure
+	
+EOM
+		text_area
+		cleanup
+		exit 1
+	fi
+	$WANROUTER start "ft1_$dev"
+	rc=$?
+	WAN_LOAD=YES
+	if [ $rc -ne 0 ]; then
+#-----------------help start--------------------------------
+
+		print_start_fail $rc $dev
+
+		cleanup
+		exit 1
+	fi
+
+}
+
+#============================================================
+#  print_start_fail
+#
+# 	Print FT1 driver startup failure messages
+#
+#============================================================
+
+print_start_fail () {
+
+	local rc=$1
+	local dev=$2
+
+	case $rc in
+	
+	1)
+		cat <<EOM >$TEMP
+	!!! FT1 Configuration Failed !!!
+
+Error	
+   FT1 Configuration driver failed to load on
+   device $dev.
+
+Reason
+   Make sure that $dev is a valid device, and 
+   $WANPIPE_CONF_DIR/$dev.conf configuration file exists.  
+
+   Check that device $dev is not already running.
+   If it is, run 'wanrouter stop $dev' first and 
+   then restart the cfgft1.
+EOM
+		;;
+
+	2)
+		cat <<EOM >$TEMP
+	!!! FT1 Configuration Failed !!!
+	
+Error
+   Wanpipe kernel modules failed to load.  
+
+Solution
+   Make sure that linux kernel has been properly
+   patched and compiled.  
+
+   Check for wanpipe modules in /lib/modules/$(uname -r)
+   directory: wanpipe.o wanrouter.o and sdladrv.o
+EOM
+		;;
+	3)
+			cat <<EOM >$TEMP
+	!!! FT1 Configuration Failed !!!
+	
+Error
+   Wanpipe drivers failed to start up.   
+
+Solution
+   Check /var/log/wanrouter and /var/log/messages for 
+   errors.  
+
+   Make sure that your configuration file $WANPIPE_CONF_DIR/$dev.conf	
+   syntax is correct.
+
+   Refer to WANPIPE_CONFIG.txt in /usr/doc/wanpipe.
+EOM
+		;;
+
+	*)
+		cat <<EOM >$TEMP
+	!!! FT1 Configuration Failed !!!
+	
+Error
+   FT1 Configuration drivers failed to load
+   on device $dev.
+
+Solution
+   Check /var/log/router and /var/log/messages for 
+   errors.  
+
+   Make sure that your configuration file $WANPIPE_CONF_DIR/$dev.conf	
+   syntax is correct.
+
+   Refer to WANPIPE_CONFIG.txt in /usr/doc/wanpipe.
+EOM
+		;;
+
+	esac
+
+	text_area
+}
+
+#============================================================
+#   check_dialog
+#
+# 	Check if lxdialog is compiled
+#
+#
+#============================================================
+
+check_dialog () {
+
+	# Check that DIALOG executable exists
+	if [ ! -f "$DIALOG" ]; then
+		
+		#-----------------help start--------------------------------
+			cat<<EOM 
+
+	!!! FT1 Configuration Error !!!
+
+The FT1 configuration utility uses lxdialog executable
+in the lxdialog directory.  
+
+Error:
+    The lxdialog executable cannot be found.
+
+Solution:
+    Run make from current directory to compile all the 
+    executables needed by the FT1 configurator.
+
+EOM
+		cleanup
+		exit 1  
+	fi
+
+}
+
+#============================================================
+#  check_meta_install
+#
+# 	Check if /etc/wanrouter.rc exists
+#   	We use this file to find out where wanpip#.conf
+#	files are.
+#
+#============================================================
+
+check_meta_install () {
+
+	if [ ! -f "$META_CONF" ]; then
+
+		cat<<EOM 
+
+	!!! FT1 Configuration Error !!!
+
+Error:
+
+   The $WAN_CONF_DIR/wanrouter.rc meta file could
+   not be found. 
+
+Solution:
+
+   Make sure that the wanpipe package is
+   installed.  
+	 
+   wanrouter.rc must be in $WAN_CONF_DIR directory.
+EOM
+	    cleanup
+	    exit 1
+	fi
+
+	source $META_CONF
+
+}
+
+#============================================================
+# check_exists
+#
+# 	Check if the wanpipe has been started
+#
+#
+#============================================================
+
+check_exists () {
+
+	if [ $OSYSTEM = "Linux" ]; then
+		
+		if [ ! -e "$ROUTER_PROC" ]; then
+			return 1
+		fi	
+	else
+		for i in $WAN_DRIVERS
+		do $MODULE_STAT | grep -q $i && {
+			return 0
+		}
+		done
+		return 1
+	fi
+
+	return 0
+}
+
+
+
+#============================================================
+# check_dependency 
+#
+# 	Check if the wanpipe has be properly installed
+#
+#
+#============================================================
+
+check_dependency () {
+
+	#Check if the wanrouter start correctly
+
+	check_exists 
+	if [ $? -eq 1 ]; then 
+
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	!!! FT1 Configuration Error !!!
+
+Error:
+    FT1 Configuration driver is not loaded.
+
+Solution:
+    Check the wanpipe#.conf file and make sure
+    that wanpipe router can be started using
+    'wanrouter start wanpipe#' before wanpipe_cfgft1
+    configuration is attempted.
+EOM
+		text_area
+		cleanup
+		exit 1 
+
+	fi
+
+	if [ ! -x "$WAN_FT1EXEC" ]; then
+
+#-----------------help start--------------------------------
+		cat <<EOM > $TEMP
+	!!! FT1 Configuration Error !!!
+
+Error:
+    FT1 executable code has not been compiled, or cannot
+    be found.
+
+Solution:
+    Make sure that path exists to the kernel source, in 
+    /usr/include/linux
+
+    Run 'make' in this directory.
+    This will compile all necessary modules.
+
+EOM
+
+		text_area
+		cleanup
+		exit 1 
+	fi
+
+}
+
+write_config_file ()
+{
+	local date=`date`
+
+
+	cat <<EOM > "$WAN_HOME/$WAN_DEVICE.cfgft1"
+#================================================
+# $WAN_DEVICE FT1 Configuration File
+#================================================
+#
+# Date: $date
+#
+# Note: This file was generated automatically
+#       by $WAN_BIN_DIR/$PROG_NAME program.
+#
+#       This file represents you latest CSU/DSU
+#       configuration.  To reconfigure your 
+#       CSU/DSU please run the
+#       $WAN_BIN_DIR/$PROG_NAME again.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+Framing 	= ${FRM[$FRAMING]} 
+Encoding 	= ${ENC[$ENCODING]}
+Line Build 	= ${LIN[$LINE_BUILD]}
+Channel 	= $CHANNEL
+Baud		= $BAUD
+Clocking	= ${CLK[$CLOCK]} 
+
+EOM
+}
+
+
+function read_meta_conf ()
+{
+	if [ $OSYSTEM = "Linux" ]; then
+		WAN_HOME=/etc/wanpipe
+	elif [ $OSYSTEM = "FreeBSD" -o $OSYSTEM = "OpenBSD" ]; then
+		WAN_HOME=/usr/local/etc/wanpipe
+		wanrouter_rc_file=""
+		if [ -r /etc/rc.conf ]; then
+			. /etc/rc.conf
+		fi
+		if [ -n "$wanrouter_rc_file" ]; then
+			WAN_HOME=${wanrouter_rc_file%/*}
+		fi
+	fi
+	META_CONF=$WAN_HOME/wanrouter.rc
+	source $META_CONF
+
+	WAN_FT1EXEC=$WAN_BIN_DIR/wanpipe_ft1exec
+	TEMP="$WAN_HOME/temp.$$"
+	return 0
+}
+
+
+#============================================================
+# INITIALIZE GLOBAL VARIABLES 
+#============================================================
+
+OSYSTEM=`uname -s`
+PROG_NAME=wanpipe_cfgft1
+
+ROUTER_PROC=/proc/net/wanrouter
+FT1_CONF=$(pwd)/FT1_CONFIG
+WANROUTER=wanrouter
+RC=$(pwd)/return_code
+GET_RC="cat $RC"
+WAN_DEVICE=$1
+WAN_LOAD=NO
+
+FRM=([0]="ESF"  [1]="D4")
+ENC=([0]="B8ZS" [1]="AMI")
+LIN[0]="CSU: 0db, DSX: 0-133ft" 
+LIN[1]="DSX: 266-399ft" 
+LIN[2]="DSX: 399-533ft" 
+LIN[3]="DSX: 399-533ft" 
+LIN[4]="DSX: 533-655ft" 
+LIN[5]="CSU -7dB" 
+LIN[6]="CSU -15dB" 
+LIN[7]="CSU -22.5dB"
+CLK=([0]="Normal" [1]="Master")					
+
+FRAMING=0
+ENCODING=0
+LINE_BUILD=0
+CHANNEL=1
+BAUD=1536
+CLOCK=0
+
+read_meta_conf
+
+if [ $OSYSTEM = "Linux" ]; then
+	MODULE_STAT=lsmod
+	WAN_DRIVERS="wanpipe"
+elif [ $OSYSTEM = "FreeBSD" ]; then
+
+	MODULE_STAT=kldstat
+	WAN_DRIVERS="wanpipe"
+	
+elif [ $OSYSTEM = "OpenBSD" ]; then
+
+	MODULE_STAT=modstat
+	WAN_DRIVERS="wanrouter"
+fi
+
+backtitle="FT1 Configuration Utility"
+
+[ -f "$FT1_CONF" ] && rm -f $FT1_CONF 
+
+DIALOG=${DIALOG=$WAN_BIN_DIR/wanpipe_lxdialog}
+
+check_dialog
+
+#Set the xterm geometry and start the wanrouter
+set_geometry `stty size 2>/dev/null`
+
+check_meta_install
+
+start_wanpipe $WAN_DEVICE 
+
+check_dependency
+
+
+#============================================================
+# MAIN PROGRAM 
+#
+#
+#
+#============================================================
+
+#Initial menu
+
+get_num_of_devices 
+if [ $? -gt 0 ]; then
+cleanup 
+exit 1
+fi
+
+auto_config_file=$2
+if [ ! -z $auto_config_file ]; then
+	autoconfig_ft1;
+	rc=$?
+	cleanup
+	exit $rc;
+fi
+
+
+while true
+do
+
+	start_menu 
+	if [ $? -eq 0 ]; then
+		FT1_OPTION=$($GET_RC);
+	else
+		break	
+	fi
+
+	[ -f "$FT1_CONF" ] && rm -f $FT1_CONF
+
+	case  $FT1_OPTION in	
+	
+	REG)
+		#Peform a READ First, so that initial FT1 options
+		#represent the current configuration.
+
+		RESULT=`$WAN_FT1EXEC wanpipe$DEVICE_NUM 3`	
+		if [ "$RESULT" != "" ]; then
+			print_success_config "Current FT1 Configuration" 0	
+		else
+			print_fail_config 0
+			break;
+		fi
+
+		
+		while true 
+		do
+			create_menu  
+			grc=$?
+			if [ $grc -eq 2 ]; then
+				[ -f "$FT1_CONF" ] && rm -f $FT1_CONF
+				RESULT=`$WAN_FT1EXEC wanpipe$DEVICE_NUM 0 $FRAMING $ENCODING $LINE_BUILD $CHANNEL $BAUD $CLOCK` 
+				if [ "$RESULT" != "" ]; then
+					print_success_config "FT1 Configuration Successful"  	
+				else
+					print_fail_config 0
+				fi
+				break
+			else	
+				if [ $grc -gt 0 ]; then
+					break
+				fi
+			fi
+		done
+		;;
+	READ)
+		RESULT=`$WAN_FT1EXEC wanpipe$DEVICE_NUM 3`		
+		if [ "$RESULT" != "" ]; then
+			print_success_config "Current FT1 Configuration"	
+		else
+			print_fail_config 0
+		fi
+		;;
+	ADV)
+		eval "$WAN_FT1EXEC wanpipe$DEVICE_NUM 2"
+		clear
+		;;
+
+	AUTO)	 
+		RESULT=`$WAN_FT1EXEC wanpipe$DEVICE_NUM 1`
+		if [ "$RESULT" != "" ]; then
+			print_success_config "Automatic FT1 Config Successful"	
+		else
+			print_fail_auto_config 0
+		fi
+		;;
+	esac
+done
+
+cleanup
+
+exit

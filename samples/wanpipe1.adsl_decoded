@@ -1,0 +1,215 @@
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Wed Oct 12 10:48:34 EDT 2005
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_ADSL, Comment	#WAN_ADSL indicates S518 ADSL card
+
+[interfaces]
+
+#-------- DRIVER INTERFACE DEFINITIONS --------------------------------
+
+w1ad = wanpipe1, , PPPoE, Comment	#PPPoE : Configure interface as Ethernet
+                                        #        so one can run PPPoE protocol over
+                                        #        it. (Roraing Penguin PPPoE)
+					
+
+
+
+[wanpipe1]
+
+CARD_TYPE 	= S518	#S518: Same for all ADSL cards must
+                        #This value must be hardcoded to S518 for all
+                        #ADSL cards.
+
+AUTO_PCISLOT 	= YES	#Auto detect PCI/BUS info for this card type
+                        #NO - disable this option
+                        #YES- enable this option
+                        #     if enabled bottom two options 
+			#     PCISLOT and PCIBUS will not be used. 
+                        #     Therefore one can set the to arbitrary value 
+                        #     or remove them all together.
+
+PCISLOT 	= 2     #PCI SLOT Number: 
+                        #Valid values = any number
+    
+PCIBUS  	= 2     #PCI BUS Number:
+			#Valid values = any number
+
+
+ENCAPMODE	= ETH_LLC_OA	#ATM Encapsulation Mode
+			        #ETH_LLC_OA: Bridged Ethernet over ATM
+                                #            ATM will expect incoming and outgoing
+                                #            ethernet protocol frames.
+                                #            LLC ATM headers. 
+				#ETH_VC_OA : Bridged Ethernet over ATM
+				#            No ATM headers.
+				#IP_LLC_OA : Classical IP over ATM
+                                #            LLC ATM headers   
+				#IP_VC_OA  : IP over ATM
+                                #            No ATM headers
+				#PPP_LLC_OA:
+				#PPP_VC_OA :
+ATM_AUTOCFG	= NO	#Attempt to autodetect VPI/VCI numbers
+                        #Default NO.
+				
+VCI	= 35		#VCI Value
+VPI	= 0		#VPI Value
+
+ADSL_WATCHDOG	= YES	#Use ATM PING to test the line status
+                        #If ATM PING failes the line will be restarted 
+
+#-------------ADSL INTERNAL VARIALBES ------------------
+
+VERBOSE	= 1				#ADSL internal variable set to 1
+					#No other options
+
+RXBUFFERCOUNT	= 50			#Rx buffer count
+					#No other options
+
+TXBUFFERCOUNT	= 50			#Tx buffer count
+					#No other optiosn
+
+ADSLSTANDARD	= ADSL_MULTIMODE	#ADSL Standard
+					#ADSL_MULTIMODE : (Default)
+					#		  Automatically detect ADSL standard
+					#		  We never needed to change this option
+					#ADSL_T1_413	  
+					#ADSL_G_LITE
+					#ADSL_G_DMT
+					#ADSL_ALCATEL_1_4
+					#ADSL_ADI
+					#ADSL_ALCATEL
+					#ADSL_T1_413_AUTO
+
+ADSLTRELLIS	= ADSL_TRELLIS_ENABLE	#Trellis Enable/Disable
+					#ADSL_TRELLIS_ENABLE : (Default)
+					#		       We never needed to change this option
+					#ADSL_TRELLIS_DISABLE
+
+ 
+ADSLTXPOWERATTEN	= 0		#ADSL Tx Power Attenuation
+                                        #
+					#*** This a valuable variable and it also works in 
+                                        #    conjuction with ADSLCODINGGAIN
+					#
+					#Integer Value 0 to 6 
+					# 0 (Deafult)
+					# 3 or 6 (*MAGIC: Found that it helps if the line is noisy
+					#                 and ADSL is constantly retraining)
+
+
+ADSLCODINGGAIN	= ADSL_AUTO_CODING_GAIN #ADSL Coding Gain
+					#
+					#*** This a valuable variable and it also works well in
+					#    conjuction with ADSLTXPOWERATTEN
+					#
+					#ADSL_AUTO_CODING_GAIN : (Default)
+					#
+					#ADSL_0DB_CODING_GAIN
+					#ADSL_1DB_CODING_GAIN
+					#ADSL_2DB_CODING_GAIN
+					#ADSL_3DB_CODING_GAIN (MAGIC: Found that helps in conjucture with
+                                        #                             ADSLTXPOWERATTEN=3)
+					#ADSL_4DB_CODING_GAIN
+					#ADSL_5DB_CODING_GAIN
+					#ADSL_6DB_CODING_GAIN
+					#ADSL_7DB_CODING_GAIN
+					
+
+ADSLMAXBITSPERBIN	= 0xE		#Maximum Bits per Bin
+					#Valid Values 0x01-0xF
+					#
+					#Determines the overall baud rate of theline.
+					#
+					#Theoretically it can help on very noisy lines
+                                        #by lowering the value and using less frequency
+					#ranges to tx/rx data.
+
+#The Start/End Tx/Rx Freqeuncy Ranges (Bins)
+#Can theoretically lower the bandwidth
+#on noisy lines, in order to avoid higher
+#unstable frequency ranges.
+#However, this never worked in practice
+#thus our suggestion is to not try to set
+#these values.
+
+ADSLTXSTARTBIN	= 0x6			#Start Tx Frequency Range (Bin)
+					#Do not adjust
+
+ADSLTXENDBIN	= 0x1F			#End Tx Frequency Range (Bin)
+					#Do not adjust
+	
+ADSLRXSTARTBIN	= 0x20			#Start Rx Frequency Range (Bin)
+					#Do not adjust
+
+ADSLRXENDBIN	= 0xFF			#End of Rx Frequency Range (Bin)
+					#Do not adjust
+
+
+ADSLRXBINADJUST	= ADSL_RX_BIN_DISABLE	#Disable Rx Frequency Ranges
+					#Do not ajust
+
+ADSLFRAMINGSTRUCT	= ADSL_FRAMING_TYPE_3	#ADSL Framing
+						#ADSL_FRAMING_TYPE_0
+						#ADSL_FRAMING_TYPE_1
+						#ADSL_FRAMING_TYPE_2
+						#ADSL_FRAMING_TYPE_3 (Default)
+						#Do not adjust
+
+ADSLEXPANDEDEXCHANGE	= ADSL_EXPANDED_EXCHANGE #ADSL Exchange
+						 #ADSL_EXPANDED_EXCHANGE (Default)
+						 #ADSL_SHORT_EXCHANGE
+						 #Do not adjust
+
+ADSLCLOCKTYPE	= ADSL_CLOCK_CRYSTAL	#ADSL Clocking
+					#ADSL_CLOCK_CRYSTAL : Slave Clocking (Default)
+					#ADSL_CLOCK_OSCILLATOR : Master Clock 
+					#Do not adjust
+
+ADSLMAXDOWNRATE	= 8192		#ADSL Max Baudrate
+				#This value WILL limit the negotiaged baudrate
+				#Value is in Kilobits per second
+				#
+				#So by setting the value to 1000 the highest
+                                #rx baud rate will by 1Mbps.
+				#
+				#Theoretically it can help on very noisy lines
+                                #by lowering the value and using less frequency
+				#ranges to tx/rx data.
+				#
+				#Doesn't work in reality :)
+				#Do not adjust
+
+
+MTU 		= 1500    #Global MTU Value
+                          #Note: This value is overwritten by the 
+                          #      interface MTU value below if it exists.
+			  #DEFAULT: 1500
+                          #Values: any number [ suggested 128 - 4086 ]
+
+UDPPORT 	= 9000    #OBSELETE option 
+                          #Old wanpipemon used sockets to connect to
+                          #device driver.
+
+TTL		= 255     #OBSELETE option
+			  #Old wanpipemon used sockets to connect to
+                          #device driver.
+
+IGNORE_FRONT_END = NO	  #Ignore Fronte End State
+			  #NOT USED BY ADSL
+
+
+[w1ad]

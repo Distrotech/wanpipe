@@ -1,0 +1,143 @@
+AFT A108dm Firmware Change Log
+===============================
+
+Release V44
+-----------
+Dec 12 2011
+Type:	Recommended A108dm Firmware
+		Fixes unreliable front end framer read/write: on newer motherboards.
+		New motherboards and new pci/pcie bridges have exposed a timing
+		issue in front end framer read/write routines. This can cause
+		corrupting in read/write routines causing T1/E1 framer to be misconfigured.
+
+Release V43
+-----------
+Aug 24 2010
+Type:	Recommended A108dm Firmware
+		Fixes PCIe parity errors on some new Dell/HP/IBM servers causing 
+   		PCI fatal error messages in the logs.
+		Fixes the need for Windows to reboot after firmware update
+
+
+Release V41
+-----------
+Feb 01 2010
+Type:		Recommended A108dm Firmware
+		Fixed PCIe dma timeouts.  On some new Dell/HP servers the PCIe timeouts
+		on dma transactions were causing PCI fatal error messages
+		in the logs.  This has now been fixed.
+
+
+
+Release V40
+-----------
+Dec 23 2009
+Type:		Recommended A108dm Firmware
+		Added a framery sync sanity check.  This check is now used by the latest
+		driver to monitor the health of the T1/E1 stream entering the FPGA.
+		In case of a resync driver will ensure that timeslot sync is maintained.
+
+		The latest driver 3.4.8/3.5.9 will use this hardware feature if its
+		available. If the firmware does not have this feature, a front end OOF
+		alarm will be used as a timeslot sync trigger.
+
+Changes:	Firmware bug fix
+		Recomended feature.
+
+Release V39
+-----------
+Oct 07 2009
+Type:		Recommended A108dm Firmware
+		Bug fix on hw echo canceller. On some machines it was possible for
+		echo canceller to start in a noisy mode. When in this mode all
+		channels would have noise on them.
+
+Changes:	Firmware bug fix
+        This firmware fixes the hwec startup procedure.
+
+Release V38
+-----------
+Aug 13 2009
+Type:		Recommended A108dm Firmware
+		New Feature: Added Free Running timer for Zaptel/Dahdi
+
+Changes:	Firmware bug fix
+		Fixes on potential pci parity errors on some systems.
+		Fixes echo canceller H100 Errors that can occour on some systems.
+
+
+Release V33
+-----------
+Sep 27 2007
+
+Type:		Recommended A108dm Firmware for echo cancel cards
+		Fixes issue with hardware echo canceller chip 
+		security. 
+		Supports DTMF detection without hardware echo
+		cancellation operation.
+
+Changes:	Firmware bug fix for echo canceller
+		This bug can shut down the driver.
+
+		Note: This bug only afected new Maxim AFT cards with HWEC.
+		      DTMF detection only applies AFT cards with HWEC.
+
+Release V31
+-----------
+Jul 10 2007
+
+Type:           Mandatory A108dm Firmware for echo cancel cards 
+		Fixes a serious bug with Echo Canceler operation.
+		This bug caused a radom channel of echo canceler
+		to become corrupted.
+
+Changes:        Firmware bug fix for echo canceler
+                This bug can cause hard crashes.
+
+                Note: This bug only afected new Maxim AFT cards with HWEC.
+
+
+
+
+Release V28
+-------------
+Nov 21 2006
+
+Type: 		Mandatory for PCI Express Cards
+		A serious bug exists in A108dm Firmware for PCI-E cards.
+		On each front end access the next pci transaction can
+		become corrupted, and if the next pci transaction is dma
+		transaction, then an invalid memory can be written to.
+
+Changes:	Firmware bug fix for PCI-E cards.
+		This bug can cause hard crashes.
+		
+		Note: This bug only affects DATA operation of A108dm PCI
+		Express Card. The TDM Voice operation is not affected.
+
+
+
+Release V27
+-------------
+Sep 27 2006
+
+Type:  		Mandatory
+	        Reason this feature is mandatory for A108D is that it
+		greatly reduces the CPU load.  With previous drivers/firmware
+		A108D consumed too much cpu.
+
+Changes:	This firmware release contains new feature:
+		- Global TDM Voice Interrupt:
+			It that combines all spans on a single
+		   	interrupt. This significantly reduces cpu load.
+		  
+		  This option is only used in TDM Voice Mode.
+
+
+Symptoms:	New Feature.
+
+Compatibility:	This feature is actually backward compatible to older wanpipe driver releases.
+		Meaning that if you install this firmware with pre beta8-2.3.4 release, the
+		new feature will not be used, and the TDM Driver will work as before.
+
+

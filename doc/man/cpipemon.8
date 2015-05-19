@@ -1,0 +1,171 @@
+
+.TH CPIPEMON 8 "MARCH 1998" Linux "User Manuals"
+.SH NAME 
+cpipemon \- Cisco HDLC Monitor for Sangoma WAN Cards
+.SH SYNOPSIS
+.B cpipemon {
+.I option
+.B } ip-address upd-port  
+
+.B For flushing specific monitor statistics: 
+
+.B \tcpipemon [
+.I f
+.B ] {
+.I option
+.B } ip-address udp-port 
+
+.B For running FT1 specific monitor commands:
+
+.B \tcpipemon [
+.I t 
+.B ] {
+.I option
+.B } 
+.B ip-address udp-port 
+
+.SH DESCRIPTION
+.B cpipemon
+is a UDP management monitor for Cisco HDLC. The above section demonstrates the different ways of running the cpipemon command.  We will discuss each method in detail below:
+
+.TP
+.I cpipemon {option} ip-address udp-port
+
+.TP
+.B ip-address
+Specify the Point-to-Point address of your defined Cisco HDLC interface.  To verify this run ifconfig.
+
+.TP
+.B udp-port
+Specify the udp-port as defined in device section of the router.conf in /etc directory. No value for this defaults to 9000.
+
+.TP 
+.B option   
+The following are the different monitoring options available to the user:
+
+.IP
+.B m
+Display modem status.
+ 
+.IP
+.B a
+Display Cisco HDLC firmware version. 
+
+.IP 
+.B g 
+Display Cisco HDLC Configuration.
+
+.IP 
+.B x
+Display Link Status.
+
+.IP
+.B q
+Run Line trace displaying Cisco HDLC data.
+
+.IP
+.B qr
+Run Line trace displaying Raw data.
+
+.IP
+.B j
+Display the time since last "router start".
+
+.IP
+.B i
+Display Global statistics.
+
+.IP
+.B e
+Display Communication Error statistics.
+
+.IP
+.B l
+Display Operational statistics.
+
+.TP
+.I cpipemon f {option} ip-address udp-port
+
+.TP
+.B f
+This option flushes all the values associated with the command specified in the option field.
+
+.TP
+.B ip-address
+Specify the Point-to-Point address of your defined PPP interface.  To verify this run ifconfig.
+
+.TP
+.B udp-port
+Specify the udp-port as defined in device section of the router.conf in /etc directory. No value for this defaults to 9000.
+
+.TP 
+.B option   
+The following are the different options available to the user:
+
+.IP
+.B i
+Flush Global statistics.
+
+.IP
+.B e
+Flush Communication Error statistics.
+
+.IP
+.B l
+Flush Operational statistics.
+
+.TP
+.I cpipemon t {option} ip-address udp-port
+
+.TP 
+.B t
+This option allows execution of FT1 specific commands specified in the option field.
+
+.TP
+.B ip-address
+Specify the Point-to-Point address of your defined PPP interface.  To verify this run ifconfig.
+
+.TP
+.B udp-port
+Specify the udp-port as defined in device section of the router.conf in /etc directory. No value for this defaults to 9000.
+
+.TP
+.B option
+The following are the different FT1 monitoring options available to the user:
+
+.IP
+.B v
+View status of the FT1 CSU/DSU.
+
+.IP
+.B s
+Perform self test on the FT1.
+
+.IP 
+.B l
+Peform Line Loop test on the FT1.
+
+.IP
+.B d
+Perform Digital Loop test on the FT1. 
+
+.IP 
+.B r
+Perform Remote test on the FT1.
+
+.IP
+.B o
+Place FT1 in Operational mode.
+
+.SH EXAMPLES
+The following are few examples to illustrate the different usage of the cpipemon command:
+.TP
+cpipemon e 192.168.1.27 9002 :  This displays the communications error statistics.
+.TP
+cpipemon f e  192.138.1.27 9005: This flushes the communications error statiscs.
+.TP
+cpipemon t l 192.128.1.27 9004: This runs the line loop test on a FT1 board.
+
+.SH AUTHOR
+.I Jaspreet Singh <jaspreet@sangoma.com>
+Sangoma Technologies Inc., www.sangoma.com

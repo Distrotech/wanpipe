@@ -1,0 +1,170 @@
+WANPIPE POS Support
+===================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with POS support
+-----------------------------------
+
+The POS support is not installed by default
+during WANPIPE installation process.
+
+To enable POS support install WANPIPE using
+the --protocol option:
+
+	./Setup install --protocol=POS
+
+
+Follow the Setup installation script and choose
+all DEFAULT options.
+
+After successful installation proceed to 
+configure you POS card using /usr/sbin/wancfg 
+GUI configurator.
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Configuring POS 
+---------------
+
+Run: /usr/sbin/wancfg
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: POS Protocol
+
+4. Hardware Section
+	Select Probe Hardware
+		Select your adapter PRI port.
+
+	Select POS Protocol
+		Select desired POS protocol
+		IBM,NCR,ICL ..
+
+5. Interface Section
+	Specify interface name.
+	(Leave it default)
+
+6. End of configuration, exit and save
+
+
+
+Start POS card
+--------------
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+     Confirm that "Pos Firmware Ready!" message exist
+
+
+
+Custom API Application
+----------------------
+
+A sample API application exists in
+/etc/wanpipe/api/pos directory.
+
+To compile it run:  make
+
+To run it run:      ./pos_api wanpipe1 <ifname> 
+		 
+		    Where <ifname> is the name of
+		    your interface. If you left it default
+		    it would be:
+
+		    	./pos_api wanpipe1 wp1pos
+
+	The APP will configure the POS card
+	and enable both POS sync ports for
+	receiving.  
+
+	All data received will be printed out in HEX.
+
+
+Use this app as a building block for you custom
+APP.
+
+
+POS API Documentation
+----------------------
+
+Complete API document that includes all wanpipe
+commands, is located in:
+
+	/etc/wanpipe/api/pos/pos_api.pdf
+
+
+
+
+Further Info
+------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+

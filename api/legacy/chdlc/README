@@ -1,0 +1,22 @@
+CHDLC API Package
+=================
+
+Author: Nenad Corbic
+Date:   Jan 18, 2002
+
+
+
+The chdlc package contains the sample client and server 
+program that should be used in user application
+development.
+
+
+Contents of the API Package
+---------------------------
+
+ 1) chdlc_api.c :  	Client application that sends and receives data.
+			To disable sending of data, comment out a WRITE definition.
+
+ 2) chdlc_rts_cts.c:	Client application that should be used when 
+                        driver has been configured for switched RTS CTS or
+			idle mark.

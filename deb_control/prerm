@@ -1,0 +1,48 @@
+#!/bin/sh
+set -e
+
+# prerm for Wanpipe
+
+echo "Uninstalling WANPIPE..."
+
+# ----------------------------------------------------------------------------
+# Remove initialization scripts.
+# ----------------------------------------------------------------------------
+remove_init()
+{
+    # Examine system bootstrap files.
+    if [ -d /etc/rc0.d ]; then
+        RC_DIR=/etc
+    elif [ -d /etc/rc.d/rc0.d ]; then
+        RC_DIR=/etc/rc.d
+    else
+        return 0
+    fi
+
+	PROD=wanrouter
+	PROD_INIT=$RC_DIR/init.d/$PROD
+
+	echo "Removing WANPIPE start-up scripts: $RC_DIR"
+	update-rc.d -f wanrouter remove
+	rm -f $PROD_INIT
+
+    return 0
+}
+
+case "$1" in
+    remove|deconfigure)
+        # remove start-on-boot scripts
+        remove_init;
+        ;;
+    upgrade)
+        echo "Nothing to Remove, wanpipe install script understand this"
+        ;;
+    failed-upgrade)
+        ;;
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 0
+        ;;
+esac
+
+exit 0

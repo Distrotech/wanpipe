@@ -1,0 +1,58 @@
+
+.TH SDLADUMP 8 "MARCH 1998" Linux "User Manuals"
+.SH NAME 
+sdladump \- View memory content of Sangoma multiprotocol WAN adapters
+.SH SYNOPSIS
+.B sdladump [
+.I switches
+.B ] {
+.I device 
+.B } [ 
+.I offest
+.B ] [
+.I length
+.B ] 
+
+
+.SH DESCRIPTION
+Sdladump utility displays the content of the on-board memory area of Sangoma WAN cards.   This utility comes in handy when the problem cannot be solved by fpipemon or ppipemon.   The memory dumps help the Engineers at Sangoma Technologies to debug problems at a very low level.
+
+The following is a description on each argument of the command:
+.TP
+.B switches
+This is an optional argument. If no value is specificed then the sdladump utility does not execute in verbose mode. It can have the following option(s):
+
+.IP
+.I -v    
+ When this argument is specified the sdladump utility runs in verbose mode.  
+
+.TP
+.B device
+This is a mandatory argument.  The value of this argument requires the WANPIPE device name used in the [devices] section of the router.conf file.  You can also retrieve this information from the /proc/net/router/ directory.
+
+.TP 
+.B offset
+This represents the address of the adapter's on-board memory.  The default value is 0.
+
+.TP
+.B length
+This argument determines the size of the memory to dump.  If no value is specified then the default is 256 bytes.    
+
+.SH EXAMPLES
+The following shows different variations of the command:
+
+.TP 
+.B sdladump -v wanpipe3 0xf000
+This will dump 256 bytes from offset 61440 from device wanpipe3
+
+.TP
+.B sdladump wanpipe3 
+This will dump 256 bytes from offset 0 from device wanpipe3
+
+.TP
+.B sdladump wanpipe3 0xe000 620
+This will dump 620 bytes from offset 57344 from device wanpipe3
+
+.SH AUTHOR
+.I Jaspreet Singh 
+<jaspreet@sangoma.com>

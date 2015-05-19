@@ -1,0 +1,14 @@
+AFT B700 Firmware Change Log
+============================
+
+Release V35
+-----------
+May  07  2009
+
+Type     	Mandatory Firmware update for B700 cards 
+		Fixes bug with PCI parity errors
+
+Changes:	Firmware bug fixes
+		Some system crashes/reboots due to parity errors
+		
+

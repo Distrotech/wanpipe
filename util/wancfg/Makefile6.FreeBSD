@@ -1,0 +1,101 @@
+# 05 Jun 93
+#
+# $Id: Makefile6.FreeBSD,v 1.2 2007/04/12 20:43:51 sangoma Exp $
+#
+
+# Uncomment this to output debug messages
+DEBUG=2
+
+#***************************************************************************
+# don't change anything below 
+
+.OBJDIR 	= /usr/obj${.CURDIR}
+BINDIR  	= /usr/local/sbin
+PROG    	= wancfg
+LDADD		= -ll -ly -lm -lstdc++
+CFLAGS		+= -Wall -O2 -D_DEBUG_=$(DEBUG) -D_GNUC_ -I. -I/common/include -I/wanpipe/code/include
+SRCS		= cpp_string.cpp\
+conf_file_reader.cpp\
+text_box_yes_no.cpp\
+dialog_yes_no.cpp\
+text_box.cpp\
+menu_base.cpp\
+input_box.cpp\
+dialog_base.cpp\
+menu_main_configuration_options.cpp\
+menu_list_existing_wanpipes.cpp\
+menu_list_all_wanpipes.cpp\
+menu_new_device_configuration.cpp\
+menu_hardware_setup.cpp\
+menu_hardware_card_type.cpp\
+menu_select_card_type_manualy.cpp\
+menu_hardware_serial_card_advanced_options.cpp\
+menu_hardware_select_serial_clock_source.cpp\
+menu_hardware_te1_card_advanced_options.cpp\
+menu_hardware_te3_card_advanced_options.cpp\
+menu_hardware_select_comms_port.cpp\
+menu_te1_select_media.cpp\
+menu_te3_select_media.cpp\
+menu_hardware_serial_select_medium.cpp\
+menu_s508_io_port_select.cpp\
+menu_s508_irq_select.cpp\
+menu_s508_memory_addr.cpp\
+menu_te_select_line_decoding.cpp\
+menu_te_select_framing.cpp\
+menu_t1_lbo.cpp\
+input_box_active_channels.cpp\
+menu_te1_clock_mode.cpp\
+menu_hardware_probe.cpp\
+menu_aft_logical_channels_list.cpp\
+input_box_number_of_logical_channels.cpp\
+menu_aft_logical_channel_cfg.cpp\
+menu_advanced_pci_configuration.cpp\
+menu_hardware_cpu_number.cpp\
+menu_wan_channel_cfg.cpp\
+menu_frame_relay_basic_cfg.cpp\
+menu_frame_relay_signalling.cpp\
+input_box_number_of_dlcis.cpp\
+menu_frame_relay_dlci_configuration.cpp\
+menu_frame_relay_advanced_dlci_configuration.cpp\
+menu_frame_relay_cir_configuration.cpp\
+menu_frame_relay_arp.cpp\
+menu_frame_relay_manual_or_auto_dlci_cfg.cpp\
+input_box_frame_relay_dlci_number.cpp\
+menu_frame_relay_dlci_list.cpp\
+menu_frame_relay_advanced_global_configuration.cpp\
+menu_select_protocol.cpp\
+menu_ppp_basic_cfg.cpp\
+menu_ppp_ip_mode.cpp\
+menu_ppp_select_authentication_protocol.cpp\
+menu_net_interfaces_list.cpp\
+menu_net_interface_setup.cpp\
+net_interface_file_reader.cpp\
+menu_net_interface_ip_configuration.cpp\
+menu_net_interface_operation_mode.cpp\
+menu_net_interface_miscellaneous_options.cpp\
+menu_chdlc_basic_cfg.cpp\
+menu_chdlc_advanced_cfg.cpp\
+menu_device_miscellaneous_options.cpp\
+conf_file_writer.cpp\
+menu_adsl_encapsulation.cpp\
+menu_adsl_advanced_cfg.cpp\
+menu_adsl_standard.cpp\
+menu_adsl_trellis.cpp\
+menu_adsl_coding_gain.cpp\
+menu_adsl_rx_bin_adjust.cpp\
+menu_adsl_framing_struct.cpp\
+menu_adsl_exchange_type.cpp\
+menu_adsl_clock_type.cpp\
+wanrouter_rc_file_reader.cpp\
+menu_wan_channel_cfg_v1.cpp\
+menu_lapb_basic_cfg.cpp\
+menu_atm_basic_cfg.cpp\
+menu_atm_interface_configuration.cpp\
+message_box.cpp\
+menu_tdmv_law.cpp\
+menu_e1_lbo.cpp\
+main.cpp
+
+NO_MAN   	=
+
+.include <bsd.prog.mk>

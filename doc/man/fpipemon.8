@@ -1,0 +1,191 @@
+
+.TH FPIPEMON 8 "MARCH 1998" Linux "User Manuals"
+.SH NAME 
+fpipemon \- Frame Relay Monitor for Sangoma WAN Cards
+.SH SYNOPSIS
+.B fpipemon {
+.I option
+.B } ip-address upd-port  
+
+.B For flushing specific monitor statistics: 
+
+.B \tfpipemon [
+.I f
+.B ] {
+.I option
+.B } ip-address udp-port 
+
+.B For running Integrated CSU/DSU unit (FT1) specific monitor commands:
+
+.B \tfpipemon [
+.I t 
+.B ] {
+.I option
+.B } 
+.B ip-address udp-port 
+
+.SH DESCRIPTION
+.B fpipemon
+is a UDP management monitor for Frame Relay. The above section demonstrates the different ways of running the fpipemon command.  We will discuss each method in detail below:
+
+.TP
+.I fpipemon {option} ip-address udp-port
+
+.TP
+.B ip-address
+Specify the Point-to-Point address of your defined frame-relay interface.  To verify this run ifconfig.
+
+.TP
+.B udp-port
+Specify the udp-port as defined in device section of the router.conf in /etc directory. No value for this defaults to 9000.
+
+.TP 
+.B option   
+The following are the different monitoring options available to the user:
+
+.IP
+.B s
+Display the Link status of your frame-relay interface.
+ 
+.IP
+.B m
+Display the modem status. 
+
+.IP 
+.B l 
+Run Line trace displaying frame-relay data.
+
+.IP 
+.B lr
+Run Line trace displaying Raw data.
+
+.IP
+.B ds
+Display If_Send Driver statistics. (mainly used for debugging purposes)
+
+.IP
+.B di
+Display Interrupt Driver statistics. (mainly used for debugging purposes) 
+
+.IP
+.B dg
+Display General Driver statistics. (mainly used for debugging purposes)
+
+.IP
+.B u
+Display the time since last "router start".
+
+.IP
+.B c
+Display Communications error statistics.
+
+.IP
+.B g
+Display Global statistics.
+
+.IP
+.B e
+Display Global error statistics.
+
+.IP
+.B a
+Display list of active DLCI(s).
+
+.IP
+.B i <##>
+Display dlci specific satitics. Where <##> is the DLCI number. Please make sure to enter the DLCI number when using this option.  For eg:
+fpipemon i 27 201.1.2.2 9005 will produce specific statistics on DLCI 27.
+
+.TP
+.I fpipemon f {option} ip-address udp-port
+
+.TP
+.B f
+This option flushes all the values associated with the command specified in the option field.
+
+.TP
+.B ip-address
+Specify the Point-to-Point address of your defined frame-relay interface.  To verify this run ifconfig.
+
+.TP
+.B udp-port
+Specify the udp-port as defined in device section of the router.conf in /etc directory. No value for this defaults to 9000.
+
+.TP 
+.B option   
+The following are the different options available to the user:
+
+.IP 
+.B c
+Flush Communications error statistics.
+
+.IP
+.B g
+Flush Global statistics.
+
+.IP
+.B e
+Flush Global error statistics.
+
+.IP
+.B i <##>
+Flush dlci specific satistics. Where <##> is the DLCI number. Please make sure to enter the DLCI number when using this option.  For eg:  fpipemon f i 27 201.1.2.2 9005 will flush the specific statistics on DLCI 27.
+
+.IP
+.B d
+Flush all the driver specific statistics.
+
+.TP
+.I fpipemon t {option} ip-address udp-port
+
+.TP 
+.B t
+This option allows execution of FT1 specific commands specified in the option field.
+
+.TP
+.B ip-address
+Specify the Point-to-Point address of your defined frame-relay interface.  To verify this run ifconfig.
+
+.TP
+.B udp-port
+Specify the udp-port as defined in device section of the router.conf in /etc directory. No value for this defaults to 9000.
+
+.IP
+.B option
+The following are the different FT1 monitoring options available to the user:
+
+.IP
+.B v
+View status of the FT1 CSU/DSU.
+
+.IP
+.B s
+Perform self test on the FT1.
+
+.IP 
+.B l
+Peform Line Loop test on the FT1.
+
+.IP
+.B d
+Perform Digital Loop test on the FT1. 
+
+.IP 
+.B r
+Perform Remote test on the FT1.
+
+.IP
+.B o
+Place FT1 in Operational mode.
+
+.SH EXAMPLES
+The following are few examples to illustrate the different usage of the fpipemon command:
+.TP 
+fpipemon c 192.168.1.27 9005 :  This displays the communications error statistics.
+.TP 
+fpipemon f c  192.168.1.27 9005: This flushes the communications error statiscs.
+.TP 
+fpipemon t s 192.168.1.27 9005: This runs the self test on a FT1 board.
+.SH AUTHOR
+.I Jaspreet Singh 
+<jaspreet@sangoma.com>

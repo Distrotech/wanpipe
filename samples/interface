@@ -1,0 +1,22 @@
+#!/bin/bash
+# Sample Interface File 
+#
+# Note to make this interface default
+# in the kernel routing table, set NETWORK=0
+# 
+# For default route, specify the IP address in
+# the GATEWAY field.
+#
+# Copy this file into /etc/wanpipe/interfaces
+# directory and rename it to the name of you
+# interface.
+#
+# eg: cp interfaces /etc/wanpipe/wp1fr16
+#
+ONBOOT=yes
+IPADDR=202.1.1.1
+NETMASK=255.255.255.0
+POINTOPOINT=202.1.1.2 
+NETWORK=
+BROADCAST=
+GATEWAY=

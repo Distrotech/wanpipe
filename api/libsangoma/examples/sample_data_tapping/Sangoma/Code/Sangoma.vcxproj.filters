@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{8a663088-1dc5-494c-bb5c-2757e69afacf}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{6520d2f3-1c85-4e61-8dd0-53ebad0bedb3}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc</Extensions>
+    </Filter>
+    <Filter Include="Source Files\libsangoma">
+      <UniqueIdentifier>{84b2189f-b37d-4afb-890e-e12789eb44ac}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Sangoma\PortBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sangoma\SangomaCard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sangoma\SangomaPort.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sangoma\driver_configurator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sangoma\sangoma_interface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\miscellaneous\libsangoma\libsangoma.c">
+      <Filter>Source Files\libsangoma</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\miscellaneous\libsangoma\libsangoma_config.c">
+      <Filter>Source Files\libsangoma</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\miscellaneous\libsangoma\libsangoma_hwec.c">
+      <Filter>Source Files\libsangoma</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\miscellaneous\libsangoma\libsangoma_utils.c">
+      <Filter>Source Files\libsangoma</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Sangoma\PortBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sangoma\SangomaCard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sangoma\SangomaPort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sangoma\driver_configurator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sangoma\sangoma_interface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

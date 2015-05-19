@@ -1,0 +1,406 @@
+WANPIPE X25/MPAPIX25 API
+========================
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+Introduction
+------------
+
+Wanpipe X25 API solution consists of two separate products: 
+	
+Original X25API and New Multi Protocol Stack: 
+
+	Original X25API The X25API is the standard wanpipe 
+	product that implements x25 protocol in firmware. 
+	The wanpipe API driver provides socket API support 
+	to the on board x25 protocol allowing users to build 
+	custom applications. 
+	
+Multi Protocol Stack X25API: 
+
+	The MP API is a new multi protocol kernel stack 
+	developed on top of wanpipe MP drivers. It includes 
+	full HDLC, Frame Relay, X25/LAPB and DSP protocols 
+	implemented as kernel modules. 
+		
+	The MP API architecture was designed to be very 
+	scalable and flexible. Using the MP Stack architecture 
+	multiple protocols can be stacked together or used 
+	independently. 
+		
+	The X25API Stack would look like the following: 		
+                                                    
+	      	Driver Protocol Stack	         |  Wan Card
+	       	----------------------------------------------------
+		API >X25 >LAPB > MP Frame Relay  |  >HDLC (adapter) 
+	or                                       | 
+		API >X25 >LAPB > MP Protocol     |  >HDLC (adapter)
+				                  
+		
+	When using MP API architecture the sangoma adapter is running 
+	RAW HDLC protocol, thus acting as dumb card. 
+		
+	Furthermore, all adapter ports, both PRI and SEC, can now 
+	be used to carry independent protocols. 	
+	(This was a big limitation in the original design.) 
+	
+	From the users perspective, the API interface is identical 
+	to both X25 API models except for few subtle differences. 
+	The choice between to API models is made on creation of 
+	the API socket. 
+	
+	To speed up API development detailed sample API
+	code has been supplied with the WANPIPE drivers. 
+	
+	We suggest that these programs be used as the starting 
+	point of the x25api/MP API application development. The user is 
+	free to modify change or use the code in any way which will 
+	provide the fastest time to market and ease of use. 
+	
+	Sample Code Location: 
+	
+	X25API : /etc/wanpipe/api/x25 
+	MP API : /etc/wanpipe/api/mpapi/x25
+
+
+
+Installing WANPIPE with X25/MPAPI API support
+---------------------------------------------
+
+X25API:
+	The X25 support is installed by default
+	during WANPIPE installation process. 
+
+MPAPI:
+	The MPAPI support is NOT installed by default
+	during WANPIPE installation process. 
+        
+	
+Thus, use the CUSTOM driver compilation 
+option in ./Setup installation script to enable 
+MPAPI option:
+	
+	./Setup install
+
+		(Custom Driver Application)
+		(Choose MPAPI protocol)
+
+After successful installation proceed to 
+configure the card for X25/MPAPI protocol 
+/usr/sbin/wancfg  GUI configurator.
+
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+Configuring MPAPI Protocol
+--------------------------
+
+Run: /usr/sbin/wancfg
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: MP Protocol
+	           or    MP Frame Relay
+
+        Note: Refer to the above protocol stack
+	      diagram.  
+	      
+	      During interface setup 
+	      user will have an option to choose
+	      a upper layer protocol.
+
+        Select protocol option and hit back.
+
+
+4. Hardware Section
+	Select Probe Hardware
+		Select your adapter PRI or SEC port.
+
+	Select all default option and hit back.
+
+
+5. Interface Section
+	
+   Select number of interfaces you wish to configure
+   (Default=1)
+
+   For each network interface do the following:
+   
+	Specify interface name.
+	(Leave it default)
+	
+	Operation Mode:  
+		ANNEXG 	used to bind upper layer MPAPI X25/LAPB protocols
+		        over the current protocol (HDLC or Frame Relay).
+
+		WANPIPE	used to run IP protocol
+		        on top of current protocol.
+		
+
+	X25 Link Setup: (MPAPI)
+	
+		(Only available under ANNEXG (MPAPI) operation mode)
+	
+		Used to configure upper MPAPI X25/LAPB protocol
+		layers.
+
+		Lapb Profile:  Configure Lapb Profile
+		               Each profile can be re-used by
+			       other lapb links.
+                        	
+				Specify your own MTU
+	
+	
+		Lapb Interface: Configure interface specific 
+		                lapb information
+
+
+		X25 Profile:   Configure X25 Profile
+		               Each profile can be re-used by
+			       other X25 links.
+
+				Specify your own MTU	
+		              	
+				Use must select number of SVC's. 
+				(A network interface will be created 
+				for each SVC.)
+		                
+		X25 Interface:  Configure each x25 interface
+		                depending on number of supported
+				svc's.
+
+				 Leave interfaces in default API mode.
+				 
+		
+		Note: Use the GUI help buttons for each option.
+		
+		
+	Protocol:
+		(Only available in WANPIPE operation mode,
+		 for MP Protocol, (not Frame Relay) )
+
+		Specify the current protocol: 
+			RAW HDLC : Use raw IP protocol
+			PPP	 : Run PPP protocol
+			CHDLC    : Run CHDLC protocol
+
+
+	Ignore Modem Status:
+		(Only available in WANPIPE operation mode)
+
+		Option used to monitor the front end T1/E1
+		status.  If the front end looses sync the
+		link will be declared down.
+
+		NO:  Run front end monitoring (default)
+		YES: Ignore front end state.
+		
+
+
+	IP Setup:
+		(Only available in WANPIPE operation mode)
+
+		Specify IP info for network interface
+
+
+
+6. End of configuration, exit and save
+
+
+
+Configuring Firmware X25 API Protocol
+-------------------------------------
+
+Run: /usr/sbin/wancfg
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: X25 Protocol
+
+4. Hardware Section
+	Select Probe Hardware
+		Select your adapter PRI port.
+
+	
+5. Interface Section
+	
+   Select number of interfaces you wish to configure
+   (Default=1)
+
+   For each network interface do the following:
+   
+	Specify interface name.
+	(Leave it default)
+	
+	Operation Mode:  
+		API 	used to develop custom applications  
+	            	on top of x25 protocol
+
+		WANPIPE	used to run IP protocol
+		        on top of X25.
+
+		
+	Protocol:
+		(Only available in WANPIPE operation mode)
+
+		Specify the upper layer protocol: 
+			RAW HDLC : Use raw IP protocol
+			PPP	 : Run PPP protocol
+			CHDLC    : Run CHDLC protocol
+
+	Ignore Modem Status:
+		(Only available in WANPIPE operation mode)
+
+		Option used to monitor the front end T1/E1
+		status.  If the front end looses sync the
+		link will be declared down.
+
+		NO:  Run front end monitoring (default)
+		YES: Ignore front end state.
+		
+
+	IP Setup:
+		(Only available in WANPIPE operation mode)
+
+		Specify IP info for network interface
+
+6. End of configuration, exit and save
+
+
+
+
+Start X25/MPAPI protocol
+------------------------ 
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are displayed.
+
+ 	Confirm the state of Front End (T1/E1/V35)
+	Confirm the Link state
+
+	Check for any error events.
+
+
+
+Custom API Application
+----------------------
+
+X25: X25 Protocol sample codes 
+	/etc/wanpipe/api/x25
+
+MPAPI: X25 Protocol sample codes
+ 	/etc/wanpipea/api/mpapi/x25
+
+
+To compile it run:  make
+
+Run:    ./svc_client 
+
+	Refer to api options below:
+
+	./svc_client API USAGE
+
+
+        scv_client <options> <extra options>
+
+<options>:
+        -i  <ifname>     #interface name
+        -c  <card name>  #card name
+        -r               #read enable
+        -w               #write eable
+
+<extra options>
+        -txcnt   <digit>  #number of tx packets  (Dflt: 1)
+        -txsize  <digit>  #tx packet size        (Dflt: 10)
+        -txdelay <digit>  #delay in sec after each tx packet (Dflt: 0)
+        -txdata  <digit>  #data to tx <1-255>
+
+	
+Example:
+
+	#X25 Client:
+	./svc_client <card name> <num of calls> < num of packets to send> 
+	
+	
+	#MPX25 Client: 
+	./svc_client -i wp1lapb -r -w -txsize 100 -txcnt 100 -txchan 1
+
+
+Use this app as a building block for you custom
+APP.
+
+
+
+Further Info
+------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+

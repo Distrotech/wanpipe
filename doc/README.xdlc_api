@@ -1,0 +1,114 @@
+WANPIPE XDLC API
+================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with XDLC API
+--------------------------------
+
+The XDLC API support is installed by default
+during WANPIPE installation process.
+
+Use the CUSTOM driver compilation 
+option in 
+    ./Setup install
+
+After successful installation proceed to 
+configure you XDLC card using /usr/sbin/wancfg 
+GUI configurator.
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+Configuring XDLC API
+------------------------
+
+NOTE: WANCFG DOESN'T CURRENTLY SUPPORT XDLC
+
+Please use sample config file
+
+
+
+Start XDLC protocol
+---------------------------------- 
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are displayed.
+
+ 	Confirm the state of Front End (T1/E1/V35)
+	Confirm the Link state
+
+	Check for any error events.
+
+
+Custom API Application
+======================
+
+A sample API application exists in
+/etc/wanpipe/api/xdlc directory.
+
+Please read the README file in /etc/wanpipe/api/xdlc 
+directory.
+
+
+

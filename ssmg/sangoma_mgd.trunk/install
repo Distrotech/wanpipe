@@ -1,0 +1,412 @@
+#!/bin/bash
+
+# ----------------------------------------------------------------------------
+# Prompt user for input.
+# ----------------------------------------------------------------------------
+prompt()
+{
+	if test $NONINTERACTIVE; then
+		return 0
+	fi
+
+	echo -ne "$*" >&2
+	read CMD rest
+	return 0
+}
+
+# ----------------------------------------------------------------------------
+# Get Yes/No
+# ----------------------------------------------------------------------------
+getyn()
+{
+	if test $NONINTERACTIVE; then
+		return 0
+	fi
+
+	while prompt "$* (y/n) "
+	do	case $CMD in
+			[yY])	return 0
+				;;
+			[nN])	return 1
+				;;
+			*)	echo -e "\nPlease answer y or n" >&2
+				;;
+		esac
+	done
+}
+
+
+
+home=`pwd`;
+
+force="false"
+noss7="invalid"
+pri="false"
+rootdir=""
+pbxdir=/usr/src/asterisk
+pbxd="asterisk"
+cfgdir="/etc/asterisk"
+mysyslog=" "
+smg_installed=0
+chan_woomera_installed=0
+no_woomera="false"
+
+
+while [ ! -z $1 ]
+do
+	if [ $1 = '-force' ]; then
+		force="force"
+	elif [ $1 = '-noss7' ]; then
+		noss7="true"
+	elif [ $1 = '-ss7' ]; then
+		noss7="flase"
+	elif [ $1 = '-bri' ]; then
+		noss7="true"
+	elif [ $1 = '-no_woomera' ]; then
+		noss7="true"
+		no_woomera="true"
+	elif [ $1 = '-pri' ]; then
+		noss7="true"
+		pri="true"
+	elif [ $1 = '-pbxdir' ]; then
+		shift
+                pbxdir=$1
+                if [ "$pbxdir" = "" ]; then
+                        echo "Error: Invalid -pbxdir input argument: $pbxdir!";
+                        exit 1
+                elif [ ! -d $pbxdir ]; then
+                        echo "Error: directory does not exist: $pbxdir!";
+                        exit 1
+                fi
+
+	elif [ $1 = '-rootdir' ]; then
+		shift
+		rootdir=$1
+		if [ "$rootdir" = "" ]; then
+			echo "Error: Invalid root dir: $rootdir!";
+			exit 1		
+		elif [ ! -d $rootdir ]; then
+			echo "Error: root dir does not exist: $rootdir!";
+			exit 1		
+		fi
+
+	else
+		echo "Invalid option: $1";
+		echo
+		echo "Usage: ./install [-bri|-ss7]"
+		echo "Please specify if smg is being installed for BRI or SS7"
+		echo
+		exit 1
+	fi
+	shift
+done
+
+if [ -f $pbxdir/include/callweaver.h ]; then
+	echo "PBXD=callweaver" > /etc/wanpipe/pbxd
+	pbxd="callweaver"
+	cfgdir="/usr/local/etc/callweaver"
+else
+	echo "PBXD=asterisk" > /etc/wanpipe/pbxd
+	pbxd="asterisk"
+	cfgdir="/etc/asterisk"
+fi
+
+if [ $noss7 == 'invalid' ] && [ $pri == 'false' ]; then
+	echo
+	echo "Usage Error: ./install [-bri|-pri|-ss7]"
+	echo "Please specify if smg is being installed for BRI or SS7 or PRI"
+	echo
+	exit 1
+fi
+
+if [ $noss7 != 'true' ]; then
+	if [ ! -e /usr/local/ss7box/$ss7boost ]; then
+		echo "Warning: $ss7boost not found in /usr/local/ss7box dir";
+	fi
+	if [ ! -e /usr/local/ss7box/$ss7boxd ]; then
+		echo "Warning: ss7boxd not found in /usr/local/ss7box dir";
+	fi
+fi
+
+if [ $force = "force" ]; then
+	echo "Stopping SMG..."
+	eval "sangoma_mgd -term"
+	echo "OK."
+	echo
+else 
+	if [ -f /var/run/sangoma_mgd.pid ]; then
+		echo "Warning: sangoma_mgd is running!"
+		getyn "Would you like to stop sangoma_mgd?"
+		if [ $? -ne 0 ]; then
+			exit 1
+		fi
+		
+		eval "sangoma_mgd -term"
+		if [ -f /var/run/sangoma_mgd.pid ];then
+			echo "Failed to stop sangoma_mgd"
+			exit 1
+		fi
+	fi
+fi
+
+echo
+echo "Checking Syslog ...."
+if [ -e  /etc/syslog.conf ]; then
+        echo "found /etc/syslog.conf "
+        mysyslog=syslog
+elif [ -e /etc/rsyslog.conf ] ; then
+        echo " found /etc/rsyslog.conf "
+        mysyslog='rsyslog'
+else
+        echo " Warning : Syslog not found "
+	echo " This install script is optimized for RedHat/Centos/Fedora Distributions"
+	getyn "Would you like to proceed?"
+	if [ $? -ne 0 ]; then
+		exit 1
+	fi	
+
+        mysyslog=" "
+	
+fi
+
+
+if [  $mysyslog != " " ]; then
+	eval "grep "local2.*sangoma_mgd" /etc/$mysyslog.conf" > /dev/null 2> /dev/null
+	if [ $? -ne 0 ]; then
+		eval "grep "local2" /etc/$mysyslog.conf " > /dev/null 2> /dev/null
+		if [ $? -eq 0 ]; then
+			echo
+			echo "Warning : local2 is already used in $mysyslog.conf"
+			echo
+		fi
+		echo -e "\n# Sangoma Media Gateway log" > tmp.$$
+		echo -e "local2.*                /var/log/sangoma_mgd.log\n" >> tmp.$$
+		eval "cat /etc/$mysyslog.conf tmp.$$ > tmp1.$$"
+		\cp -f tmp1.$$ /etc/$mysyslog.conf
+		eval "/etc/init.d/$mysyslog restart"
+	fi
+	eval "grep "local3.*sangoma_bri" /etc/$mysyslog.conf" > /dev/null 2> /dev/null
+        if [ $? -ne 0 ]; then
+                eval "grep "local3" /etc/$mysyslog.conf " > /dev/null 2> /dev/null
+                if [ $? -eq 0 ]; then
+                        echo
+                        echo "Warning : local3 is already used in $mysyslog.conf"
+                        echo
+                fi
+		echo -e "\n# Sangoma BRI Daemon (smg_bri)  log" > tmp.$$
+                echo -e "local3.*                /var/log/sangoma_bri.log\n" >> tmp.$$
+                eval "cat /etc/$mysyslog.conf tmp.$$ > tmp1.$$"
+                \cp -f tmp1.$$ /etc/$mysyslog.conf
+                eval "/etc/init.d/$mysyslog restart"
+        fi
+fi
+
+if [ -f tmp1.$$ ]; then
+	rm -f  tmp1.$$
+fi
+if [ -f tmp.$$ ]; then
+        rm -f  tmp.$$
+fi
+
+echo "Ok"
+echo
+echo "Checking logrotate ..."
+eval "type logrotate" > /dev/null 2> /dev/null
+if [ $? -ne 0 ]; then
+	echo "Error: Logrotate not found !"
+fi
+
+if [ -e /etc/logrotate.d ] && [ -e /etc/logrotate.d/$mysyslog ]; then
+
+	eval "grep sangoma_mgd /etc/logrotate.d/$mysyslog" > /dev/null 2> /dev/null
+	if [ $? -ne 0 ]; then
+		eval "sed -e 's/messages/messages \/var\/log\/sangoma_mgd.log/' /etc/logrotate.d/$mysyslog >tmp2.$$ 2>/dev/null"
+		eval "cp -f tmp2.$$ /etc/logrotate.d/$mysyslog"
+		eval "logrotate -f /etc/logrotate.d/$mysyslog" 
+		if [ $? -ne 0 ]; then
+			echo "Error: logrotate restart failed!";
+			exit 1;
+		fi
+		echo "Logrotate is being changed and restarted!"
+	else
+		echo "Logrotate is configured!"
+	fi
+
+else
+        echo "Error: Logrotate dir: /etc/logrotate.d not found !"
+fi
+
+echo "OK."
+echo
+echo "Checking for SCTP Utilities...."
+if [ ! -e  /usr/include/netinet/sctp.h ] && [ ! -e /usr/include/sctp.h ]; then
+	echo
+	echo "Error: lksctp-tools-devel package missing"
+	echo "Please install sctp using a package manager"
+	echo "eg: yum install lksctp-tools-devel"
+	echo
+	exit 1
+fi 
+echo "OK."
+echo
+
+echo "Checking for SCTP modules..."
+eval "modprobe -l | grep \"\/sctp.ko\" >/dev/null 2>/dev/null"
+if [ $? -ne 0 ]; then
+	if [ ! -e /proc/net/sctp ]; then
+		echo "Warning: Your Kernel does not support SCTP Protocol!"
+		echo "SCTP is needed by SMG!"
+		echo
+		echo "Please contact sangoma support!"
+		echo
+		exit 1
+	fi
+fi
+echo "OK."
+echo
+
+
+echo "Compiling LibTeletone MGD ..."
+echo
+sleep 1
+cd lib/libteletone
+eval "./configure > /dev/null"
+echo "..."
+eval "make clean > /dev/null"
+eval "make > /devnull" 
+if [ $? -ne 0 ]; then
+	exit 1;
+fi
+make install
+echo "Ok."
+
+cd $home
+
+echo
+echo
+echo "Compiling Sangoma MGD ..."
+echo
+sleep 1
+eval "make clean 2> /dev/null > /dev/null"
+if [ $pri = "true" ]; then
+        eval "make PRI=YES" 
+else
+if [ $noss7 = "true" ]; then
+        eval "make NO_SS7=YES" 
+else
+        eval "make" 
+fi
+fi
+
+if [ $? -ne 0 ]; then
+	exit 1;
+fi
+
+if [ $pri = "true" ]; then
+	eval "make INSTALLPREFIX=$rootdir PRI=YES install"
+else
+if [ $noss7 = "true" ]; then
+	#This case is currently used for bri
+	eval "make INSTALLPREFIX=$rootdir NO_SS7=YES install"
+else
+	eval "make INSTALLPREFIX=$rootdir install"
+fi
+fi
+
+if [ $? -ne 0 ]; then
+	echo
+	echo " SMG Installation Failed"
+	echo 
+	echo " Please contact Sangoma Support"
+	echo " http://wiki.sangoma.com"
+	echo
+	exit 1;
+else
+	echo "Ok."
+	smg_installed=1;
+fi
+
+if [ "$no_woomera" == "false" ]; then 
+	if [ -d chan_woomera.trunk ]; then
+
+		cd chan_woomera.trunk
+
+		echo "Compiling Woomera Channel ..."
+
+		if [ ! -e $pbxdir ]; then
+			echo
+			echo "Error: $pbxdir directory does not exist!"
+			echo "       Please provide the path to Asterik or CallWeaver source."
+			echo "       Then re-run eg: ./install -pbxdir /usr/src/asterisk "
+			echo
+			getyn "Would you like to continue installation?"
+			if [ $? -ne 0 ]; then
+				exit 1;
+			fi
+		else
+			eval "make clean 2> /dev/null > /dev/null"
+			eval "make PBXDIR=$pbxdir"
+			if [ $? -ne 0 ]; then
+				exit 1;
+			fi
+			make INSTALLPREFIX=$rootdir install
+			if [ $? -ne 0 ]; then
+				echo
+				echo "Error: Failed to compile chan_woomera into PBX source!"
+				echo
+				exit 1;
+			fi
+			echo "Ok."
+			chan_woomera_installed=1;
+		fi
+
+	else
+		echo "Warning: chan_woomera directory does not exist!"
+		exit 1
+	fi
+fi
+
+if [ $smg_installed -eq 1 ]; then
+	echo "---------------------------------"
+	echo
+	echo " SMG Install Done"
+	echo
+	echo "--> Config: /etc/sangoma_mgd.conf"
+	echo "--> Start:  sangoma_mgd -bg"
+	echo
+else
+	echo "---------------------------------"
+	echo
+	echo " SMG Installation Failed"
+	echo 
+	echo " Please contact Sangoma Support"
+	echo " http://wiki.sangoma.com"
+	echo
+fi
+
+if [ $chan_woomera_installed -eq 1 ]; then
+	echo
+	echo " Chan Woomera Install Done"
+	echo 
+	echo "--> Config: $cfgdir/woomera.conf"
+	echo "--> Start: start $pbxd (part of $pbxd)"
+	echo
+	echo "---------------------------------"
+elif [ $no_woomera = "true" ];then
+	echo
+	echo " You chose not to install Chan Woomera"
+	echo 
+else
+	echo
+	echo " Chan Woomera Installatin Failed"
+	echo 
+	echo " If you are running Asteirsk/CallWeaver on another system"
+	echo " ignore this message. Otherwise please contact"
+	echo " Sangoma Support."
+	echo " http://wiki.sangoma.com"
+	echo
+	echo "---------------------------------"
+fi
+
+exit 0
+

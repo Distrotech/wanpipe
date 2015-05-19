@@ -1,0 +1,168 @@
+AFT Channelized Operation
+------------------------
+
+AFT Channelized Support is used to support multi-timeslot 
+HDLC hub implementations (hubs for remote sub-DS1 nodes) 
+or soft PBX or IVR systems. It can also be used to support 
+non-standard framing, for example 13 bit monosynch. 
+
+On the A101 and A102 cards you can mix voice 
+applications with standard WANPIPE(R) routing.
+
+So you can configure, say:
+
+Timeslots 1-16 	   
+	Operation: HDLC Mode    
+	Used by:    WANPIPE routing of IP over Frame 
+                   Relay
+		   
+Timeslots 17-23 
+	Operation: Transparent (Raw) Mode
+	Used by     Voice channels hooked to Asterisk PBX
+	
+Timeslot 24    
+	Operation: HDLC Mode
+	Used by:	   Asterisk PRI signaling channel
+
+
+Setup wanpipe into timeslot channelized mode, where each
+timeslot or timeslot group has a dedicated network interface. 
+A custom API is available to read/write data to a network 
+interface.
+
+
+
+CONFIGURATION
+=============
+
+Using the wancfg configurator:
+
+1. Select AFT HDLC protocol
+
+2. Hardware Setup
+	Do a hardware probe and find an AFT card
+
+        Leave everything else default
+
+3. T1/E1 Setup
+	Configure based on your telco info.
+
+
+3. Interface Setup 
+
+	If T1 specify up to 24 interfaces
+	If E1 specify up to 31 interfaces
+
+	For each interface:
+		
+	Interface Name: Leave default
+			(or specify name)
+			
+	Operation Mode: VOIP    - Iface Used by Asterisk
+			API     - Iface Used by custom application
+			WANPIPE - Iface Used by IP Stack
+
+			Note: If WANPIPE mode selected choose a
+			      Protocol/IP and configure them 
+			      accordingly.
+			
+				e.g.: Protocol: MP_FR (Frame Relay)
+				    IP Address Setup
+
+	Bound Channels: (Select one or more timeslots) 
+			e.g.: 1		#Timeslot number one
+			    1-5		#Timeslots one to five
+			    1-5.10-15	#Timeslots one to five 
+			    		#and ten to fifteen
+					
+	HDLC: (To enable disable HDLC engine on this
+	       interface)
+		YES: HDLC mode enabled (must be enabled for WANPIPE routing)
+		NO:  Transparent (Bitstreaming/Raw) Mode enabled
+
+	MTU:
+	  	Set the MTU value appropriate for this
+		interface:
+
+		e.g.: Voice Applications: Set to 10 or less.
+                    Wanpipe:            Set to 1500
+
+
+	Leave all other options default.
+		
+4. When you finish interface configuration
+   proceed to exit.
+
+
+
+
+OPERATION
+=========
+
+1. Start wanpipe
+
+	e.g.: wanrouter start
+
+	Note: You will see up to 24/32 interfaces
+   	configured:
+		e.g.: ifconfig 
+
+
+
+
+API CUSTOM APPLICATIONS
+========================
+
+Use a sample app in /etc/wanpipe/api/aft
+    
+   You can run the app directly over each interface and
+   read/write custom data to a specific timeslot.
+
+   The interfaces that have HDLC enabled, will 
+   tx/rx HDLC frames.
+
+   The interface that have HDLC disabled, will
+   tx/rx raw bits with no encapsulation.
+
+
+Run:    ./aft_api 
+
+	Refer to api options below:
+
+	AFT API USAGE
+
+
+        aft_api <options> <extra options>
+
+<options>:
+        -i  <ifname>     #interface name
+        -c  <card name>  #card name
+        -r               #read enable
+        -w               #write enable
+
+<extra options>
+        -txcnt   <digit>  #number of tx packets  (Dflt: 1)
+        -txsize  <digit>  #tx packet size        (Dflt: 10)
+        -txdelay <digit>  #delay in sec after each tx packet (Dflt: 0)
+        -txdata  <digit>  #data to tx <1-255>
+
+	
+Example:
+
+	#Enable read and write on wp1aft interface
+	
+	./aft_api -c wanpipe1 -i wp1aft -r -w -txsize 100 -txcnt 1 -verbose 
+
+	#Receive Only
+	
+	./aft_api -c wanpipe1 -i wp1aft -r -verbose
+
+
+
+ASTERISK
+========
+
+Please refer to ftp.sangoma.com/linux/doc/README.asterisk
+
+
+

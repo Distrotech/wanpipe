@@ -1,0 +1,7 @@
+#The following was added by wanpipe
+#Section for zaptel device
+KERNEL="zapctl",     NAME="zap/ctl"
+KERNEL="zaptimer",   NAME="zap/timer"
+KERNEL="zapchannel", NAME="zap/channel"
+KERNEL="zappseudo",  NAME="zap/pseudo"
+KERNEL="zap[0-9]*",  NAME="zap/%n"

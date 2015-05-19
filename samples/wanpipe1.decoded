@@ -1,0 +1,289 @@
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Tue Aug 30 13:40:34 EDT 2005
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_AFT_TE1, Comment		#WAN_AFT_TE1 - Indicates A104/8 card
+					#WAN_AFT     - Indicates A101/2 card
+
+[interfaces]
+w1g1 = wanpipe1, , STACK, Comment	
+#Hardware Interface
+#
+#w1g1 - if name
+#
+#wanpipe1 - device name must be same as above
+#
+#<empty field> - not used
+#
+#STACK    - opertaion mode indicating that
+#           protocol stack is running over
+#           this interface
+
+w1g1fr = wanpipe1, auto, WANPIPE, fr, w1g1.fr   
+#Frame Relay Protocol Interace
+#
+#w1g1fr -  if name
+#
+#wanpipe1 - hardware device name
+#           must be same as above
+#
+#dlci_num - auto   - auto dlci (CPE ONLY)
+#           16-1007 - actual dlci number
+#           (Note this filed is not used 
+#            for PPP or CHDLC protocols)
+#
+#OP mode: - WANPIPE  - operation mode IP 
+#                      A file with IP addresses must exist
+#                      for this interface in:
+#                      /etc/wanpipe/interfaces/w1g1fr
+#         - API      - opertaion mode API
+#                      No IP address info needed
+#                      Interface will be brought up with no IP.
+#                      One can connect a AF_WANPIPE socket to this
+#                      interface.
+#protocol - Interface protocol
+#           [fr, ppp, chdlc]
+#
+#protocol profile - Protocol configuration profile
+#                   Multiple protocols instances can have
+#                   same protocol profile.
+
+[wanpipe1]
+
+#-------- DEVICE / DRIVER BINDING ----------------------------------
+
+CARD_TYPE 	= AFT	#AFT: Same for all aft cards must
+                        #This value must be hardcoed to AFT for all
+                        #aft cards.
+	
+S514CPU 	= A     #Used by A101/2 driver to determine T1/E1 port
+                        #A - port 1   
+                        #B - port 2
+			#For A104 driver: Always set this value to A!
+
+CommPort 	= PRI   #Only used by S514 cards. 
+                        #PRI - S514 primary port
+                        #SEC - S514 secondary port
+                        #
+	                #OBSELETE for AFT cards (can be removed)
+
+#-------- PCI SETUP ----------------------------------------------
+
+
+AUTO_PCISLOT 	= NO    #Auto detect PCI/BUS info for this card type
+                        #NO - disable this option
+                        #YES- enable this option
+                        #     if enabled bottom two options 
+			#     PCISLOT and PCIBUS will not be used. 
+                        #     Therefore one can set the to arbitrary value 
+                        #     or remove them all together.
+
+PCISLOT 	= 2     #PCI SLOT Number: 
+                        #Valid values = any number
+    
+PCIBUS  	= 2     #PCI BUS Number:
+			#Valid values = any number
+
+
+#--------------FRONT END SETUP -----------------------------------
+
+FE_MEDIA	= T1    #Front End Type: 
+			#T1 - set front end for T1 mode
+                        #E1 - set front end for E1 mode
+
+FE_LCODE	= B8ZS  #Front End Line Coding
+			#If T1:  B8ZS or AMI
+                        #   E1:  HDB3 or AMI        
+
+FE_FRAME	= ESF   #Front End Framing
+			#If T1:  ESF or D4 
+                        #   E1:  CRC4 or NCRC4
+
+FE_LINE		= 1       #Front End Line number.
+			  #Used by A104 driver to determine T1/E1 port
+			  #Valid values are: 1-4
+			  #
+                          #The A101/2 driver doesn't use this option   
+                          #so one should hardcode it to 1 or 
+                          #remove it all together.
+					
+	
+TE_CLOCK 	= NORMAL  #T1/E1 Clock Source
+                          #NORMAL - slave clock, clock is received from telco
+                          #         This is always the DEFAULT
+                          #MASTER - master clcok, use hw oscillator clock
+                          #         Only used in back to back mode or
+                          #         when specified by telco.
+ 
+TE_REF_CLOCK 	= 0	  #T1/E1 Reference Clock Source
+                          #This option allows one to use the incoming clock
+                          #from a different port as a clock source to this
+                          #port.  FOR THIS OPTION TO WORK: TE_CLOCK=MASTER
+			  #Valid options: 0   - disable 
+                          #               1-4 - use clock from particular port
+
+ACTIVE_CH	= ALL	  #Specify T1/E1 Active channels (timeslots)
+                          #Since AFT cards support channelization this
+                          #option MUST BE HARDCODED TO:  ALL!
+
+TE_HIGHIMPEDANCE	= NO  #Set the Front Ent chip in High Impedance mode
+                              #used for datascoping:
+                              #NO - Disable high impedance mode (DEFAULT)
+                              #YES - Enable hight impedance mode 
+                              #      (only if you know what you are doing)
+
+LBO 		= 0DB     #Front End Line Buildout
+                          # 0db     (Default)  
+                          # 7.5dB     
+                          # 15dB      
+                          # 22.5dB     
+                          # 0-110ft    
+                          # 110-220ft  
+                          # 220-330ft  
+                          # 330-440ft  
+                          # 440-550ft  
+                          # 550-660ft 
+  
+FE_TXTRISTATE	= NO	  #Front End Tri-State Mode
+                          #Disable front end chip TX mode
+                          #Used for datascoping or connecting multiple ports
+                          #together where one port is operating normally and others
+                          #are tristated, thus only receiving.
+                          #NO - Disable tristae mode
+                          #YES- Enable tristate mode
+
+MTU 		= 1500    #Global MTU Value
+                          #Note: This value is overwritten by the 
+                          #      interface MTU value below if it exists.
+                          #Values: any number [ suggested 128 - 4086 ]
+
+UDPPORT 	= 9000    #OBSELETE option 
+                          #Old wanpipemon used sockets to connect to
+                          #device driver.
+
+TTL		= 255     #OBSELETE option
+			  #Old wanpipemon used sockets to connect to
+                          #device driver.
+
+IGNORE_FRONT_END = NO	  #Ignore Fronte End State
+                          #NO - Do not ignore front end state,
+                          #     therefore if state changes, change the
+                          #     state of the above protocol.
+                          #YES- Igonore front end state
+                          #     Thus if front end goes down, the protocol
+                          #     will not know.
+
+#--------------------------------------------
+#Protocol Interface Configuration
+#--------------------------------------------
+
+[w1g1fr]
+
+CIR	= 0		  #OBSOLETE: Not used by AFT cards
+BC	= 0               #OBSOLETE: Not used by AFT cards 
+BE	= 0		  #OBSOLETE: Not used by AFT cards
+INARP	= NO		  #OBSOLETE: Not used by AFT cards
+INARPINTERVAL	= 0	  #OBSOLETE: Not used by AFT cards
+INARP_RX	= NO	  #OBSOLETE: Not used by AFT cards
+IPX	= NO		  #OBSOLETE: Not used by AFT cards
+
+MULTICAST	= NO	  #Enable/Disable MULTICAST flag on this interface
+                          #NO - Disable
+                          #YES- Enable 
+
+DYN_INTR_CFG	= NO	  #Enable Dynamic IP addressing if supported by
+                          #protocol.
+                          #NO - Disable Dynamic IP addressing
+                          #YES- Eanble Dynamic IP addressing
+
+TRUE_ENCODING_TYPE	= NO #OBSOLETE: Not used by AFT cards
+
+GATEWAY	= NO		  #Indicates that this interface is a default
+                          #gateway interface.  Used by dynamic IP code.
+                          #NO - This interface is not gateway
+                          #YES- This interface is a gateway
+
+LIP_MTU	= 1500		  #OPTIONAL 
+			  #MTU for LIP Interface
+                          #Values: 128 to 4096
+			  #Note! This value should not be greater
+			  #      Than MTU for lower interfaces
+                          #If not defined: default 1500
+
+#--------------------------------------------
+#Protocol Profile Configuration
+#--------------------------------------------
+
+
+[w1g1.fr]
+NUMBER_OF_DLCI	= 1	#Number of DLCI's 
+                        #Important when configured for NODE!
+
+Station		= CPE   #Station Configuration
+			#CPE  - customer end point
+                        #NODE - frame relay switch emulation.
+
+SIGNALLING	= AUTO  #Frame Relay Signalling
+                        #AUTO - Tries to autodetect frame relay 
+                        #       signalling (CPE mode only)
+                        #ANSI
+                        #LMI
+                        #Q933
+
+T391		= 10	
+
+T392		= 16	
+
+N391		= 6	
+
+N392		= 6	
+
+N393		= 4	
+
+FR_ISSUE_FS	= YES	#OBSOLETE Not used by AFT cards
+
+
+#-------------------------------------------
+#Hardware Interface Configuration
+#-------------------------------------------
+
+[w1g1]
+HDLC_STREAMING	= YES	#Enable HDLC engine on this interface
+                        #YES - HDLC engine enabled.
+                        #      All frames Rx/Tx from/to this interface
+                        #      will be in HDLC format.
+                        #NO  - HDLC engine disabled.
+                        #      Rx/Tx Transparent (Raw) bits to and from
+                        #      interface.
+
+ACTIVE_CH	= ALL   #Timeslot binding
+            		#Specify what T1/E1 timeslots should be boudned
+                        #to this interface.
+                        #ALL - All timeslots
+                        #1-5 - 1 to 5
+                        #1.5 - 1 and 5
+                        #1-10.11-20 - 1 to 10 and 11 to 20
+
+MTU		= 1500  #OPTIONAL
+			#Maximum Tx Size for this interface
+                        #if this value is NOT set the global
+                        #MTU value will be used
+
+MRU		= 1500  #OPTIONAL
+			#Maximum Rx Size for this interface
+                        #if this value is NOT set the global
+                        #MRU value will be used
+

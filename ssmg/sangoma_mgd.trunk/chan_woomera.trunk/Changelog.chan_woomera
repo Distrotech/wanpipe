@@ -1,0 +1,234 @@
+chan_woomera.c
+======================================
+
+Jun 06 2009
+ * v1.51 Nenad Corbic <ncorbic@sangoma.com>
+ *      Updated for Asterisk 1.6.1
+
+Apr 24 2009
+ * v1.50 Nenad Corbic <ncorbic@sangoma.com>
+ *      Bug fix on write socket. Check that write woomera socket failed.
+ *      This update prevents socket warning messages on call congestion.
+ *
+
+Apr 08 2009
+ * v1.49 Nenad Corbic <ncorbic@sangoma.com>
+ *      Bug fix on transfer. The owner was not
+ *      properly updated causing unpredictable behaviour.
+
+
+Apr 05 2009
+ * v1.48 Nenad Corbic <ncorbic@sangoma.com>
+ *      Updated locking on pbx_start
+ *      
+ 
+Apr 03 2009
+ * v1.47 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added BLOCKER sanity check.
+ *
+ 
+Mar 29 2009
+ * v1.46 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added hup_pending stat to call_status
+ *      Let tech_hangup destroy softhungup channel
+ *
+ 
+Mar 27 2009
+ * v1.45 Nenad Corbic <ncorbic@sangoma.com>
+ *      Major updates on channel locking.
+ *      This update fixes potential crashing issues
+ *      under heavy load. Stress tested in 500+ call 
+ *      environment. 
+ *
+ 
+Mar 55 2009
+ * v1.44 Nenad Corbic <ncorbic@sangoma.com>
+ *      Updated woomera channel locking using 
+ *      DEADLOCK_AVOIDANCE. Fixed RDNIS transmission issue.
+
+
+Mar 01 2009
+ * v1.43 David Yat Sin <dyatsin@sangoma.com>
+ *      Fix for crash on callweaver trunk due to opbxtransfercapability2str
+ *      not defined
+ *
+
+Feb 25 2009
+ * v1.42 David Yat Sin <dyatsin@sangoma.com>
+ *      Support for callweaver trunk
+ *
+ 
+Jan 26 2008
+ * v1.40 Nenad Corbic <ncorbic@sangoma.com>
+ *      Call Bearer Capability Feature
+ *
+
+ Dec 19 2008
+ * v1.39 David Yat Sin <dyatsin@sangoma.com>
+ * 	Support for Asterisk 1.6
+ 
+ Dec 05 2008
+ * v1.38 David Yat Sin <dyatsin@sangoma.com>
+ *	Support for fax_detect using Asterisk software DSP
+ 
+ Nov 26 2008
+ * v1.37 Nenad Corbic <ncorbic@sangoma.com>
+ *	Bug Fix: tech_read try again now checks for hangup
+ 
+ Oct 14 2008
+ * v1.36 David Yat Sin <dyatsin@sangoma.com>
+ *  Bug Fix: Call hangup on call park
+
+ Jul 23 2008
+ * v1.35 Nenad Corbic <ncorbic@sangoma.com>
+ *  Bug Fix: Check for cid_name.
+ 
+ Jul 23 2008
+ * v1.34 Nenad Corbic <ncorbic@sangoma.com>
+ *  Added udp tagging and rx/tx sync options for
+ *	voice streams debugging. Not for production.
+ 
+ Jul 18 2008
+ * v1.33 Nenad Corbic <ncorbic@sangoma.com>
+ *	Added UDP Sequencing to check for dropped frames
+ *	Should only be used for debugging.
+
+ Jun 3 2008
+ * v1.32 David Yat Sin <davidy@sangoma.com>
+ *      Updated for callweaver v1.2.0
+ 
+ Jun 2 2008
+ * v1.31 Nenad Corbic <ncorbic@sangoma.com>
+ * v1.30 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added AST_CTONROL_RING event on outgoing call.
+ *     Updated for CallWeaver 1.2 SVN
+	  
+ May 21 2008
+ * v1.30 David Yat Sin <davidy@sangoma.com>
+ *	Fix for compilation issues with Callweaver v1.2-rc5 
+
+ Apr 30 2008
+ * v1.29 David Yat Sin <davidy@sangoma.com>
+ *	Added AST_CONTROL_SRCUPDATE in tech_indicate
+ 
+
+ Apr 29 2008
+ * v1.28 David Yat Sin <davidy@sangoma.com>
+ *	Fix for compilation issues with Callweaver v1.99
+ *
+
+ Feb 13 2008
+ * v1.27 David Yat Sin <davidy@sangoma.com>
+ *     Fixed issue channel type not defined when calling tech_call 
+ *
+
+ Feb 13 2008
+ * v1.26 Nenad Corbic <ncorbic@sangoma.com>
+ *      Compilation Update for callweaver 1.2-rc5
+ *
+
+ Feb 06 2008
+* v1.25 Nenad Corbic <ncorbic@sangoma.com>
+ *      Bug fix in woomera message declaration
+ *      Possible memory overflow
+ *
+
+ Jan 23 2008
+ * v1.24 Nenad Corbic <ncorbic@sangoma.com>
+ *	Removed LISTEN on every woomera channel. Listen
+ *      only on master. Fixed jitterbuffer support on AST1.4
+ *
+
+ Jan 22 2008
+ * v1.23 Nenad Corbic <ncorbic@sangoma.com>
+ *	Implemented Music on Hold.
+ *
+
+ Jan 11 2008
+ * v1.22 David Yat Sin <davidy@sangoma.com>
+ * 	rxgain and txgain configuration parameters 
+ *	are ignored if coding is not specified in 
+ *	woomera.conf	
+
+Dec 27 2007
+ * v1.21 David Yat Sin <davidy@sangoma.com>
+ * 	 Support for language
+
+Dec 20 2007
+ * v1.20 David Yat Sin <davidy@sangoma.com>
+ *	 Support for call confirmation
+ * 	 Support for default context
+
+Nov 30 2007
+ * v1.19 Nenad Corbic <ncorbic@sangoma.com>
+ *       Updated for latest CallWeaver
+ *	 Updated smgversion update on master socket 
+ *       restart.
+
+Nov 22 2007
+
+ * v1.18 Nenad Corbic <ncorbic@sangoma.com>
+ *       Updated Channel-Name on outbound call
+ *       Check queued events on ABORT
+ *       Major Unit Testing done
+ *       Ability to change chan name from Makefile
+ *
+ * v1.17 Nenad Corbic <ncorbic@sangoma.com>
+ *       Updates for Asterisk 1.4
+ *       Updated the release causes
+ *       Updated for tech_indication
+ *       
+ * v1.16 Nenad Corbic <ncorbic@sangoma.com>
+ *       Added support for Asterisk 1.4
+ *       Updated support for Callweaver
+ *
+ * v1.15 Nenad Corbic <ncorbic@sangoma.com>
+ *       Added PRI_CAUSE and Q931-Cause-Code 
+ *       in woomera protocol.
+ *
+ * v1.14 Nenad Corbic <ncorbic@sangoma.com>
+ *       Updated for session support
+ *
+ * v1.13 Nenad Corbic <ncorbic@sangoma.com>
+ *       Added CallWeaver Support
+ *       |->(thanks to Andre Schwaller)
+ *       Updated codec negotiation for 
+ *       mutliple profiles.
+ *
+ * v1.12 Nenad Corbic <ncorbic@sangoma.com>
+ *       Updated DTMF locking
+ *
+ * v1.11 Nenad Corbic <ncorbic@sangoma.com>
+ *       Updated multiple profiles 
+ *       Updated Dialect for OPAL Woomera
+ *       Added call logging/debugging
+ *
+ * v1.10 Nenad Corbic <ncorbic@sangoma.com>
+ *       Bug fix in incoming hangup 
+ * 
+ * v1.9 Nenad Corbic <ncorbic@sangoma.com>
+ *      Fixed remote asterisk/woomera
+ *      setup.
+ *
+ * v1.8 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added Woomera OPAL dialect.
+ *      Code cleanup.
+ *      Added cli call_status
+ *
+ * v1.7 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added smgdebug to enable smg debugging
+ *      Added rdnis
+ *
+ * v1.6 Nenad Corbic <ncorbic@sangoma.com>
+ *      Added incoming trunk group context 
+ *      The trunk number will be added to the
+ *      profile context name. 
+ *      Added presentation feature.
+ *
+ * v1.5 Nenad Corbic <ncorbic@sangoma.com>
+ *      Use only ALAW and MLAW not SLIN.
+ *      This reduces the load quite a bit.
+ *      Autodetect Format from HELLO Message.
+ *      RxTx Gain supported in woomera.conf as well
+ *      from CLI.
+

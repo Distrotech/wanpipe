@@ -1,0 +1,44 @@
+Sample Configuration Files
+==========================
+
+This directory contains samples of WANPIPE configuration
+files. 
+
+WANPIPE Configuraton files should be created using the
+/usr/sbin/wancfg utility.  In case of problems
+these sample files could be used to setup a router
+manually.
+
+
+Sample Configuraton Files:
+--------------------------
+
+
+interface		:sample interface configuration file	
+wanpipe1.adsl		:ADLS config file 
+wanpipe1.asy		:CHDLC Async config file
+wanpipe1.atm		:ATM config file
+wanpipe1.atty		:Async TTY config file (Equivalent to COM1/ttyS0)
+wanpipe1.bitstrm	:Bit Streaming config file
+wanpipe1.chdlc		:CHDLC protocol config file
+wanpipe1.chdlc_t1	:CHDLC protocol over T1/E1 adapter
+wanpipe1.fr		:Frame Relay protocol
+wanpipe1.fr_t1		:Frame Relay over T1/E1 adapter 
+wanpipe1.mult_fr	:Multi-Port Frame Relay 
+wanpipe1.mult_fr_t1	:Multi-Port Frame Relay over T1/E1 adapter
+wanpipe1.mult_ppp_chdlc		:Multi-Port PPP or CHDLC protocols 
+wanpipe1.mult_ppp_chdlc_t1	:Multi-Port PPP or CHDLC protocols over T1/E1 adapter
+wanpipe1.ppp		:Standard PPP protocol
+wanpipe1.ppp_t1		:Standard PPP protocol over T1/E1 adapter
+wanpipe1.sdlc		:SDLC API protocol
+wanpipe1.stty		:Sync TTY config file (Multilink PPP layer1)
+wanpipe1.x25		:X25 API protocol
+wanrouter.rc		:Sample wanrouter environment file
+
+Copy one of the configuration into /etc/wanpipe 
+directory and rename it to wanpipe1.conf.
+
+NOTE: To create wanpipe2.conf, rename any one of the
+      above files, and edit it accordingly.
+
+

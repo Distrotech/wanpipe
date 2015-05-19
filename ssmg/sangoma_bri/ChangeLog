@@ -1,0 +1,156 @@
+SMG BRI Daemon - BRI Protocol stack
+
+------------------------------------------------------------------------------
+Author: David Yat Sin <dyatsin@sangoma.com>
+Copyright (c) 2007-2008 Sangoma Technologies Inc.
+------------------------------------------------------------------------------
+
+* Tue Feb 23 2010 David Yat Sin <dyatsin@sangoma.com> - 2.21
+============================================================
+- Support for boost version 103
+
+* Thu May 07 2009 David Yat Sin <david.yatsin@sangoma.com> - 2.06
+=================================================================
+- Fix for segfault on invalid ACU_DIGIT_IN
+
+* Thu Apr 30 2009 David Yat Sin <david.yatsin@sangoma.com> - 2.05
+=================================================================
+- Fix for segfault on incoming ACU_DIGIT_IN
+
+* Fri Apr 24 2009 David Yat Sin <david.yatsin@sangoma.com> - 2.04
+=================================================================
+- Fix for segfault on outgoing call with invalid trunkgroup
+
+* Fri Apr 17 2009 David Yat Sin <david.yatsin@sangoma.com> - 2.03
+=================================================================
+- Removed FD restart on socket timeout
+
+* Fri Apr 10 2009 David Yat Sin <david.yatsin@sangoma.com> - 2.02
+=================================================================
+- Improvements in PHY layer implementation
+
+* Thu Apr 09 2009 David Yat Sin <david.yatsin@sangoma.com> - 2.01
+=================================================================
+- Compiled vs sigboost version 100
+- Support for Sangoma MGD restart procedure
+- Major internal changes
+
+* Tue Nov 02 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.59
+=================================================================
+- Fix for smg_brid crashing if ACU_DIGIT_IN is received with size < 1
+
+* Mon Oct 27 2008 David Yat Sin <dyatsin@sangoma.com> - 1.58-beta
+=================================================================
+- Support for per channel round robin 
+
+* Wed Sep 24 2008 David Yat Sin <dyatsin@sangoma.com> - 1.57-beta
+=================================================================
+- Fix for crash when single span is used and all spans are in 
+- physical disconnected state. Introduced in 1.56-beta
+
+* Wed Sep 11 2008 David Yat Sin <dyatsin@sangoma.com> - 1.56-beta
+=================================================================
+- Support for Round-Robin (ascending/descending) and Sequential
+- huntgroups.
+
+* Mon Aug 18 2008 David Yat Sin <dyatsin@sangoma.com> - 1.55-beta
+=================================================================
+- Support for additional DL parameters T200, T203 Timers.
+- Support for PH transmit timeout parameter.
+
+* Mon Aug 11 2008 David Yat Sin <dyatsin@sangoma.com> - 1.54-beta
+=================================================================
+- Support for all Netbricks NS timers.
+- Minor improvements to BRI logging (full_capture).
+
+* Mon Jul 28 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.53-beta
+======================================================================
+- Support for separate logger thread
+
+* Mon Jul 28 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.52-beta
+======================================================================
+- Fix for ACU_ALERT_RQ not sent on call_start_ack, introduced in 1.51
+- release
+
+* Mon Jul 28 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.51-beta
+======================================================================
+- Updated version
+
+* Fri Jul 25 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.50-beta
+======================================================================
+- ALERT msg send on CALL_START_ACK
+- dl_always_up enabled by default on NT mode
+
+* Wed Jul 23 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.49-beta
+======================================================================
+- Incoming OOB digits are queued if in TRANSPARENT_RCV mode
+
+* Mon Jul 21 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.48-beta
+======================================================================
+- Support for Timer T300 configuration
+- Support for ignore_oob_digits options
+
+* Wed Jul 17 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.47-beta
+======================================================================
+- Support for ACU_INFO_IN keypad pass-through to Asterisk
+
+* Wed Jul 17 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.46-beta
+======================================================================
+- Support for ACU_DIGIT_IN pass-through to Asterisk
+
+* Wed Jul 16 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.45
+=================================================================
+- Fix for issue when call is answered on CALL_START_ACK, changed to
+- call answer on CALL_ANSWERED.
+
+* Wed Jul 08 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.44
+=================================================================
+- v1.43-beta renamed as v1.44  stable
+
+* Wed Jul 04 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.43-beta
+======================================================================
+- Support for test start option 
+
+* Wed Jun 25 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.42-beta
+======================================================================
+- Support for logging to non-syslog
+
+* Thu Jun 16 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.40
+===================================================================
+- Fix for some of the release codes not being passed to sangoma_mgd
+
+* Thu May 15 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.39b
+====================================================================
+- Fix for smg_brid causing segfaults on some systems on incoming OOB
+- alarms
+
+* Mon April 30 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.39
+====================================================================
+- Fix for RDNIS not cleared
+
+* Wed April 16 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.38
+====================================================================
+- Support for show_spans and show_calls.
+
+* Tues April 15 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.37
+====================================================================
+- Added support for multiple MSNs.
+
+* Mon April 14 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.36
+====================================================================
+- Added support for timer_t3 and timer_t302
+- Changed boost_msg.cpp to use shared path for all SMG-BRI messages
+- Minor changes: Increased verbosity level for some informational
+- messages
+
+* Mon April 05 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.35d
+====================================================================
+- Fix for TEI not being re-negotiated on PHY disconnect.
+
+
+* Mon April 03 2008 David Yat Sin <david.yatsin@sangoma.com> - 1.35
+====================================================================
+- First stable release. 
+
+
+

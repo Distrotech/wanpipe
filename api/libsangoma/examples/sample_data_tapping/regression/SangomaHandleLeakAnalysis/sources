@@ -1,0 +1,54 @@
+TARGETNAME=leak_analysis
+TARGETTYPE=PROGRAM
+UMTYPE=console
+UMENTRY=main
+UMBASE=0x400000
+
+TARGETPATH=obj
+
+MSC_WARNING_LEVEL=/W2
+
+USE_STL=1
+USE_NATIVE_EH=1
+USE_LIBCMT=1
+
+#USE_MSVCRT=1
+
+#USE_RTTI=1
+#USE_STATIC_ATL=1
+#USE_CRTDLL=1
+
+############################################################################################
+#C_DEFINES=$(C_DEFINES) /Od /DWIN32 /D_DEBUG /D_CONSOLE 
+#C_DEFINES=$(C_DEFINES) /D_MBCS /Gm 
+#C_DEFINES=$(C_DEFINES) /TP
+############################################################################################
+
+############################################################################################
+C_DEFINES=$(C_DEFINES) /D__WINDOWS__ /DUSE_SANGOMA_ERRNO
+############################################################################################
+
+INCLUDES=$(DDK_INC_PATH);\
+$(SANG_WP_DEVEL)\wanpipe_common\include;\
+$(SANG_WP_DEVEL)\wanpipe_common\wanec;\
+$(SANG_WP_DEVEL)\wanpipe_common\wanec\OCT612x-01.04.01\include\oct6100api;\
+$(SANG_WP_DEVEL)\wanpipe_common\wanec\OCT612x-01.04.01\include;\
+$(SANG_WP_DEVEL)\wanpipe_common\wantools\libsangoma;\
+$(SANG_WP_DEVEL)\wanpipe_common\wantools\libsangoma\wanec;\
+$(SANG_WP_DEVEL)\wanpipe_common\include\aft_core;\
+$(SANG_WP_DEVEL)\wanpipe_common\include\debug;\
+$(SANG_WP_DEVEL)\wanpipe_windows\include
+
+
+TARGETLIBS=\
+	$(SDK_LIB_PATH)\kernel32.lib \
+	$(SANG_WP_DEVEL)\wanpipe_common\wantools\libsangoma\$(O)\libsangoma.lib 
+#	$(SDK_LIB_PATH)\msvcprt.lib
+
+SOURCES=\
+	driver_configurator.cpp \
+	leak_analysis.cpp \
+	PortBuffer.cpp \
+	SangomaCard.cpp \
+	SangomaPort.cpp \
+	sangoma_interface.cpp
