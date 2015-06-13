@@ -2244,7 +2244,7 @@ init_global_params()
 		WANEC_UNLOAD_DRIVERS="wanec"
 		MODULE_LOAD=modprobe
 		MODULE_UNLOAD="modprobe -r"
-		MODULE_EXT=".ko"
+		MODULE_EXT=".ko.gz"
 		DEPMOD=YES
 	
 		check_command_exist modprobe
@@ -2343,7 +2343,7 @@ init_global_params()
 		MODULE_STAT=kldstat
 		MODULE_LOAD=kldload
 		MODULE_UNLOAD=kldunload
-		MODULE_EXT=".ko"
+		MODULE_EXT=".ko.gz"
 		DEPMOD=YES
 		if [ "$major_ver" = "5" -o "$major_ver" = "6" ]; then
 			MODULE_DIR=/boot/modules
@@ -2359,7 +2359,7 @@ init_global_params()
 			kldconfig -m $WAN_MODULE_DIR 2>/dev/null
 		fi
 
-		usymbol=`nm $WAN_MODULE_DIR/wanpipe.ko | grep " U zt_register" > /dev/null`
+		usymbol=`nm $WAN_MODULE_DIR/wanpipe.ko.gz | grep " U zt_register" > /dev/null`
 		if [ -n $usymbol ]; then
 			kldconfig -m /usr/local/lib/zaptel 2>/dev/null
 		fi
