@@ -44,7 +44,7 @@ LDLIBS =
 else
 LX_OBJ = $(LXDIR)/checklist.o $(LXDIR)/menubox.o $(LXDIR)/inputbox.o $(LXDIR)/util.o 
 GUI_OBJ = wangui.o
-LDLIBS = -lncurses
+LDLIBS = -lncurses -ltinfo
 
 CFLAGS += -DWANPIPEMON_GUI -DLOCALE  
 endif

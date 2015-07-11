@@ -968,10 +968,10 @@ get_kernel_ver ()
 		SUBLEVEL)
 			KLVL=$value
 			;;
-		EXTRAVERSION)
-			KEVER=$value
-			break
-			;;
+#		EXTRAVERSION)
+#			KEVER=$value
+#			break
+#			;;
 		esac
 
 	done < $1/Makefile
