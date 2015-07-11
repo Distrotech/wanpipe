@@ -5,7 +5,7 @@ SYSINC=/lib/modules/$(shell uname -r)/build/include
 
 CFLAGS = -D__LINUX__ -Wall -Wstrict-prototypes -I$(SYSINC) -O2 -fomit-frame-pointer -DLOCALE 
 LDFLAGS = -s -L .
-LDLIBS = -lncurses
+LDLIBS = -lncurses -ltinfo
 WAN_VIRTUAL=
 
 CFLAGS += -I$(ASTBROOT)/include -DCURSES_LOC="<ncurses.h>"
