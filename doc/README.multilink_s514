@@ -1,0 +1,343 @@
+WANPIPE MULTILINK PPP SUPPORT
+-----------------------------
+
+Dependencies:
+-------------
+
+	1. Compiled (2.4.X) Kernel  PPP sync/async layers
+	   preferably as modules.
+	
+		make menuconfig
+		under "Network Device Support"
+		Enable PPP, MULTILINK, SYNCPPP ...
+
+            Note: The 2.2.X kernels need a Multilink patch
+                     however it has not been tested with 
+                     the wanpipe drivers.
+
+	2. PPPD Daemon version 2.4.0 or greater
+
+	3. Latest Wanpipe drivers.
+	   WANPIPE CHDLC driver must be compiled.
+	
+	
+Description:
+-----------
+
+The Sync/Async/Multilink PPP is a standard implementation 
+of the PPP protocol implemented in the Linux Kernel, NOT 
+in WANPIPE firmware. 
+
+Using the Sangoma adapter as a TTY serial card and the Linux 
+PPP Layer a standard PPP connection can be established over 
+a T1/T3 Link or a Modem line.
+
+The Sync/Async/Multilink PPP has been developed to address 
+the standard WANPIPE PPP limitations:
+
+ 	- The standard WANPIPE PPP (supported in firmware) 
+	  cannot run on a Secondary port and
+	  
+	- Does not support Multilink operation.
+
+The Sync/Async/Multilink PPP has two modes 
+of operation:
+	
+	- Sync with Multilink option.
+          Used to establish a PPP connection 
+	  over sync T1 lines.
+	
+	- Async.
+	  Use to establish a PPP connection via 
+	  MODEM over a telephone line.
+	  (Only available on S514-S508 cards)
+
+
+SYNC Mode
+---------
+
+	Using the PPPD daemon, kernel Sync-PPP layer and the Wanpipe sync TTY
+	driver: a PPP protocol connection can be established via Sangoma 
+	adapter, over T1 leased line.
+
+	The 2.4.X kernel PPP layer supports MULTILINK protocol. 
+	It can be used to bundle any number of Sangoma adapters (T1 lines) 
+	into one, under a single IP address. Thus, efficiently obtaining 
+	multiple T1 throughput.
+
+	NOTE: The remote side must also implement MULTILINK PPP protocol.
+
+
+ASYNC Mode
+----------
+
+	Using the PPPD daemon, kernel Async PPP layer and the WANPIPE async TTY
+	driver: a PPP protocol connection can be established via Sangoma adapter 
+	and a MODEM, over a telephone line.
+
+	The WANPIPE Async TTY driver simulates a serial TTY driver that is normally
+	used to interface the MODEM to the Linux kernel.
+	NOTE: This option only works on a SECONDARY Port of the S514-PCI/S508-
+	ISA card.
+
+
+Device /dev/ttyWP(0,1,2..)
+-------------------------
+
+	To interface a PPPD daemon to the WANPIPE TTY driver 
+	a /dev/ttyWPX X={0,1,3...) device must be created.
+
+		ex: mknod -m 666 /dev/ttyWP0 c 240 0
+
+		Note: 240 is the Major Number
+		0 is the Minor Number
+
+	IMPORTANT:
+	This option should only be used if the MULTILINK option 
+	desired, to bundle T1 connections together or to simulate a 
+	serial async device driver. Otherwise, it is
+	recommended that standard WANPIPE PPP is used.
+
+
+MULTILINK Setup/Configuration
+-----------------------------
+
+Assuming:
+     - WANPIPE modules have been installed 
+       with CHDLC support.
+     
+     - Kernel PPP layer compiled and loaded.
+
+     - PPPD daemon version 2.4.0 installed.
+
+
+Refer to README.install on how to 
+recompile the kernel/upgrade wanpipe modules.
+
+
+1. Create a WANPIPE configuration file using the
+   '/usr/sbin/wancfg' GUI configurator.
+	
+	eg: /usr/sbin/wancfg
+	
+
+2. Select Protocol:  Sync/Async TTY PPP	
+   
+   
+3. In Hardware Section: WANPIPE TTY OPTIONS:
+
+	TTY_MINOR: TTY MINOR represents a TTY port.
+	   	
+		Options: 0,1,2,3 & Default: 0
+
+	   	It binds a WANPIPE device driver to the 
+	   	/dev/ttyWPX device, where X=(0,1,3,..).
+		
+	   	For example MINOR number 0 binds a
+	   	Wanpipe TTY driver to /dev/ttyWP0. Thus, when pppd
+	   	daemon opens the /dev/ttyWP0 it will reach 
+	   	the device driver whose Minor number is 0.
+
+	   	Note TTY_MINOR must differ for each Wanpipe device.
+
+
+ 	TTY_MODE: WANPIPE TTY driver operation mode
+	
+		Options: Sync or Async 
+		Default: Sync
+
+		The driver operation mode must be specified here, 
+		since driver cannot obtain the operation mode 
+		from the pppd configuration calls. Therefore, 
+		if the driver operation mode is Sync than the pppd 
+		must be invoked with the sync option.
+		
+	Furthermore, all subsequent drivers must be configured with 
+	the same TTY MODE and different MINOR numbers.
+	
+3. The wancfg configurator will configure the pppd daemon 
+   according to the TTY_MODE selected. 
+   
+   It will also prompt the user for MULTILINK support.
+	
+	IMPORTANT: 
+		- First wanpipe device shuld/must be a MASTER.  
+		  Under MASTER configuration, Local and Remote IP addresses
+		  must be supplied.
+
+		- All other wanpipe devices should be setup as
+		  SLAVES. There will be no IP setup here.
+
+   
+   Three files will be created for each Wanpipe device:
+   
+	- /etc/ppp/options.ttyWPX 	:X is TTY_MINOR number.
+	- /etc/ppp/peers/isp_wanpipeX 	:X is a wanpipe device number (1-16)
+	- /dev/ttyWPX 			:X is TTY_MINOR number.
+	
+	
+4. WANPIPE TTY drivers must be started before the 
+   pppd attempts to open a /dev/ttyWPX device.
+
+	ex: wanrouter start wanpipe1
+
+   In case of MULTILINK, all wanpipe devices should be
+   started before pppd is started.
+   
+
+5. Once the Wanpipe device is started, PPP connection can 
+   be established by calling the pppd call script (created by wancfg):
+
+	ex: pppd call isp_wanpipe1
+
+		Start PPP protocol on MASTER device wanpipe1.
+
+   In case of MULTILINK, after the MASTER device has connected, and
+   a ping test is successful:
+
+   Start the second link (SLAVE DEVICE) by running pppd call script
+   for the SLAVE device:
+
+   	ex: pppd call isp_wanpipe2
+
+		Start PPP protocol on SALVE device wanpipe2 and
+		attach to the MASTERs network interface.
+
+6. For further information on MULTILINK and pppd please refer
+   to:
+   	1. man pppd
+	2. /usr/local/wanrouter/PPP-HOWTO
+	3. Call Sangoma Tech Support : 
+		Tel:    905-474-1990
+		Email:  techdesk@sangoma.com
+	
+
+
+Sample Cisco 1600 Setup
+-----------------------
+
+This example setup should be given to an ISP that doesn't 
+know how to setup up Mulitlink PPP on a Cisco box :)
+
+
+Scenaraio:
+
+Two Wanpipe S514 adapters connected back to back to a CISCO 1600 via two
+WAN T1 lines, running MULTILINK PPP, in order to bundle two T1 lines
+for geater than T1 throughput.
+
+
+	1) Enter the CISCO configuration mode
+		Cisco>enable
+		Cisco>password: <enter password>
+		Cisco#
+
+	2) Configure Global Mulitlink PPP protocol
+
+		Cisco# config
+		Cisco(config)# multilink virtual_template 1
+		Cisco(config)# exit
+
+	3) Configure Serial0 device for Multilink PPP
+
+		Cisco# config
+		Cisco(config)# interface serial0
+		Cisco(config-if)# encapsulation ppp
+		Cisco(config-if)# no ip address
+		Cisco(config-if)# ppp multilink
+		Cisco(config-if)# no shutdown
+		Cisco(config-if)# exit
+
+	4) Configure Serial1 device for Multilink PPP
+	
+		Cisco(config)# interface serial1
+		Cisco(config-if)# encapsulation ppp
+		Cisco(config-if)# no ip address
+		Cisco(config-if)# ppp multilink
+		Cisco(config-if)# no shutdown
+		Cisco(config-if)# exit
+
+	5) Configure virtual_template interface
+	
+		Cisco(config)# interface virtual_template 1
+		Cisco(config-if)# encapsulation ppp
+		Cisco(config-if)# ip address <local ip> <netmask>
+		Cisco(config-if)# ppp multilink
+		Cisco(config-if)# exit
+		Cisco(config)# exit
+
+
+Back to Back situation
+----------------------
+
+If you are setting up WANPIPE back to back Multilink
+against an external router:
+
+	Interface (onboard FT1 CSU/DSU): 
+		Cable: Back to Back T1 cable (Part number: 624).
+
+
+	Interface (V35): 
+		Cable: Back to Back V34 Cable (Part number: 609)
+		
+		Clocking: Clocking must be set to INTERNAL on the
+			  WANPIPE side.
+		
+	For all sangoma cables please refer to: 
+		http://www.sangoma.com/faqcable.htm
+
+
+	
+Tech Support
+------------
+
+For further information on MULTILINK and pppd please refer to:
+
+   	1. man pppd
+	2. /usr/local/wanrouter/PPP-HOWTO
+	3. Call Sangoma Tech Support : 
+		Tel:    905-474-1990
+		Email:  techdesk@sangoma.com
+
+
+
+APPENDIX
+========
+
+
+/etc/ppp/options 
+-----------------------------
+persist
+defaultroute
+debug
+kdebug 2
+asyncmap 0
+sync
+multilink
+lcp-echo-interval 5
+lcp-echo-failure 12
+
+
+#On some CISCO routers we must
+#be in silent mode
+#silent
+
+
+#DEBUG Only should be commented out in production
+nodetach
+
+-----------------------------
+
+
+
+
+
+/etc/ppp/peers/isp_wanpipe1
+-----------------------------
+ttyWP0          #Bind to WANPIPE device wanpipe1
+
+#201.1.1.1:201.1.1.2
+
+#user bonded-isp-username
+
+-----------------------------

@@ -1,0 +1,199 @@
+WANPIPE ASYNC HDLC STREAMING API Support
+=========================================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with ASYNC HDLC support
+----------------------------------------
+
+The ASYNC HDLC API support IS NOT installed by default
+during WANPIPE installation process.
+
+Use the CUSTOM driver compilation 
+option in: 
+    
+    ./Setup install
+    
+    	Custom Compilation Mode
+
+	Enable DEF for default protocols and
+	
+	Enable ASYHDLC protocol.
+
+
+After successful installation proceed to 
+configure you ASYNC HDLC card using 
+MANUAL configuration files located in samples/
+directory.
+	wanpipe1.asyhdlc_pri
+	wanpipe2.asyhdlc_sec
+
+Note: wancfg GUI configurator doesn't support
+      Async HDLC API.
+      
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+Configuring ASYNC HDLC API
+--------------------------
+
+After successful installation proceed to 
+configure you ASYNC HDLC card using 
+MANUAL configuration files located in 
+wanpipe/samples/ directory.
+
+	wanpipe1.asyhdlc_pri
+	wanpipe2.asyhdlc_sec
+
+1. Change dir to wanpipe/samples directory
+
+2. Copy wanpipe1.asyhdlc_pri to /etc/wanpipe/wanpipe1.conf
+
+	Card: S514 PRI Port
+	PCI:  Autodetect
+
+	The wanpipe1.conf is configured to autdetect
+	the S514 card. If running more than one S514
+	card, please edit wanpipe1.conf and disable AUTO_PCISLOT
+	option, and specify the actual PCI SLOT and BUS 
+	numbers.
+
+	Run: "wanrouter hwprobe" to obtain PCI info.
+
+3. Save and Exit
+
+
+Start Async HDLC Streaming protocol
+---------------------------------- 
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are dispalyed.
+
+ 	Confirm the state of Front End (T1/E1/V35)
+	Confirm the Link state
+
+	Check for any error events.
+
+
+Custom API Application
+======================
+
+A sample API application exists in
+/etc/wanpipe/api/asyhdlc directory.
+
+To compile it run:  make
+
+Run:    ./asyhdlc_api 
+
+
+
+API ./asyhdlc_api USAGE:
+
+./asyhdlc_api <options> <extra options>
+
+
+
+<options>:
+	-i  <ifname>     #interface name
+	-c  <card name>  #card name
+	-r               #read enable
+	-w               #write eable
+
+<extra options>
+	-txcnt   <digit>  #number of tx packets  (Dflt: 1)
+	-txsize  <digit>  #tx packet size        (Dflt: 10)
+	-txdelay <digit>  #delay in sec after each tx packet (Dflt: 0)
+	-txdata  <digit>  #data to tx <1-255>
+
+	-txfile  <file>   #Use file to tx instead
+	-rxfile  <file>   #Save all rx data to a file
+	
+	-rxcnt   <digit>  #number of rx packets before exit
+			  #this number overwrites the txcnt
+	                  #Thus, app will only exit after it
+	                  #receives the rxcnt number of packets.
+	
+	-verbose	  #Enable verbose mode
+
+
+eg: To enable read:
+	
+	./asyhdlc_api -i wp1chdlc -c wanpipe1 -r -verbose
+
+
+eg: To enable read and write:
+	
+	./asyhdlc_api -i wp1chdlc -c wanpipe1 -r -w -txsize 100 -txcnt 10 -verbose
+
+	
+
+
+
+      
+	
+
+
+
+
+
+

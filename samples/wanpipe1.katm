@@ -1,0 +1,165 @@
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Wed Mar  7 18:20:38 PST 2007
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_AFT, Comment
+
+[interfaces]
+w1g1 = wanpipe1, , STACK, Comment
+w1g1ka1 = wanpipe1, , API, lip_katm, w1g1.lip_atm
+
+[wanpipe1]
+
+#-------- DEVICE / DRIVER BINDING ----------------------------------
+
+CARD_TYPE 	= AFT	#AFT: Same for all aft cards must
+                        #This value must be hardcoed to AFT for all
+                        #aft cards.
+	
+S514CPU 	= A     #Used by A101/2 driver to determine T1/E1 port
+                        #A - port 1   
+                        #B - port 2
+			#For A104 driver: Always set this value to A!
+
+CommPort 	= PRI   #Only used by S514 cards. 
+                        #PRI - S514 primary port
+                        #SEC - S514 secondary port
+                        #
+	                #OBSELETE for AFT cards (can be removed)      
+
+#-------- PCI SETUP ----------------------------------------------
+
+
+AUTO_PCISLOT 	= YES   #Auto detect PCI/BUS info for this card type
+                        #NO - disable this option
+                        #YES- enable this option
+                        #     if enabled bottom two options 
+			#     PCISLOT and PCIBUS will not be used. 
+                        #     Therefore one can set the to arbitrary value 
+                        #     or remove them all together.
+
+PCISLOT 	= 2     #PCI SLOT Number: 
+                        #Valid values = any number
+    
+PCIBUS  	= 2     #PCI BUS Number:
+			#Valid values = any number
+                    
+         
+#--------------FRONT END SETUP -----------------------------------
+
+FE_MEDIA	= T1    #Front End Type: 
+			#T1 - set front end for T1 mode
+                        #E1 - set front end for E1 mode
+
+FE_LCODE	= B8ZS  #Front End Line Coding
+			#If T1:  B8ZS or AMI
+                        #   E1:  HDB3 or AMI        
+
+FE_FRAME	= ESF   #Front End Framing
+			#If T1:  ESF or D4 
+                        #   E1:  CRC4 or NCRC4
+
+FE_LINE		= 1       #Front End Line number.
+			  #Used by A104 driver to determine T1/E1 port
+			  #Valid values are: 1-4
+			  #
+                          #The A101/2 driver doesn't use this option   
+                          #so one should hardcode it to 1 or 
+                          #remove it all together.
+					
+	
+TE_CLOCK 	= NORMAL  #T1/E1 Clock Source
+                          #NORMAL - slave clock, clock is received from telco
+                          #         This is always the DEFAULT
+                          #MASTER - master clcok, use hw oscillator clock
+                          #         Only used in back to back mode or
+                          #         when specified by telco.
+ 
+TE_REF_CLOCK 	= 0	  #T1/E1 Reference Clock Source
+                          #This option allows one to use the incoming clock
+                          #from a different port as a clock source to this
+                          #port.  FOR THIS OPTION TO WORK: TE_CLOCK=MASTER
+			  #Valid options: 0   - disable 
+                          #               1-4 - use clock from particular port
+
+ACTIVE_CH	= ALL	  #Specify T1/E1 Active channels (timeslots)
+                          #Since AFT cards support channelization this
+                          #option MUST BE HARDCODED TO:  ALL!
+
+TE_HIGHIMPEDANCE	= NO  #Set the Front Ent chip in High Impedance mode
+                              #used for datascoping:
+                              #NO - Disable high impedance mode (DEFAULT)
+                              #YES - Enable hight impedance mode 
+                              #      (only if you know what you are doing)
+
+LBO 		= 0DB     #Front End Line Buildout
+                          # 0db     (Default)  
+                          # 7.5dB     
+                          # 15dB      
+                          # 22.5dB     
+                          # 0-110ft    
+                          # 110-220ft  
+                          # 220-330ft  
+                          # 330-440ft  
+                          # 440-550ft  
+                          # 550-660ft 
+  
+FE_TXTRISTATE	= NO	  #Front End Tri-State Mode
+                          #Disable front end chip TX mode
+                          #Used for datascoping or connecting multiple ports
+                          #together where one port is operating normally and others
+                          #are tristated, thus only receiving.
+                          #NO - Disable tristae mode
+                          #YES- Enable tristate mode                                      
+
+
+DATA_MUX_MAP	= 0x01234567	#Do not change
+
+                              	
+MTU 		= 212		#Do not change
+UDPPORT 	= 9000		#Do not change
+TTL		= 255           #Do not change
+IGNORE_FRONT_END = NO           #Do not change
+
+[w1g1ka1]
+VPI		= 0 		#Not used by katm
+VCI		= 35		#Not used by katm
+
+ENCAPMODE	= STACK_VC_OA   #Must be set to STACK_VC_OA so 
+			        #no pdu headers are used
+
+OAM_LOOPBACK	= NO            #Must be set to NO
+OAM_LOOPBACK_INT= 5
+
+OAM_CC_CHECK	= NO         	#Must be set to NO
+OAM_CC_CHECK_INT= 2
+
+ATMARP		= NO        	#Must be set to NO
+ATMARP_INT	= 15
+
+MTU		= 4096        	#Acual AAL5 layer MTU size
+				#Options: 1500 - 8000
+
+[w1g1.lip_atm]
+
+[w1g1]
+PROTOCOL	= MP_ATM	#Do not change any of the following
+HDLC_STREAMING	= NO		
+ACTIVE_CH	= ALL		
+IDLE_FLAG	= 0x7E
+MTU		= 212
+MRU		= 212
+DATA_MUX	= YES

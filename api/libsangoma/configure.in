@@ -1,0 +1,55 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+# Package and LT (libtool) versions are not the same (they can match sometimes though)
+# see http://sources.redhat.com/autobook/autobook/autobook_91.html for details
+# more info on versioning: http://www.nondot.org/sabre/Mirrored/libtool-2.1a/libtool_6.html#SEC33
+
+# before libsangoma 3.0.0 we really did not follow libtool versioning mechanism
+# starting with 3.0.0 package and LT version of libsangoma we should NOT increment
+# both the package version (specified in AC_INIT) and the libtool (LIBSANGOMA_LT_*) versions
+# together just to have them match, they are not meant to match (but may do so by coincidence). 
+# Libtool version must be incremented just when there are library interface changes or bug fixes
+# according to the libtool rules (read the document mentioned at the top of this file)
+# the package version changes more feely as we wish (we put the rules there about when to change)
+# for example, if we ever fix a bug in priserver.c and we want to make a release we can do so
+# without incrementing libsangoma LT version
+
+AC_INIT([libsangoma],[3.5.0],[ncorbic@sangoma.com])
+AC_CONFIG_HEADERS(config.h)
+AM_INIT_AUTOMAKE
+
+LIBSANGOMA_LT_CURRENT=3  # interface 3
+LIBSANGOMA_LT_REVISION=5 # first revision of this interface
+LIBSANGOMA_LT_AGE=0      #not backwards compatible (0 previous interfaces are compatible)
+
+#AC_CONFIG_MACRO_DIR([m4])
+
+AC_SUBST(LIBSANGOMA_LT_CURRENT)
+AC_SUBST(LIBSANGOMA_LT_REVISION)
+AC_SUBST(LIBSANGOMA_LT_AGE)
+
+# Checks for programs.
+AC_PROG_CC
+AC_PROG_LIBTOOL
+AC_CHECK_PROG(AR, ar, ar, no) 
+
+
+# Checks for library headers
+AC_CHECK_HEADERS(fcntl.h netinet/in.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h math.h)
+
+# Checks for libpri support
+AC_ARG_WITH(libpri,
+	[  --with-libpri=<path> enable pri support],[LIBPRI_PATH="$withval"])
+AM_CONDITIONAL([LIBPRI],[test -d "$LIBPRI_PATH" ])
+AC_SUBST([LIBPRI_PATH])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_TIME
+
+# Checks for library functions.
+AC_FUNC_SELECT_ARGTYPES
+AC_CHECK_FUNCS([gettimeofday memset select socket])
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
+

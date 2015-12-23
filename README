@@ -1,0 +1,1042 @@
+------------------------------------------------------------------------------
+Linux WAN Router Utilities Package
+------------------------------------------------------------------------------
+Version beta1-2.3.1
+Jan 27 2003
+Author: Nenad Corbic <ncorbic@sangoma.com>
+Copyright (c) 1995-2003 Sangoma Technologies Inc.
+------------------------------------------------------------------------------
+
+INTRODUCTION
+
+Wide Area Networks (WANs) are used to interconnect Local Area Networks (LANs)
+and/or stand-alone hosts over vast distances with data transfer rates
+significantly higher than those achievable with commonly used dial-up
+connections.
+
+Usually an external device called `WAN router' sitting on your local network
+or connected to your machine's serial port provides physical connection to
+WAN.  Although router's job may be as simple as taking your local network
+traffic, converting it to WAN format and piping it through the WAN link, these
+devices are notoriously expensive, with prices as much as 2 - 5 times higher
+then the price of a typical PC box.
+
+Alternatively, considering robustness and multitasking capabilities of Linux,
+an internal router can be built (most routers use some sort of stripped down
+Unix-like operating system anyway). With a number of relatively inexpensive WAN
+interface cards available on the market, a perfectly usable router can be
+built for less than half a price of an external router.  Yet a Linux box
+acting as a router can still be used for other purposes, such as fire-walling,
+running FTP, WWW or DNS server, etc.
+
+This kernel module introduces the notion of a WAN Link Driver (WLD) to Linux
+operating system and provides generic hardware-independent services for such
+drivers.  Why can existing Linux network device interface not be used for
+this purpose?  Well, it can.  However, there are a few key differences between
+a typical network interface (e.g. Ethernet) and a WAN link.
+
+Many WAN protocols, such as X.25 and frame relay, allow for multiple logical
+connections (known as `virtual circuits' in X.25 terminology) over a single
+physical link.  Each such virtual circuit may (and almost always does) lead
+to a different geographical location and, therefore, different network.  As a
+result, it is the virtual circuit, not the physical link, that represents a
+route and, therefore, a network interface in Linux terms.
+
+To further complicate things, virtual circuits are usually volatile in nature
+(excluding so called `permanent' virtual circuits or PVCs).  With almost no
+time required to set up and tear down a virtual circuit, it is highly desirable
+to implement on-demand connections in order to minimize network charges.  So
+unlike a typical network driver, the WAN driver must be able to handle multiple
+network interfaces and cope as multiple virtual circuits come into existence
+and go away dynamically.
+ 
+Last, but not least, WAN configuration is much more complex than that of say
+Ethernet and may well amount to several dozens of parameters.  Some of them
+are "link-wide"  while others are virtual circuit-specific.  The same holds
+true for WAN statistics which is by far more extensive and extremely useful
+when troubleshooting WAN connections.  Extending the ifconfig utility to suit
+these needs may be possible, but does not seem quite reasonable.  Therefore, a
+WAN configuration utility and corresponding application programmer's interface
+is needed for this purpose.
+
+Most of these problems are taken care of by this module.  Its goal is to
+provide a user with more-or-less standard look and feel for all WAN devices and
+assist a WAN device driver writer by providing common services, such as:
+
+ o User-level interface via /proc file system
+ o Centralized configuration
+ o Device management (setup, shutdown, etc.)
+ o Network interface management (dynamic creation/destruction)
+ o Protocol encapsulation/decapsulation
+
+To ba able to use the Linux WAN Router you will also need a WAN Tools package
+available from
+
+	ftp.sangoma.com/pub/linux/current_wanpipe/wanpipe-X.Y.Z.tgz
+
+where vX.Y.Z represent the wanpipe version number.
+
+For technical questions and/or comments please e-mail to ncorbic@sangoma.com.
+For general inquiries please contact Sangoma Technologies Inc. by
+
+	Hotline:	1-800-388-2475	(USA and Canada, toll free)
+	Phone:		(905) 474-1990  ext: 106
+	Fax:		(905) 474-9223
+	E-mail:		dm@sangoma.com	(David Mandelstam)
+			ncorbic@sangoma.com (Nenad Corbic)
+	WWW:		http://www.sangoma.com
+
+
+INSTALLATION
+
+Please read the README.install on how to 
+install the WANPIPE tools and drivers properly. 
+
+
+After installation read README.config on how
+to configure and start wanpipe device.
+
+For further information refer to the
+doc/ directory.
+
+ftp.sangoma.com/linux/current_wanpipe/doc
+
+
+COPYRIGHT AND LICENSING INFORMATION
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program; if not, write to the Free Software Foundation, Inc., 675 Mass
+Ave, Cambridge, MA 02139, USA.
+
+
+
+ACKNOWLEDGEMENTS
+
+This product is based on the WANPIPE(tm) Multiprotocol WAN Router developed
+by Sangoma Technologies Inc. for Linux 2.0.x and 2.2.x.  Success of the WANPIPE
+together with the next major release of Linux kernel in summer 1996 commanded
+adequate changes to the WANPIPE code to take full advantage of new Linux
+features.
+
+Instead of continuing developing proprietary interface tied to Sangoma WAN
+cards, we decided to separate all hardware-independent code into a separate
+module and defined two levels of interfaces - one for user-level applications
+and another for kernel-level WAN drivers.  WANPIPE is now implemented as a
+WAN driver compliant with the WAN Link Driver interface.  Also a general
+purpose WAN configuration utility and a set of shell scripts was developed to 
+support WAN router at the user level.
+
+Many useful ideas concerning hardware-independent interface implementation
+were given by Mike McLagan <mike.mclagan@linux.org> and his implementation
+of the Frame Relay router and drivers for Sangoma cards (dlci/sdla).
+
+With the new implementation of the APIs being incorporated into the WANPIPE,
+a special thank goes to Alan Cox in providing insight into BSD sockets.
+
+Special thanks to all the WANPIPE users who performed field-testing, reported
+bugs and made valuable comments and suggestions that help us to improve this
+product.
+
+	o From 2.3.1 contains major structural driver changes.
+	  The new Hardware Abstraction layer cleanly separates, the
+	  physical layer from the driver/protocol layers.
+
+	  Support for 2.6.X kernel.
+
+	o From 2.3.0 contains major structural driver changes 
+	  most notably the ADSL OS abstraction layer. ADLS drivers
+	  can now be compiled against any custom kernel.
+
+	o From 2.2.6 release forward the new S514-7 Dual T/E1, 
+ 	  S514-8 Single TE1 and S518 ADSL cards are supproted.
+
+	o From 2.2.4 release forward the new S514-4 T/E1 and S514-5 56K
+          cards are supported.
+   
+	o From 2.2.3 release forward ALL wanpipe modules
+          including API modules, can be recompiled from
+           ./Setup installation script! 
+           NO KERNEL RECOMPILATION is necessary.
+           
+	o From 2.2.3 release forward, wanpipe directory
+           architecture has been changed.  New home directory
+           for wanpipe is /etc/wanpipe. 
+   
+	o All old releases are in ../old_releases/wanpipe directory. 
+
+	o Custom RPMs can be build based on current kernel image
+	  by using the ./Setup buildrpm command.
+	  Read the README.rpmbuild.
+
+
+
+
+NEW IN beta1-2.3.1 RELEASE
+===========================
+Jan 27 2004	
+	
+	o Support for 2.6.X kernels
+	
+	o New Hardware Abstracion Layer
+	  Cleanly separates the hardware
+	  layer from the data/protocol layers.
+
+	o New AFT Hardware Support
+          Sangomas new high-speed T1/E1
+	  adapters.
+
+	o Bitstrm Update
+	  New bitstrm SWITCHING on
+	  serial cards.
+	
+		
+	
+2.3.0-8
+Jan 15 2004
+
+	o ADSL Update
+          Fixed the lights problem
+	  where lights turn off after
+	  training timeout.
+
+	o All Drivers UDP PKT TYPE
+	  The check for UPD packets function
+	  has been secured by checking for the
+	  packet length before proceeding to test
+	  for udp packet.
+
+	o Wanpipe DEBIAN packager
+          The ./Setup installation script
+	  can now build DEBIAN packages.
+
+	  ./Setup builddeb
+
+	o Wanpipe PCAP Tracing
+          wanpipemon trace utility can now
+	  trace to a PCAP type file, that
+	  can be read by "Etheral" for
+	  graphical protocol decoding.
+
+	  wanpipemon -i <ifname> -pcap -c tr
+
+	  for further info run:
+	  	wanpipemon -traceinfo <cr>
+
+2.3.0-7
+Dec 01 2003
+
+	o MAJOR BUG FIX: T1/E1
+	 
+	  The 2.3.0-6 release had a major T1/E1
+	  bug!  
+	  
+	  NOTE: This bug was only on 2.3.0-6 
+	        release.
+
+	o Bitstrm Update
+	  New bitsreaming firmware.
+
+	o X25 Update
+	
+	  Added an algorithm to check for
+	  loss of tx clock.  In such case
+	  the firmware would not be able to
+	  transmit.  The API would receive an
+	  OOB message with packet type 0x0C
+	  same as the modem down condition.
+	
+	  Update x25 firmware
+
+
+2.3.0-6
+Nov 24 2003
+	o Bitstrm Update
+	 
+	  Fixed E1 API.
+	  New Bitstrm Firmware that fixes and 
+	  monitors the channel slip condition.
+
+	o X25 Update
+          Added front end state. If modem
+	  goes down, the link state will
+	  follow.
+
+	  Fixed the incoming call user data lenght filed.
+	  The user data length on incoming call would
+	  always be set, even if there was no user
+	  data.
+
+	  Added detailed milisecond timesamps
+	  to trace packets.
+
+	  Updated the trace lost counter.
+	 
+	o MPAPI 
+	  Added PVC support to MPAPI X25 stack
+	  Added the MOD128 X25 support
+
+	o ADSL
+	  Update the SMP locks
+	  Fixed a shared interrupt bug.
+
+	o HDLC Firmware Update
+	  Added FAST_ISR option to the
+	  CHDLC firmware, for better performance
+	  when all four ports are running at
+	  the same time.
+
+2.3.0-5
+Oct 7 2003
+	o WPBWM Utility
+	  Added a bandwidth monitor utility
+	  to the wanpipe package.  
+	  Used for real time throughput statistics
+	  on all running network interfaces.
+	  
+	o ATM Update
+	  ATM drivers didn't work over E1 cards.
+	  Configuration issue.
+
+	o ADSL Update
+	  ADSL drivers failed to train
+	  on lines in South Africa. 
+	  Update firmware and minor driver
+	  bug fixes.
+
+	o BitStreaming Bug Fix
+	  Problem with bitstreaming over
+	  S514 (1/2) Serial cards.
+
+	o X25API Update
+	  Added interrupt based tracing
+	  this way the trace will not 
+	  drop any packets, even during
+	  high traffic conditions.
+
+	o Update X25API
+	  The MTU of 128 was not supported :(
+
+	o PPP over Frame Relay
+	  Added the PPP protocol support over
+	  Frame Relay.
+
+	o Setup Update
+	  Buildrpm option has been fixed for
+	  RedHat 9.0
+
+
+2.3.0-4
+Aug 11 2003
+	o EduKit Driver Update
+	  Updated ioctl calls
+
+	o Added ss7 headers to the
+	  release, to resolve the
+	  ss7pipemon compilation issue.
+
+2.3.0-3
+Aug 5 2003
+	o Update to X25API driver
+	  Fixed the accept() 
+          Fixed the reset()
+	  Fixed the clear_call() 
+	  
+	o Wanpipemon
+	  New SS7 monitor
+
+	o Setup Update
+	  
+	  Fixed the kernel source update.
+	  Now the wanpipe drivers can be
+	  compiled inside the kernel tree.
+
+2.3.0-2
+Jul 21 2003
+	o Wanpipe Bug Fix
+	  The test code used in debugging
+	  was left inside the driver, which
+	  caused problems when shutting down
+	  wanpipe.
+
+
+2.3.0-1
+Jul 18 2003
+	o New API sockets 
+
+	  The MPAPI sockets have replaced the
+	  original WANPIPE API sockets.  The
+	  API interface is 100% backward compatible.
+
+2.3.0-0
+Jun 14 2003
+
+	o Wanrouter External Scripts Support
+   
+          The /usr/sbin/wanrouter startup script
+	  is now able to start external scripts for
+	  each action performed on WANPIPE devices.
+
+
+	  Script Location: 
+		Configurable in /etc/wanpipe/wanrouter.rc
+		
+		eg:	WAN_SCRITPS_DIR=/etc/wanpipe/scripts/
+
+
+	  Interface Start/Stop Scripts:
+
+	    <device name>-<interface name>-<cmd>
+
+	    eg: wanpipe1-wan0-start
+		wanpipe1-wan0-stop
+
+
+	    Interfaces scripts will get invoked by the following commands:
+	    	
+		wanrouter [start|stop|restart]
+		wanrouter [start|stop|restart] <device>
+		wanrouter [start|stop|restart] <device> <interface>
+		
+	    or  Dynamically by wanpipe syncppp driver after 
+	        successfull IPCP negotiation.
+
+		This option is extremely useful for PPPoA ADSL
+		or PPP customers, that need to update their 
+		routers based on new negotiated IP addresses.
+
+	  Device Start/Stop Scripts:
+
+	    <device name>-<cmd>
+
+	    eg: wanpipe1-start
+		wanpipe1-stop
+
+	    Device scripts will get invoked by the following commands:
+		wanrouter [start|stop|restart]
+		wanrouter [start|stop|restart] <device>
+
+	  Global Start/Stop Scripts:
+
+	    <cmd>
+
+	    eg: start
+		stop
+
+	    Global Wanpipe scripts will get invoked by the following commands:
+		wanrouter [start|stop|restart]
+
+	  Wancfg Configurator Update
+	    
+	    The /usr/sbin/wancfg configuration utility has
+	    been updated to create/edit all external
+	    global,device,interface scripts.
+
+
+	  Each script is executed as Bash2 shell script.
+
+
+	o Wancfg Configurator Update
+	
+	  The /usr/sbin/wancfg configuration utility has 
+	  been updated to create/edit all external
+	  global,device,interface scripts.
+
+
+	o New API sockets 
+
+	  The MPAPI sockets have replaced the
+	  original WANPIPE API sockets.  The
+	  API interface is 100% backward compatible.
+
+
+	o Wanrouter External Scripts Support
+   
+          The /usr/sbin/wanrouter startup script
+	  is now able to start external scripts for
+	  each action performed on WANPIPE devices.
+
+
+	  Script Location: 
+		Configurable in /etc/wanpipe/wanrouter.rc
+		
+		eg:	WAN_SCRITPS_DIR=/etc/wanpipe/scripts/
+
+
+	  Interface Start/Stop Scripts:
+
+	    <device name>-<interface name>-<cmd>
+
+	    eg: wanpipe1-wan0-start
+		wanpipe1-wan0-stop
+
+
+	    Interfaces scripts will get invoked by the following commands:
+	    	
+		wanrouter [start|stop|restart]
+		wanrouter [start|stop|restart] <device>
+		wanrouter [start|stop|restart] <device> <interface>
+		
+	    or  Dynamically by wanpipe syncppp driver after 
+	        successfull IPCP negotiation.
+
+		This option is extremely useful for PPPoA ADSL
+		or PPP customers, that need to update their 
+		routers based on new negotiated IP addresses.
+
+	  Device Start/Stop Scripts:
+
+	    <device name>-<cmd>
+
+	    eg: wanpipe1-start
+		wanpipe1-stop
+
+	    Device scripts will get invoked by the following commands:
+		wanrouter [start|stop|restart]
+		wanrouter [start|stop|restart] <device>
+
+	  Global Start/Stop Scripts:
+
+	    <cmd>
+
+	    eg: start
+		stop
+
+	    Global Wanpipe scripts will get invoked by the following commands:
+		wanrouter [start|stop|restart]
+
+	  Wancfg Configurator Update
+	    
+	    The /usr/sbin/wancfg configuration utility has
+	    been updated to create/edit all external
+	    global,device,interface scripts.
+
+
+	  Each script is executed as Bash2 shell script.
+
+
+	o Wancfg Configurator Update
+	
+	  The /usr/sbin/wancfg configuration utility has 
+	  been updated to create/edit all external
+	  global,device,interface scripts.
+
+
+
+beta7-2.3.0
+May 22 2003
+
+	o ADCCP Lapb API Protocol
+	  
+	  New ADCCP Lapb API protocol for
+	  S514 and S508 cards.
+
+	  Read the REAME.adccp for more info.
+
+	o ADSL Update
+  
+          Bug fixes and feature upates to the
+	  ADSL code.  Including, line watchdog
+	  and cell delienation fix.
+
+	  Added a line watchdog feature. New config
+	  option ADSL_WATCHDOG in wanpipe1.conf.
+
+	  New PPPoA ppp driver.  No need to use
+	  the pppd daemon any more.  The whole PPPoA 
+	  configuration is now inside /usr/sbin/wancfg.
+
+          New Interface Config Options:
+
+		DYN_INTR_CFG: Option enables dynamic ppp ip addressing
+		PAP:          Enables pap authentication
+		CHAP:	      Enables chap authentication
+		USERID:       User id
+		PASSWD:       User password
+
+	  Refer to README.adsl for further info.
+
+	o MPAPI X25 Updates and fixes
+
+	o Updated WANPIPE for 
+	  RedHat AS 2.1 distribution.  
+
+
+
+beta6-2.3.0
+Apr 22 2003
+
+	o ATM firmware update
+	  Beta5 had the ATM wrong firmware version,
+	  which doesn't work with some ATM switches.
+
+	o Frame Relay bug fix. 
+	  If running beta4-2.3.0 update to the latest
+	  or enable MULTICASTING in network interface
+	  protocol setup.
+
+	o ADSL protocol update
+	  ADSL driver was too sensitive to noisy lines which
+	  caused it to re-train too often. 
+
+	  ADSL PPPoA has been re-designed.  The PPPD Daemon
+	  is not used any more.  The Wanpipe PPP kernel stack
+	  has PAP/CHAP support now.  
+
+	  Thus whole PPPoA configuration, including PAP/CHAP
+	  is now handled by the /usr/sbin/wancfg configurator.
+
+ 	o New SNMP MIBS
+	  New SNMP MIBS for T1/E1/56 front ends
+	  Updated original protocol mibs: FR/PPP/CHDLC/X25 ...
+
+
+beta5-2.3.0
+Apr 9 2003
+
+	o New ATM driver for S514(T1/E1) cards
+
+	  Flexible PHY-layer, supporting all formats of Idle, 
+	  Unassigned and Physical Layer cells.
+
+	  DS1 direct ATM cell mapping as per ITU G.804 
+	  Section 2.1.
+	
+	  Support for AAL Type 5.
+
+    	  ATM operations and management (OAM) support.
+
+    	  Extensive statistics at both the PHY and ATM levels.
+
+    	  Real-time data scope with advanced cell-filtering 
+	  capabilities.
+
+    	  Unlimited number of VPI/VCI combinations.
+
+    	  Encapsulation and protocols supported
+          (IP over ATM, PPP over ATM, and Ethernet over ATM)
+
+	o ADSL driver update
+         
+	  Major bug fixes in ADSL driver.
+	  Better retraining algorithm, improved debugging.
+	  Better performance on noisy lines.
+
+	o Multi-Protocol Driver Support
+
+	  The Multi Protocol drivers implements HDLC/PPP/CHDLC
+	  protocols in kernel that run over sangoma dumb
+	  card support (S514/S508).
+
+          All Multi Protocol drivers can run on each Sangoma
+	  S514/S508 Primary and Secondary Ports.
+
+	o Multi-Protocol API Support
+
+	  The Multi Protocol API support runs on top of the
+	  Multi Protocol drivers.  The MPAPI supports X25/LAPB
+	  and DSP protocols as kernel modules. 
+
+          All Multi Protocol APIs can run on each Sangoma
+	  S514/S508 Primary and Secondary Ports.
+
+	  Sample code /etc/wanpipe/api/mpapi/
+	
+	  The MPAPI support is not released with standard wanpipe
+	  release.  It must be downloaded separately.  For
+	  further info contact Sangoma Technologies.
+
+	o Updated Wanpipe Documentation
+	  
+	  New PDF Files: WanpipeInstallation.pdf
+	                 WanpipeConfiguration.pdf
+			 WanpipeOperation.pdf
+			 WanpipeDebugging.pdf
+			 x25_programming_manual.pdf
+	
+	  New README Files:
+	                 There is a README file for
+			 each new protocol.
+
+			 eg: README.atm, README.adsl...
+
+			 New README.faq
+
+          All README files are in doc/ directory or
+	  once WANPIPE is installed in /usr/share/doc/wanpipe
+	  directory.
+
+	o Updated Wanpipe utilites
+
+
+
+beta4-2.3.0
+Feb 20 2003
+
+	o ATM Protocol support for all S514 (T1/E1/V35) cards.
+	  
+	  ATM Protocol includes a full PHY/SAR ATM layer.
+	  As well as the following ATM Encapsulation Protocols:
+	  	Ethernet (LLC/VC) over ATM
+		Classical IP (LLC/VC) over ATM
+
+	  ATM Protocol is part of Default WANPIPE protocols,
+	  thus it will be compiled by default during
+	  	./Setup install
+
+	  IMPORTANT: 
+	        ATM Protocol is still in beta state and 
+	        there are known bug issues with the ATM
+		firmware that will be resolved in the
+		next release.
+
+	o POS (Point of Sale) S509/S515 card support
+	  The POS adapters support proprietary protocols
+	  such as: IBM 4680, NCR 2126, NCR 1255
+
+	  To enable POS card, on installation run:
+	  	./Setup install 
+			Enable POS in Custom compile mode 
+
+		or
+		
+		./Setup install --protocol=POS
+		
+
+	o ADSL driver update
+
+	  Major bug fix in rx data path.
+	  	Racing condition between the
+		interrupt and the rx task.
+		
+
+	o Wanpipe drivers update
+
+	  Wanpipe Event based line debugging 
+	  
+	  For Frame Relay, PPP and CHDLC protocols, 
+	  extensive debugging is outputted to the 
+	  logs, in case of  a protocol, line or 
+	  hardware error events.
+
+	o Setup installation script update
+
+	   When compiling wanpipe drivers two compilation
+	   options are offered:
+
+	   Compilaton Options:  Default or Custom
+
+	   Default compilation: 
+	   	Compile the standard WANPIPE protocols 
+		into the kernel device driver: Frame Relay, PPP, CHDLC 
+		Multi-Port Frame Relay, Multi-Port PPP, and X25(API). " 
+		
+	   Custom compilation:
+	        Offer a menu of all available WAN and 
+		API protocols. The user will be able to enable 
+		protocols individually or all at once, 
+		as desired. 
+
+	o Bit Streaming Update
+	
+	  Fixed bitstreaming for E1 cards.
+	  New bitstreaming api sample codes in
+	  /etc/wanpipe/api/bitstrm directory.
+	
+
+beta3-2.3.0
+Jan 7 2003
+
+	o ADSL Update
+	  
+	  Added ATM OAM protocol support
+	  OAM Cell loopback is used to test the 
+	  functionality of the ATM network before
+	  the upper layers are enabled.
+	  i.e. ATM Ping
+
+	  Added further buffer locking mechanism that
+	  will further protect buffers on SMP systems.
+
+	o Wanpipemon Update
+
+	  Added ADSL ATM Cell trace option 
+	  (tl2) to ADSL debugger.
+	  
+	  eg: wanpipemon -i <ifname> -c tl2
+
+	o Frame Relay memory leak bug fix under
+	  BRIDGE MODE. If a non ethernet packet was
+	  received from the remote network, it was
+	  not properly deallocated. 
+
+	  This condition is very rare but it may occur.
+
+	o Updated ATMARP's for Classical IP over
+	  ATM protocol.  On startup the Client
+	  will send out ATMARPS every 10 seconds.
+	  Refer to RFC2225
+	
+	o Updated Classical IP over ATM protocol.
+	  Maximum MTU=9180 bytes.  Specified in RFC2225
+
+beta2 2.3.0
+	o Bug fix in wanrouter.h header
+           The kernel source compilation failed due to
+           a missing header include file in wanrouter.h 
+ 
+           This has been fixed now.  No other changes
+           except in wanrouter.h.
+
+	o wanpipemon debugger update
+       
+
+beta1-2.3.0
+
+	o ADSL abstraction layer has been added
+	  to the main wanpipe source.  Thus, from now
+	  on ADSL code can be compiled against any
+	  custom kernel.  
+
+	  Added new ATM encapsulation modes:
+
+	  Bridged Ethernet LLC over ATM (PPPoE: requires rp-pppoe)
+	  Bridged Ethernet VC over ATM
+	  Routed IP LLC over ATM (Classical IP)
+	  Routed IP VC over ATM
+	  PPP LLC over ATM (PPPoA: requires pppd)
+	  PPP VC over ATM (PPPoA: requires pppd)
+
+	o Wanpipemon GUI update
+	  Better menu system
+
+	o Major driver updates due to new common
+	  headers between all protocols and other
+	  operating systems (FreeBSD, NetBSD). 
+	  
+
+beta4-2.2.6
+	
+	o Compilation problems on RedHat 8.0 kernel
+          have been fixed
+
+
+beta3-2.2.6
+
+	o Turns out that RedHat 8 moved the 2.4.20 feature
+	  into its 2.4.18 kernel, thus causing the same
+	  problem.  Thus I had to re-do the fix.
+
+	o Fixed the bug that caused the wanpipe comilation
+	  errors when drivers were being compiled into
+	  the kernel. (i.e. not modules)
+
+        The current 2.2.6 RPMS are not affected by this bug, since
+        they were compiled for older kernels (not 2.4.20).
+
+
+beta2-2.2.6
+
+	o Due to the change in 2.4.20 kernel all wanpipe
+	  network interfaces failed on startup.
+	  	  
+	  A fix was a one liner, however it had to be
+	  applied to all protocols.
+
+
+beta1-2.2.6
+
+	o Support for new hardware:
+		S5147 - Dual T1/E1 card
+		S5148 - T1/E1 card
+		S518  - ADSL card
+
+	o New ADSL drivers
+		Ethernet of ATM	(IPoE and PPPoE) 
+		Classical IP of ATM
+
+	o Updated drivers for all protocols
+ 	  
+	o A unified debugging tool 'wanpipemon'
+	  that replaces protocol specific debugging
+	  tools (fpipemon, cpipemon, xpipemon ...)
+
+	  GUI support for wanpipemon 
+
+	o Update 'wancfg' configuration tool 
+	
+	o Updated documentation
+
+	o Frame Relay Feature
+		Auto DLCI configuration for a single DLCI.
+		The /usr/sbin/wancfg will offer the auto
+		option if FR is configured for CPE and
+		a Single DLCI.
+
+	o New MultiPort Frame Relay Driver
+
+	  This new Frame Relay driver can operate on both
+	  S514/S508 PRIMARY and SECONDARY ports.
+
+	  Thus, on a single S5141 card one can run CHDLC,
+	  and FR on each port.
+
+	  On a S5142 card on can run CHDLC, MPPP and MFR
+	  protocols on each 4 ports.  
+
+	o SDLC support for Linux
+	  API for SDLC protocol
+
+	o Update to /usr/sbin/wanrouter
+
+	 	wanrouter debug 
+			Check current wanpipe environment.
+                        After a startup error run this command to
+                        get a possible solution
+                        i.e. wanrouter start; wanrouter debug;
+
+        	wanrouter debug if_name
+			Display common debugging statistics
+                        In case of line problems save to file,
+                        wait 2-5mi and send to Sangoma Tech Support
+                        i.e. wanrouter debug wp1fr16 > debug_file;
+
+        	wanrouter messages
+			Display wanpipe kernel event messages
+                        i.e. /var/log/messages
+
+        	wanrouter conflog
+			Display wanpipe configuration parsing messages
+                        i.e. /var/log/wanrouter
+
+
+
+
+PRODUCT COMPONENTS AND RELATED FILES
+
+/etc/wanpipe/: (or user defined)
+	wanpipe1.conf	default router configuration file
+
+etc/wanpipe/samples:
+	interface	sample interface configuration file
+	wanpipe1.cpri 	CHDLC primary port
+     	wanpipe2.csec 	CHDLC secondary port
+     	wanpipe1.fr   	Frame Relay protocol
+     	wanpipe1.ppp  	PPP protocol ) 
+	wanpipe1.asy	CHDLC ASYNC protocol
+	wanpipe1.x25	X25 protocol
+	wanpipe1.stty	Sync TTY driver (Used by Kernel PPPD daemon)
+	wanpipe1.atty	Async TTY driver (Used by Kernel PPPD daemon)
+	wanrouter.rc	sample meta-configuration file
+
+/etc/wanpipe/firmware:
+	fr514.sfm	Frame relay firmware for Sangoma S508/S514 card
+	cdual514.sfm	Dual Port Cisco HDLC firmware for Sangoma S508/S514 card
+	ppp514.sfm      PPP Firmware for Sangoma S508 and S514 cards
+	x25_508.sfm	X25 Firmware for Sangoma S508 card.
+ 	bscmp514.sfm    Multi point bisync
+	edu_kit.sfm     Education driver  
+	bitstrm.sfm	Bit streaming firmware 
+	bscstrm514.sfm	Bisync streaming firware
+
+
+/lib/modules/X.Y.Z/misc:
+	wanrouter.o	router kernel loadable module
+	af_wanpipe.o	wanpipe api socket module
+
+/lib/modules/X.Y.Z/net:
+	sdladrv.o	Sangoma SDLA support module
+	wanpipe.o	Sangoma WANPIPE(tm) driver module
+	syncppp.o	Kernel Sync PPP module
+
+/proc/net/wanrouter
+	Config		reads current router configuration
+	Status		reads current router status
+	{name}		reads WAN driver statistics
+
+/usr/sbin:
+	wanrouter	wanrouter start-up script
+	wanconfig	wanrouter configuration utility
+	sdladump	WANPIPE adapter memory dump utility
+        wanpipemon      Debugging Monitor for all WANPIPE protocols
+	wpkbdmon        WANPIPE keyboard led monitor/debugger
+	wancfg		WANPIPE GUI configuration program.
+                        Creates wanpipe#.conf files. 
+	cfgft1		GUI CSU/DSU configuration program.
+
+
+wanpipe/ (temporary untar directory):
+	README		this file
+	COPYING		GNU General Public License
+	Setup		installation script
+	Filelist	distribution definition file
+	wanrouter.rc	meta-configuration file 
+			(used by the Setup and wanrouter script)
+
+/usr/share/doc/wanpipe:
+	WanpipeInstallation.pdf 	WAN Router User's Manual
+	WanpipeInstallation.txt
+	WanpipeConfiguration.pdf
+	WanpipeConfiguration.txt
+	WanpipeOperation.pdf
+	WanpipeOperation.txt
+	
+wanpipe/patches:
+	wanrouter-v2213.gz  	patch for Linux kernels 2.2.11 up to 2.2.13.
+	wanrouter-v2214.gz	patch for Linux kernel 2.2.14. 
+	wanrouter-v2215.gz	patch for Linux kernels 2.2.15 to 2.2.17.
+	wanrouter-v2218.gz	patch for Linux kernels 2.2.18 and up.
+	wanrouter-v240.gz	patch for Linux kernel 2.4.0.  
+	wanrouter-v242.gz	patch for Linux kernel 2.4.2.
+	wanrouter-v243.gz	patch for Linux kernel 2.4.3
+	wanrouter-v244.gz	patch for Linux kernel 2.4.4
+	wanrouter-v245.gz	patch for Linux kernel 2.4.5
+	wanrouter-v246.gz 	patch for Linux kernel 2.4.6 and up
+	wanrouter-v249.gz	patch for Linux kernel 2.4.9 and up
+	wanrouter-v2416.gz	patch for Linux kenrel 2.4.16 and up
+	wanrouter-v2034.gz	patch for Linux kernel 2.0.34
+	wanrouter-v2036.gz 	patch for Linux kernel 2.0.36 and up. 
+
+wanpipe/patches/kdrivers:
+	Sources of the latest WANPIPE device drivers.
+	These are used to UPGRADE the linux kernel to the newest
+	version if the kernel source has already been pathced with
+	WANPIPE drivers.
+
+/etc/wanpipe/api/x25:
+	*		x25 api sample programs.
+/etc/wanpipe/api/chdlc:
+	*		chdlc api sample programs.
+/etc/wanpipe/api/fr:
+	*		fr api sample programs.
+
+/usr/src/linux/include/linux:
+	wanrouter.h	router API definitions
+	wanpipe.h	WANPIPE API definitions
+	sdladrv.h	SDLA support module API definitions
+	sdlasfm.h	SDLA firmware module definitions
+	if_wanpipe.h	WANPIPE Socket definitions
+	if_wanpipe_common.h	WANPIPE Socket/Driver common definitions.
+	sdlapci.h	WANPIPE PCI definitions
+	
+
+/usr/src/linux/net/wanrouter:
+	*		wanrouter source code
+/usr/src/linux/drivers/net/wan:
+	sdla* and
+	wanpipe* 	wanpipe source code
+
+/var/log:
+	wanrouter	wanrouter start-up log (created by the Setup script)
+
+/var/lock:  (or /var/lock/subsys for RedHat)
+	wanrouter	wanrouter lock file (created by the Setup script)
+
+

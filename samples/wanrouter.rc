@@ -1,0 +1,42 @@
+#!/bin/bash
+# router.rc	WAN router meta-configuration file.
+#
+#		This file defines variables used by the router shell scripts
+#		and should be located in /etc/wanpipe directory.  These are:
+#
+#               ROUTER_BOOT	=       Boot flag (YES/NO).
+#               WAN_CONF_DIR	=       Where to put wanpipe config files.
+#		WAN_INTR_DIR	=	Where to put wanpipe interface files.
+#               WAN_LOG		=       Where to put start-up log file.
+#               WAN_LOCK	=       File used as a lock.
+#		WAN_LOCK_DIR	=
+#		WAN_IP_FORWARD	=	Enable IP Forwarding on startup.
+#               WAN_DEVICES	=       Name of the wanpipe devices to be
+#                                       loaded on 'wanrouter start'
+#                                       (ex: "wanpipe1 wanpipe2 wanpipe3...")
+#
+#                              Note:    Name of wanpipe devices correspond
+#                                       to the configuration files in
+#                                       WANPIPE_CONF_DIR directory:
+#                                         (ex. /etc/wanpipe/wanpipe1.conf )
+#
+#               Note:   This file is 'executed' by the shell script, so
+#                       the usual shell syntax must be observed.        
+ROUTER_BOOT=YES
+WAN_CONF_DIR=/etc/wanpipe
+WAN_INTR_DIR=/etc/wanpipe/interfaces
+WAN_BIN_DIR=/usr/sbin
+WAN_LOG=/var/log/wanrouter
+WAN_LOCK=/var/lock/wanrouter
+WAN_LOCK_DIR=/var/lock
+WAN_IP_FORWARD=NO
+NEW_IF_TYPE=NO
+WAN_LIB_DIR=/etc/wanpipe/lib
+WAN_ADSL_LIST=/etc/wanpipe/wan_adsl.list
+WAN_ANNEXG_LOAD=NO
+WAN_LIP_LOAD=YES
+WAN_DYN_WANCONFIG=NO
+WAN_SCRIPTS_DIR=/etc/wanpipe/scripts
+WAN_FIRMWARE_DIR=/etc/wanpipe/firmware
+WAN_DEVICES_REV_STOP_ORDER=YES
+WAN_DEVICES="wanpipe1 "

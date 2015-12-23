@@ -1,0 +1,55 @@
+XDLC API Package
+=================
+
+Author: Nenad Corbic
+Date:   Jul 2004
+
+
+
+The xdlc api package contains the sample xdlc  
+program that should be used in user application
+development.
+
+
+Contents of the API Package
+---------------------------
+
+ 1) xdlc_api.c :	This is a XDLC API applicationt that runs
+  		        on top of a single xdlc interface.  The
+			interface can be Primary or Secondary.
+
+			Eg: Enable Rx and Tx:  Tx 10 frames 100 bytes 
+	
+			    ./xdlc_api -i wp1sa1 -c wanpipe1 -r -w \
+					-txsize 100 -txcnt 10 -verbose
+
+			
+			Eg: Enable Primary Rx Only 
+
+			    ./xdlc_api -i wp1sa1 -c wanpipe1 -r -verbose
+
+
+
+ 2) xdlc_mps.c :  	Multi Address XDLC Primary/Secondary Application.
+ 			This app, supports multiple xdlc addresses as well
+			as full duplex tx/rx.
+ 
+ 			Eg: Enable Secondary Rx and Tx:  Tx 10 frames 100 bytes 
+			
+ 			    ./xdlc_mps -r -w -txsize 100 -txcnt 10 -verbose
+	
+			Eg: Enable Primary Rx Only 
+
+			    ./xdlc_mps -pri -r -verbose
+			
+
+			Note: ./xdlc_mps contains hardcoded intrace names.
+				
+				Primary Interafces:   wp1pa1 wp1pa2
+				Secondary Interfaces: wp2sa1 wp2sa2
+	
+				Please change these names to correspond
+				to your interface names and re-make
+				the application.
+
+ 

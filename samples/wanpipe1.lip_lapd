@@ -1,0 +1,187 @@
+
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Fri Jun 25 16:47:33 EDT 2004
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_AFT_TE1, Comment  #WAN_AFT_TE1 - Indicates A104/8 card
+                                 #WAN_AFT     - Indicates A101/2 card
+
+
+[interfaces]
+w1g1 = wanpipe1, , STACK, Comment               	#do not change
+w1lapd = wanpipe1, 1 ,API, lip_lapd, lapd.w1g1,         #do not change
+
+
+[wanpipe1]
+#-------- DEVICE / DRIVER BINDING ----------------------------------
+
+CARD_TYPE       = AFT   #AFT: Same for all aft cards must
+                        #This value must be hardcoed to AFT for all
+                        #aft cards.
+
+S514CPU         = A     #Used by A101/2 driver to determine T1/E1 port
+                        #A - port 1
+                        #B - port 2
+                        #For A104 driver: Always set this value to A!
+
+CommPort        = PRI   #Only used by S514 cards.
+                        #PRI - S514 primary port
+                        #SEC - S514 secondary port
+                        #
+                        #OBSELETE for AFT cards (can be removed)
+
+#-------- PCI SETUP ----------------------------------------------
+
+
+AUTO_PCISLOT    = NO    #Auto detect PCI/BUS info for this card type
+                        #NO - disable this option
+                        #YES- enable this option
+                        #     if enabled bottom two options
+                        #     PCISLOT and PCIBUS will not be used.
+                        #     Therefore one can set the to arbitrary value
+                        #     or remove them all together.
+
+PCISLOT         = 1     #PCI SLOT Number:
+                        #Valid values = any number
+
+PCIBUS          = 3     #PCI BUS Number:
+                        #Valid values = any number
+
+
+
+#--------------FRONT END SETUP -----------------------------------
+
+FE_MEDIA        = T1    #Front End Type:
+                        #T1 - set front end for T1 mode
+                        #E1 - set front end for E1 mode
+
+FE_LCODE        = B8ZS  #Front End Line Coding
+                        #If T1:  B8ZS or AMI
+                        #   E1:  HDB3 or AMI
+
+FE_FRAME        = ESF   #Front End Framing
+                        #If T1:  ESF or D4
+                        #   E1:  CRC4 or NCRC4
+
+FE_LINE         = 1       #Front End Line number.
+                          #Used by A104 driver to determine T1/E1 port
+                          #Valid values are: 1-4
+                          #
+                          #The A101/2 driver doesn't use this option
+                          #so one should hardcode it to 1 or
+                          #remove it all together.
+
+
+TE_CLOCK        = NORMAL  #T1/E1 Clock Source
+                          #NORMAL - slave clock, clock is received from telco
+                          #         This is always the DEFAULT
+                          #MASTER - master clcok, use hw oscillator clock
+                          #         Only used in back to back mode or
+                          #         when specified by telco.
+
+TE_REF_CLOCK    = 0       #T1/E1 Reference Clock Source
+                          #This option allows one to use the incoming clock
+                          #from a different port as a clock source to this
+                          #port.  FOR THIS OPTION TO WORK: TE_CLOCK=MASTER
+                          #Valid options: 0   - disable
+                          #               1-4 - use clock from particular port
+
+ACTIVE_CH       = ALL     #Specify T1/E1 Active channels (timeslots)
+                          #Since AFT cards support channelization this
+                          #option MUST BE HARDCODED TO:  ALL!
+
+TE_HIGHIMPEDANCE        = NO  #Set the Front Ent chip in High Impedance mode
+                              #used for datascoping:
+                              #NO - Disable high impedance mode (DEFAULT)
+                              #YES - Enable hight impedance mode
+                              #      (only if you know what you are doing)
+
+IGNORE_FRONT_END = NO
+LBO             = 0DB     #Front End Line Buildout
+                          # 0db     (Default)
+                          # 7.5dB
+                          # 15dB
+                          # 22.5dB
+                          # 0-110ft
+                          # 110-220ft
+                          # 220-330ft
+                          # 330-440ft
+                          # 440-550ft
+                          # 550-660ft
+
+FE_TXTRISTATE   = NO      #Front End Tri-State Mode
+                          #Disable front end chip TX mode
+                          #Used for datascoping or connecting multiple ports
+                          #together where one port is operating normally and others
+                          #are tristated, thus only receiving.
+                          #NO - Disable tristae mode
+                          #YES- Enable tristate mode
+
+MTU             = 1500    #Global MTU Value
+                          #Note: This value is overwritten by the
+                          #      interface MTU value below if it exists.
+                          #Values: any number [ suggested 128 - 4086 ]
+
+
+UDPPORT         = 9000    #OBSELETE option
+                          #Old wanpipemon used sockets to connect to
+                          #device driver.
+
+TTL             = 255     #OBSELETE option
+                          #Old wanpipemon used sockets to connect to
+                          #device driver.
+
+IGNORE_FRONT_END = NO     #Ignore Fronte End State
+                          #NO - Do not ignore front end state,
+                          #     therefore if state changes, change the
+                          #     state of the above protocol.
+                          #YES- Igonore front end state
+                          #     Thus if front end goes down, the protocol
+                          #     will not know.
+
+
+#--------------------------------------------
+#Q921/LAPD  Profile Configuration
+#--------------------------------------------
+
+[lapd.w1g1]
+LAP_STATION	= DTE     
+T1	= 2
+T2	= 0
+T3	= 6
+T4	= 3
+N2	= 5
+LAP_MODE = 128
+LAP_WINDOW  = 7
+MAX_PKT_SIZE = 1024
+
+
+
+#--------------------------------------------
+#Hardware Interface Configuration
+#--------------------------------------------
+
+
+[w1g1]
+HDLC_STREAMING	= YES 	#Enable hardware hdlc engine
+			#(Do not change)
+
+ACTIVE_CH       = 24	#DCHAN on T1/E1 Span
+			#For T1 select 24
+			#For E1 seelct 16
+			#(Confirm with telco)
+
+[w1lapd]

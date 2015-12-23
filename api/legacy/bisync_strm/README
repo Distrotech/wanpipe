@@ -1,0 +1,30 @@
+BISYCN STREAMING API Package
+============================
+
+Author: Nenad Corbic
+Date:   Mar 18, 2002
+
+
+This package was developed for receiving
+NASDAQ feeds.  It is a vary specific project.
+If you need standard BiSync in ../Bisync
+directory.
+
+The bisync streaming package contains the sample 
+client and server program that should be used in 
+user application development.
+
+Make sure that the bisync streaming drivers
+have been specified during installation process.
+
+./Setup install --protocol=BSCSTRM
+
+
+Contents of the API Package
+---------------------------
+
+ 1) bscstrm_api.c :  A sample API utility, that will send and receive
+                    data packets across a bisync line.  This program
+	   	    should be used as a starting point in developing
+	 	    a real-world bisycn application.
+

@@ -1,0 +1,150 @@
+
+#================================================
+# WANPIPE4 Configuration File
+#================================================
+#
+# Date: Fri Jul 30 16:47:33 EDT 2004
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipe1 = WAN_AFT_SERIAL, Comment
+
+#===================================================
+#Hardware Interface Definition
+#Protocol Interface Definition
+#===================================================
+
+[interfaces]
+
+#Hardware interface w1g1 used in STACK mode
+w1g1 = wanpipe1, , STACK, Comment
+
+#Protocol interface w4sa1 
+#w4sa1 	-> ifname
+#wanpipe1 	-> devname
+#33 	 	-> sdlc address (in decimal)
+#API		-> API operation mode
+#lip_xdlc	-> XDLC protocol
+#xdlc.w1g1	-> XDLC protocol cfg profile
+
+w4sa1 = wanpipe1, 33 , API, lip_xdlc, xdlc.w1g1,   
+
+
+
+#===================================================
+#Hardware Device Configuration
+#===================================================
+
+[wanpipe1]
+
+CARD_TYPE 	= AFT			#AFT card type - no other options
+
+S514CPU 	= A			#A - no other options
+
+AUTO_PCISLOT	= NO			#Autodetec a single AFT card 	
+					#in the system:  YES | NO
+
+PCISLOT 	= 2			#PCI Slot info
+PCIBUS		= 7			#PCI Bus info
+					#Use wanrouter hwprobe to determine this info
+
+FE_LINE		= 1			#A144 Serial Port
+					#Valid Values: 1 | 2 | 3 | 4
+
+Clocking 	= External		#External | Internal
+
+BaudRate 	= 2400			#Integer from 128 to 1500000
+					#Only valid with Internal Clocking
+
+IGNORE_FRONT_END  = NO			#Ignore CTS/RTS states
+					#Optoins: YES | NO
+
+MTU		= 1500			#Hardware HDLC MTU
+					#Valid:  128 to 8000
+					#Default: 1500
+
+#===================================================
+#SDLC Profile Configuraton
+#Used above interface devices
+#===================================================
+
+[xdlc.w1g1]
+
+STATION 		= SECONDARY	#PRIMARY/SECONDARY
+MAX_I_FIELD_LEN		= 1024			
+WINDOW			= 7
+
+#-------------------------------------------------
+#Primary Only Config
+#-------------------------------------------------
+
+PROT_CONFIG		= TWO_WAY_ALTERNATE #TWO_WAY_ALTERNATE or
+				    	    #TWO_WAY_SIMULTANEOUS
+
+TWS_MAX_ACK_CNT		= 10	#Used in TWO_WAY_SIMULTANEOUS mode:
+				# Number of packets to ack in full 
+				# duplex mode number must be greater 
+				# than window.
+	
+	
+ERROR_RESP_CONFIG 	= PRI_SNRM_ON_NO_RESP	#PRI_SNRM_ON_NO_RESP or
+						# PRI_DISC_ON_NO_RESP
+  						#Response after no response 
+						#timeout
+						
+PRI_NORMAL_POLL_TIMER		= 40		#Normal Primary Poll in (ms)
+PRI_SLOW_POLL_TIMER		= 80		#Slow (disc) Pri Poll (ms)
+
+PRI_FRAME_RESPONSE_TIMER	= 1000		#Timeout if packet with F 
+						#bit is not received (ms).
+MAX_NO_RESPONSE_CNT		= 5		#Error after number of above 
+						#timeouts.
+
+
+#--------------------------------------------------
+#Primary and Secondary Config
+#--------------------------------------------------
+
+MAX_FRAME_RETRANSMIT_CNT	= 7		#Number of consec REJ 
+						#before error
+MAX_RNR_CNT			= 7		#Number of consec RNR 
+						#before error 
+
+#--------------------------------------------------
+#Secondary only Config
+#--------------------------------------------------
+
+SEC_NRM_TIMER			= 2000		#Period between pri polls (ms)
+
+
+#===================================================
+#Protocol Interface Configuration
+#===================================================
+
+[w4sa1]
+
+#No options
+
+
+
+
+#===================================================
+#Hardware Interface Configuration
+#===================================================
+[w1g1]
+
+HDLC_STREAMING	= YES		#Enable hardware HDLC engine
+				#Options: YES - hdlc enabled
+				#         NO - bitstreaming mode
+
+ACTIVE_CH	= 1		#Single serial channel - no other options	
+

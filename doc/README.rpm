@@ -1,0 +1,106 @@
+WANPIPE RPMS
+=============
+
+Author: Nenad Corbic  <ncorbic@sangoma.com>
+
+For change log information refer to linux/current_wanpipe/README
+
+IMPORTANT:
+----------
+
+	o Wanpipe RPMs contain wanpipe kernel modules.
+	   This makes the RPMs kernel sensitive.  
+	
+        o RPM Packages are build for stock distribution
+           kernels only!!  If you have a custom built kernel
+           use the latest wanpipe source package from 
+           current_wanpipe/ directory.
+
+           One can build custom RPMS using the ./Setup buildrpm
+           option, during source install.   
+
+           Refer the current_wanpipe/doc/README.rpmbuild
+           for more info.
+ 
+
+Choosing an RPM:
+--------------
+
+	o Determine the Linux Distribution:
+		cat /etc/issue
+			(eg: RedHat 7.1)
+
+        o Determine the Kernel image you are running:
+		uname -r
+		    (eg: 2.4.2-2 	: it is not an smp kernel)
+		    (eg: 2.4.2-2smp     : smp kernel) 
+
+	o Determine the processor type
+		uname -m
+		    (eg: i686)
+
+	o Based on the above information choose an RPM package.
+	
+           wanpipe-<version>.<linux distrib>.<kernel ver>.<processor>.rpm	
+
+	   eg: ftp.sangoma.com/linux/RPM/redhat/7.1/i686/
+		 wanpipe-2.2.4-3.rh71up.k242-2.i686.rpm
+       
+
+Installing RPM
+----------
+
+	o List the contents of the rpm
+
+		rpm -qipl <wanpipe rpm name>
+
+		Make sure that the /lib/modules/<kernel name> directory
+                matches your current kernel modules directory.
+
+                i.e. the output of command 'uname -r' must match the above
+                     <kernel name> directory. 
+
+
+	o The rpm must be installed using the --force option, to 
+           override the old modules.
+
+    		rpm -i --force <wanpipe rpm name>
+
+
+Checking Kernel Modules
+------------------
+
+	o Run  'depmod -a' command
+		This command will calculate module dependencies.
+                Look for error messages.
+
+	o Run 'modprobe wanpipe' command
+		Look for error messages.
+
+        o Check hardware probe information
+	
+		wanrouter hwprobe 
+			or
+		modprobe wanpipe
+		cat /proc/net/wanrouter/hwprobe
+
+
+Configuring Wanpipe
+---------------
+
+	o Run '/usr/sbin/wancfg' to create the configuration file.
+	  
+	  	Each 'wancfg' GUI option contains HELP 
+		associated with it. 
+
+	o Refer to /usr/share/doc/wanpipe/README-2.config
+
+
+
+Wanpipe Operation
+--------------
+
+	o Start wanpipe  'wanrouter start'  or
+			 'wanrouter start wanpipe1'
+
+	o Refer to /usr/share/doc/wanpipe/README-3.operation

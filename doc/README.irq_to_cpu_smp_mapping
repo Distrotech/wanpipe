@@ -1,0 +1,112 @@
+Binding an IRQ to a single CPU in SMP Systems
+---------------------------------------------
+
+Author: Nenad Corbic
+
+Date: Dec 04 2001
+
+
+Introduction:
+-------------
+
+	The 2.4 kernels, enabled with SMP support can map IRQ's 
+	to one or number of active CPUs.  With the new TCP/IP stack 
+	in the 2.4 kernels this really becomes necessary. Otherwise, 
+	you might find the incoming packets arranged out of order, 
+	because later interrupts are serviced (on another CPU) before 
+	earlier ones, thus requiring a reordering further down the 
+	handling layers. 
+
+	The problem of out of order packets is very apparent in voice
+	over IP applications which are very sensitive packet delays.
+
+
+Kernel Configuration:
+---------------------
+	
+	Enable SMP 2.4.X kernel support
+	
+	1) cd /usr/src/linux
+	2) make menuconfig
+		Processor Type and Features --->
+			[*] Symmetric Multi-Processing (SMP)
+	
+	
+
+SMP Affinity
+------------
+
+
+	The kernel IO-APIC support uses the /proc file system
+	to export cpu to irq mapping information.
+
+		ls /proc/irq/
+
+	The /proc/irq directory contains all available IRQ's.  Each
+	IRQ directory contains a irq to cpu mapping file called
+	'smp_affinity'.  For example to view irq to cpu mapping for
+	irq 20 (irq 20 is a virtually mapped irq):
+		
+		cat /proc/irq/20/smp_affinity
+			
+		(eg: output)	ffffffff
+
+	The smp_affinity contains the CPU bitmap.  Each bit is used
+	to enable or disable a specific CPU.
+
+		eg: bit 1 : enables/disables CPU0
+		    bit 2 : enables/disables CPU1 
+		    ... etc
+
+	By default, for all IRQ's all CPUs are enabled.  As we can see from
+	the above smp_affinity 	output (ffffffff) all CPUs are enabled.
+
+	NOTE: One first 8 bits are used. i.e. XXXXXXff  (X is not used)
+
+	
+
+Binding IRQ to a single CPU
+---------------------------
+		    
+	Bind IRQ 20 to CPU 0
+		echo 1 > /proc/irq/20/smp_affinity
+	
+	Bind IRQ 20 to CPU1
+        	echo 2 > /proc/irq/20/smp_affinity                            
+
+	Bind IRQ 20 to both CPUs
+        	echo 3 > /proc/irq/20/smp_affinity
+     
+	
+	List of currently active IRQs can be obtained via /proc
+	file system:
+	
+	ex: cat /proc/interrupt          
+		   CPU0       CPU1       
+	  0:     583136     604076    IO-APIC-edge  timer
+	  1:      18951      21151    IO-APIC-edge  keyboard
+	  2:          0          0          XT-PIC  cascade
+	 12:     176814     179323    IO-APIC-edge  PS/2 Mouse
+	 14:     123651     122628    IO-APIC-edge  ide0
+	 15:          4          0    IO-APIC-edge  ide1
+	 18:     613796     615032   IO-APIC-level  eth0
+	 20:     153928      66964   IO-APIC-level  wanpipe3
+
+    
+    
+	This is operation (echo 1 > /proc/irq/20/smp_affinity) 
+	is totaly dynamic. Thus, irq can be mapped during card operation.
+
+	Furthermore, it has nothing to do with whether the card is 
+	loaded and irq is used,  or not. Meaning that irq mapping can be
+	performed before devices are loaded and started.
+
+
+Usage
+------
+
+	A good idea would be to bind eth0 irq and wanpipe irq to a different 
+	CPUs.
+
+	The wanpipe version 2.2.4 will have this option as part of its
+	configuration file.  

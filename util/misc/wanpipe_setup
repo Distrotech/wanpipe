@@ -1,0 +1,539 @@
+#!/bin/sh
+# wanpipe_setup		WANPIPE WAN Router Installation/Removal Script.
+#
+# Copyright	(c) 1996-2001, Sangoma Technologies Inc.
+#
+#		This program is free software; you can redistribute it and/or
+#		modify it under the terms of the GNU General Public License
+#		as published by the Free Software Foundation; either version
+#		2 of the License, or (at your option) any later version.
+# ----------------------------------------------------------------------------
+# May 23, 2001	David Rokhvarg	Initial version based on Setup script for WANPIPE(tm)
+# ============================================================================
+
+####### FUNCTION DEFINITIONS #################################################
+
+# ----------------------------------------------------------------------------
+# Clear the screen if it is supported.
+# ----------------------------------------------------------------------------
+clearscr()
+{
+	# check if the terminal environment is set up
+	[ "$TERM" ] && clear 2> /dev/null
+}
+
+check_bash ()
+{
+	BASH_SUPPORT=`echo $BASH_VERSION | cut -d'.' -f1 2> /dev/null`
+}
+
+check_awk ()
+{
+	eval "awk -W version 2> /dev/null > /dev/null"
+	if [ $? -eq 0 ]; then
+		AWK_SUPPORT=YES
+	else
+		AWK_SUPPORT=NO
+	fi
+}
+
+
+#-----------------------------------------------------------------------------
+# Pause.
+# ----------------------------------------------------------------------------
+pause()
+{
+	[ $# -ne 0 ] && echo -e $* >&2
+	echo -e "Press [Enter] to continue...\c" >&2
+	read tmp
+	return 0
+}
+
+# ----------------------------------------------------------------------------
+# Prompt user for input.
+# ----------------------------------------------------------------------------
+prompt()
+{
+	echo -ne "$*" >&2
+	read CMD rest
+	return 0
+}
+
+# ----------------------------------------------------------------------------
+# Get Yes/No
+# ----------------------------------------------------------------------------
+getyn()
+{
+	while prompt "$* (y/n) "
+	do	case $CMD in
+			[yY])	return 0
+				;;
+			[nN])	return 1
+				;;
+			*)	echo -e "\nPlease answer y or n" >&2
+				;;
+		esac
+	done
+}
+
+# ----------------------------------------------------------------------------
+# Select an item from the list.
+# Return:	0 - selection is in $SEL
+#		1 - quit or empty list
+# ----------------------------------------------------------------------------
+select_list()
+{
+	[ $# -eq 0 ] && return 1
+
+	col=`expr $# / 10 + 1`
+	cnt=0
+	for option in $*
+	do	cnt=`expr $cnt + 1`
+		echo -en "\t$cnt) $option"
+		[ `expr $cnt % $col` -eq 0 ] && echo ""
+	done
+	echo -e "\tq) quit\n"
+	get_select $*
+}
+
+#-----------------------------------------------------------------------------
+# Display banner.
+# ----------------------------------------------------------------------------
+banner()
+{
+	clearscr
+	echo -e "\t----------------------------------------------------------"
+	echo -e "\t          WAN Router v$PROD_VER Installation Script"
+	echo -e "\t    Copyright (c) 1995-2000, Sangoma Technologies Inc."
+	echo -e "\t----------------------------------------------------------"
+	echo ""
+	return 0
+}
+
+#-----------------------------------------------------------------------------
+# Install configuration files.
+# ----------------------------------------------------------------------------
+install_config()
+{
+	banner
+	cat << ENDOFTEXT
+WANPIPE META CONFIGURATION
+
+There are two configuration files associated with WANPIPE.  
+
+1) $META_CONF: 
+	- defines locations of important files such as lock
+	  and configuration files as well as start/stop 
+	  order of multiple WANPIPE devices.
+2) $PROD_CONF:
+	- main configuration file for each WANPIPE device.
+	- defines interfaces, hardware and protocol information.
+	- this file can be created using the 'wancfg' GUI
+	  utility or manually based on sample files located
+	  in $SAMPLES_DIR.
+	  
+Please read the /usr/doc/wanpipe/Installation.(pdf/txt) manual for further
+information.
+
+ENDOFTEXT
+	pause
+
+	# Create meta-configuration file.
+	create_mataconf
+
+	return 0
+}
+
+
+function get_conf_dir ()
+{
+	local response 
+
+	#banner
+	echo -e "\nPlease specify a desired location for WANPIPE configuration files."
+	echo -e "\n\t(Press Enter for Default: $PROD_HOME)\n"
+	echo -n "<specify path:>"
+	read response
+
+	WAN_CONF_DIR=$PROD_HOME
+
+	if [ $response ]; then 
+		WAN_CONF_DIR=$response
+	fi
+
+	# Check the directory exist
+	if [ ! -d $WAN_CONF_DIR ]; then
+		echo -e "\nERROR: Directory $WAN_CONF_DIR not found !\n"
+		getyn "Would you like to try again"
+		if [ $? -ne 0 ]; then
+			WAN_CONF_DIR=$PROD_HOME
+		else 
+			get_conf_dir	
+		fi 
+	fi
+}
+
+function get_intr_dir ()
+{
+	local response=no
+	local response1
+
+	WAN_INTR_DIR=$PROD_HOME/interfaces
+
+#	if [ -d "/etc/sysconfig/network-scripts" ]; then
+#		echo -e "\nWould you like to use the NEW network interface types?"
+#		echo  	"(RedHat feature:" 
+#		echo    "   * Interface files will be written into"
+#		echo    "     /etc/sysconfig/network-scripts directory."
+#		echo    "   * Interface file names will start with ifcfg-<ifname>"
+#		echo    "   * Enables the usage of ifup and ifdown scripts"
+#		echo -n "(y/n): "
+#		read response
+#		case $response in
+#			[yY]) WAN_INTR_DIR=/etc/sysconfig/network-scripts
+#			      NEW_IF_TYPE=YES;
+#			      response=yes
+#			;;
+#			*)    response=no
+#			;;
+#		esac
+#	fi
+#	
+#	echo
+
+	if [ $response = no ]; then
+
+		echo -e "\nPlease specify a desired location for WANPIPE interface files."
+		echo -e "\n\t(Press Enter for Default: $WAN_INTR_DIR)\n"
+		echo -n "<specify path:>"
+		read response1
+
+		WAN_INTR_DIR=$PROD_HOME/interfaces
+
+		if [ $response1 ]; then 
+			WAN_INTR_DIR=$response1
+		fi
+	fi
+
+	echo
+
+	# Check the directory exist
+	if [ ! -d $WAN_INTR_DIR ]; then
+		echo -e "\nERROR: Directory $WAN_INTR_DIR not found !\n"
+		getyn "Would you like to try again"
+		if [ $? -ne 0 ]; then
+			WAN_INTR_DIR=$PROD_HOME/interfaces
+		else 
+			get_intr_dir	
+		fi 
+	fi
+}
+
+# ----------------------------------------------------------------------------
+# Create meta-configuration file.
+# ----------------------------------------------------------------------------
+
+create_mataconf()
+{
+	local response
+
+	# Select directory for the log file.
+	if	[ -d /var/log ]; then
+		LOG_FILE=/var/log/$PROD
+	elif	[ -d /var/adm wanpipe1]; then
+		LOG_FILE=/var/adm/$PROD
+	else	
+		LOG_FILE=/etc/wanpipe/$PROD.log
+	fi
+
+	# Select directory for the lock file.
+	if	[ -d /var/lock/subsys ]; then
+		LOCK_FILE=/var/lock/subsys/$PROD
+		LOCK_DIR=/var/lock/subsys
+	elif    [ -d /var/lock ]; then
+		LOCK_FILE=/var/lock/$PROD
+		LOCK_DIR=/var/lock
+	else	
+		LOCK_FILE=/etc/wanpipe/$PROD.lck
+		LOCK_DIR=/etc/wanpipe
+	fi
+
+	[ -f $META_CONF ] &&  mv $META_CONF $META_CONF.old 
+
+	get_conf_dir
+	get_intr_dir
+
+	ENABLE_IP_FWD=NO	
+
+#	cat << EOF
+#
+#IP Forwarding enables/disables kernel packet routing.
+#   If this machine is a router select   Y
+#   If this machine is a firewall select N
+#
+#Note: 
+#   If ip forwarding is disabled the kernel will not
+#   route packets.  Firewalling policy tables will have
+#   to be generaded first.
+#
+#Options:
+#--------
+#  Yes: Enable ip forwarding on router startup.
+#   No:  Leave ip forwarding unchanged.
+#
+#EOF
+#
+#	getyn "Enable IP Forwarding on Wanrouter Startup"
+#	if [ $? -ne 0 ]; then
+#		ENABLE_IP_FWD=NO
+#	else 
+#		ENABLE_IP_FWD=YES
+#	fi 
+#
+
+	if test $NONINTERACTIVE; then
+		ENABLE_IP_FWD=NO
+	fi
+
+	if [ $ANNEXG_PROT -a $ANNEXG_PROT = YES ]; then
+		ANNEXG_LOAD=YES;
+	fi
+
+	cat > $META_CONF << ENDOFTEXT
+#!/bin/sh
+# router.rc	WAN router meta-configuration file.
+#
+#		This file defines variables used by the router shell scripts
+#		and should be located in /etc/wanpipe directory.  These are:
+#
+#               ROUTER_BOOT	=       Boot flag (YES/NO).
+#               WAN_CONF_DIR	=       Where to put wanpipe config files.
+#		WAN_INTR_DIR	=	Where to put wanpipe interface files.
+#               WAN_LOG		=       Where to put start-up log file.
+#               WAN_LOCK	=       File used as a lock.
+#		WAN_LOCK_DIR	=
+#		WAN_IP_FORWARD	=	Enable IP Forwarding on startup.
+#               WAN_DEVICES	=       Name of the wanpipe devices to be
+#                                       loaded on 'wanrouter start'
+#                                       (ex: "wanpipe1 wanpipe2 wanpipe3...")
+#
+#                              Note:    Name of wanpipe devices correspond
+#                                       to the configuration files in
+#                                       WANPIPE_CONF_DIR directory:
+#                                         (ex. $WAN_CONF_DIR/wanpipe1.conf )
+#
+#               Note:   This file is 'executed' by the shell script, so
+#                       the usual shell syntax must be observed.        
+ENDOFTEXT
+
+	echo "ROUTER_BOOT=YES"		>> $META_CONF
+	echo "WAN_CONF_DIR=$WAN_CONF_DIR" >> $META_CONF
+	echo "WAN_INTR_DIR=$WAN_INTR_DIR" >> $META_CONF
+	echo "WAN_LOG=$LOG_FILE"	>> $META_CONF
+	echo "WAN_LOCK=$LOCK_FILE"	>> $META_CONF
+	echo "WAN_LOCK_DIR=$LOCK_DIR"	>> $META_CONF
+	echo "WAN_IP_FORWARD=$ENABLE_IP_FWD" >> $META_CONF
+	echo "NEW_IF_TYPE=$NEW_IF_TYPE" >> $META_CONF
+	echo "WAN_LIB_DIR=/etc/wanpipe/lib" >> $META_CONF
+	echo "WAN_ADSL_LIST=/etc/wanpipe/wan_adsl.list" >> $META_CONF
+	echo "WAN_ANNEXG_LOAD=$ANNEXG_LOAD" >> $META_CONF
+	echo "WAN_DYN_WANCONFIG=NO" >> $META_CONF
+	echo "WAN_SCRIPTS_DIR=/etc/wanpipe/scripts" >> $META_CONF
+	echo "WAN_DEVICES=\"wanpipe1\""	>> $META_CONF
+
+	return 0
+}
+
+# ----------------------------------------------------------------------------
+# Install initialization scripts.
+# ----------------------------------------------------------------------------
+
+install_init()
+{
+	# Examine system bootstrap files.
+	if [ -d /etc/rc0.d ]
+	then RC_DIR=/etc
+	elif [ -d /etc/rc.d/rc0.d ]
+	then RC_DIR=/etc/rc.d
+	else return 0
+	fi
+
+	banner
+	cat << ENDOFTEXT
+
+WANPIPE BOOTSTRAP CONFIGURATION
+
+Your system uses System V -style initialization scripts.  You have an option
+to add router start-up script to those scripts so that the router will start
+automatically when system enters multi-user mode and shut down when it enters
+single-user mode or when it is halted.
+
+i.e. By selecting this option WANPIPE will startup on system bootup and 
+     stop on system shutdown.
+
+ENDOFTEXT
+
+	getyn "Would you like to install WANPIPE start-up scripts?" || return 0
+
+	PROD_INIT=$PROD_INIT$PROD 
+	echo -e "\n\t WANPIPE Setup for boot startup "
+
+	# Install start scripts.
+	[ -d $RC_DIR/rc2.d ] && install -D -m 755 $ROOT/$WANROUTER_STARTUP $ROOT/$RC_DIR/rc2.d/$START_SCRIPT
+	[ -d $RC_DIR/rc3.d ] && install -D -m 755 $ROOT/$WANROUTER_STARTUP $ROOT/$RC_DIR/rc3.d/$START_SCRIPT
+	[ -d $RC_DIR/rc4.d ] && install -D -m 755 $ROOT/$WANROUTER_STARTUP $ROOT/$RC_DIR/rc4.d/$START_SCRIPT
+	[ -d $RC_DIR/rc5.d ] && install -D -m 755 $ROOT/$WANROUTER_STARTUP $ROOT/$RC_DIR/rc5.d/$START_SCRIPT
+
+	# Install stop scripts.
+	[ -d $RC_DIR/rc0.d ] && install -D -m 755 $ROOT/$WANROUTER_STARTUP $ROOT/$RC_DIR/rc0.d/$STOP_SCRIPT
+	[ -d $RC_DIR/rc1.d ] && install -D -m 755 $ROOT/$WANROUTER_STARTUP $ROOT/$RC_DIR/rc1.d/$STOP_SCRIPT
+	[ -d $RC_DIR/rc6.d ] && install -D -m 755 $ROOT/$WANROUTER_STARTUP $ROOT/$RC_DIR/rc6.d/$STOP_SCRIPT
+	[ -d $RC_DIR/init.d ] && install -D -m 755 $ROOT/$WANROUTER_STARTUP $ROOT/$RC_DIR/init.d/$PROD
+
+	pause
+	return 0
+
+}
+
+# ----------------------------------------------------------------------------
+# Remove product.
+# ----------------------------------------------------------------------------
+remove()
+{
+	banner
+	echo "You are about to remove WANPIPE start-up scripts!"
+	getyn "\nAre you sure?" || return 0
+
+	# Read meta-configuration file.
+	if [ -f $ROUTER_RC ]; then
+		source $ROUTER_RC
+	fi
+
+	#X25API_CONF=${X25API_CONF:=$X25API_CONF}
+	ROUTER_LOG=${ROUTER_LOG:=/var/log/$PROD}
+	ROUTER_LOCK=${ROUTER_LOCK:=/var/lock/$PROD}
+
+	# Remove start-up scripts.
+	remove_init
+
+	# Remove log and configuration files.
+	#echo "Removing log and configuration files..."
+        #[ -f $ROUTER_RC ] && rm -f $ROUTER_RC
+	#[ -f $ROUTER_LOG ] && rm -f $ROUTER_LOG
+
+	#FIXME: Find a better way of doing this
+	#WAN_LIST=`ls /etc/wanpipe/wanpipe?.conf`
+	#for wan in $WAN_LIST; do
+	#	[ -f "$wan" ] && rm -f $wan
+	#done
+
+	# Remove contents of the home directory.
+	#echo -e "\nYou can now delete $PROD_HOME directory and its contents."
+	echo -e "Done."
+	return 0
+}
+
+# ----------------------------------------------------------------------------
+# Remove initialization scripts.
+# ----------------------------------------------------------------------------
+remove_init()
+{
+	# Examine system bootstrap files.
+	if [ -d /etc/rc0.d ]
+	then RC_DIR=/etc
+	elif [ -d /etc/rc.d/rc0.d ]
+	then RC_DIR=/etc/rc.d
+	else return 0
+	fi
+
+
+	echo "Removing start-up scripts..."
+	[ -f $RC_DIR/rc2.d/$START_SCRIPT ] && rm -f $RC_DIR/rc2.d/$START_SCRIPT
+	[ -f $RC_DIR/rc3.d/$START_SCRIPT ] && rm -f $RC_DIR/rc3.d/$START_SCRIPT
+	[ -f $RC_DIR/rc5.d/$START_SCRIPT ] && rm -f $RC_DIR/rc4.d/$START_SCRIPT
+	[ -f $RC_DIR/rc5.d/$START_SCRIPT ] && rm -f $RC_DIR/rc5.d/$START_SCRIPT
+	[ -f $RC_DIR/rc0.d/$STOP_SCRIPT  ] && rm -f $RC_DIR/rc0.d/$STOP_SCRIPT
+	[ -f $RC_DIR/rc1.d/$STOP_SCRIPT  ] && rm -f $RC_DIR/rc1.d/$STOP_SCRIPT
+	[ -f $RC_DIR/rc6.d/$STOP_SCRIPT  ] && rm -f $RC_DIR/rc6.d/$STOP_SCRIPT
+	[ -f $RC_DIR/init.d/$PROD  ]       && rm -f $RC_DIR/init.d/$PROD
+	return 0
+}
+
+
+####### MAIN #################################################################
+# set -x
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+KERNEL=`uname -r`
+PROD=wanrouter
+PROD_VER=beta1-2.3.4
+PROD_HOME=/etc/wanpipe
+META_CONF=$PROD_HOME/$PROD.rc
+WAN_INTR_DIR=$PROD_HOME/interfaces
+WAN_CONF_DIR=$PROD_HOME
+PROD_CONF=$WAN_CONF_DIR/wanpipe1.conf
+PROD_PATCH=$PROD_HOME/patches
+PROD_INIT=/usr/sbin/
+FILELIST=$PROD_HOME/Filelist
+SOURCEDIR=/usr/src/linux
+START_SCRIPT=S03$PROD
+STOP_SCRIPT=K10$PROD
+ROUTER_RC=$META_CONF
+UTIL_DIR=$PROD_HOME/util
+WANROUTER_STARTUP_SMPL=$PROD_HOME/samples/wanrouter
+WANROUTER_STARTUP=/usr/sbin/wanrouter
+NEW_IF_TYPE=NO
+
+TEMP=$PROD_HOME/temp.$$
+
+SAMPLES_DIR=/usr/doc/wanpipe/samples
+
+check_bash
+check_awk
+
+#Check for kernel series 2.2.X or 2.4.X
+eval "uname -r | grep 2.4 > /dev/null"
+if [ $? -eq 0 ]; then
+	KERN_VER=24
+	LINUXDRIVERS_NET="drivers/net/wan"
+else
+	KERN_VER=22
+	LINUXDRIVERS_NET="drivers/net"
+	
+	eval "uname -r | grep 2.0 > /dev/null"
+	if [ $? -eq 0 ]; then
+		KERN_VER=20
+		DRIVERS_NET="sdladrv.c sdlamain.c sdla_ft1.c sdla_chdlc.c sdla_fr.c sdla_ppp.c sdla_x25.c"
+	fi
+fi
+LINUXDRIVERS_WAN="net/wanrouter"
+
+[ "$UID" = 0 ] || {
+	error "You must be a superuser (root) to run this script"
+	exit 1
+}
+
+# Check router home directory.
+[ -d "$PROD_HOME" ] || {
+	error "Router home directory ($PROD_HOME) not found"
+	exit 1
+}
+
+if [ "$1" = "remove" ]; then 
+	remove; 
+	exit; 
+elif [ "$1" = "install" ]; then
+        install_init;
+        exit;
+else
+	echo -e "\nUSAGE:";
+	echo -e "   ./wanpipe_setup {optons}";
+        #echo -e "\n";
+        echo -e "            install  : Install and configure WANPIPE startup scripts and options";
+	echo -e "            remove   : Uninstall WANPIPE startup scripts";
+	exit 0;
+fi	
+		  
+#install_init || exit 1
+#install_config || exit 1
+

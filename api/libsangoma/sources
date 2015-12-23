@@ -1,0 +1,42 @@
+TARGETNAME=libsangoma
+TARGETPATH=obj
+TARGETTYPE=DYNLINK
+#TARGETTYPE=LIBRARY
+DLLENTRY=_DllMainCRTStartup
+
+MSC_WARNING_LEVEL=$(SANG_WARNING_LEVEL)
+
+USE_LIBCMT=1
+
+DLLDEF=libsangoma.def
+
+############################################################################################
+C_DEFINES=$(C_DEFINES) /D__WINDOWS__ /D__COMPILING_LIBSANGOMA__ /DWP_PREVENT_WINSOCK_NAME_CONFLICT
+
+############################################################################################
+
+INCLUDES=$(SDK_INC_PATH);\
+$(SANG_WP_DEVEL)\wanpipe_common\include;\
+$(SANG_WP_DEVEL)\wanpipe_common\include\aft_core;\
+$(SANG_WP_DEVEL)\wanpipe_windows\include;\
+$(SANG_WP_DEVEL)\wanpipe_common\wantools\libsangoma;\
+$(SANG_WP_DEVEL)\wanpipe_common\wantools\libsangoma\wanec;\
+$(SANG_WP_DEVEL)\wanpipe_common\wantools\wanec_apilib;\
+$(SANG_WP_DEVEL)\wanpipe_common\wanec;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\include;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\include\oct6100api;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\octdeviceapi\oct6100api;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\apilib\llman;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\include\apilib;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\include\octrpc;\
+$(SANG_WP_DEVEL)\$(OCTASIC_INCLUDE)\apilib\bt
+
+
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+$(SDK_LIB_PATH)\user32.lib \
+$(SDK_LIB_PATH)\SetupApi.lib \
+$(SDK_LIB_PATH)\Advapi32.lib \
+$(SANG_WP_DEVEL)\wanpipe_common\wantools\libsangoma\wanec\$(O)\waneclib.lib
+
+SOURCES=libsangoma.c libsangoma.rc libsangoma_hwec.c libsangoma_utils.c libsangoma_config.c
+

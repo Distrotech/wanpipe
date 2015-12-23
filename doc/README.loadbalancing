@@ -1,0 +1,214 @@
+Wanpipe Load Balancing with TEQL
+--------------------------------
+
+
+Introduction
+------------
+
+There are several ways of loadbalancing in Linux. One of the easiest and
+straightforward ways is 'TEQL' - "True" (or "trivial") link equalizer.
+Like most things having to do with queueing, load sharing goes both
+ways. Both ends of a link may need to participate for full effect.
+
+However in real-world situations, users control only one side
+of the link, and telco the other.  Refer to diagrams below.
+
+Imagine this situation:
+
+
+
+                        +-------+   wan0   +-----------+
+                    eth0|   A   |==========|   B       |eth0
+        'network 1' ----|Wanpipe|          | Wanpipe   |---- 'network 2'
+                        |       |==========|   or      |
+			|       |          | Ext Router|
+                        +-------+   wan1   +-----------+
+
+or
+
+                        +-------+       wan0 (ppp)    +-------+
+                    eth0|   A   |=====================| Cisco |--- ISP1
+    'local network' ----|Wanpipe|                     |       |
+                        |       |========             +-------+
+                        +-------+        | wan1  
+				         | (fr)           
+					 |            +-------+
+					 =============|  Bay  |--- ISP2
+	                                              |       |
+						      +-------+
+
+
+Therefore, we will concetrate on our side of the network (Router A),
+and how to setup TEQL with multiple wanpipe devices, for greater
+than T1 throughput. 
+
+
+
+What is needed
+--------------
+
+1) Make sure that TEQL modules has been compiled
+	modprobe -l | grep eql
+
+   The module name is "sch_teql".
+
+   If doesn't exist:
+   	cd /usr/src/linux
+	make menuconfig
+            (network options-->QOS section--> enable TEQL as module)
+
+	make modules
+	make modules_install
+
+
+2) Make sure that wanpipe has been installed and running.
+
+   Refer to ftp.sangoma.com/linux/current_wanpipe/doc
+   for further info.
+
+
+
+Setup by Step Configuration
+---------------------------
+
+0) Configure ALL wanpipe interfaces with
+   DYN_INTR_CFG option set to YES.
+	
+   This option will bring the wanpipe network 
+   interface down, if the line goes down !!!  
+   
+   Once the interface goes down, it will be
+   temporarily removed from the routing table until it comes
+   back up.  
+   
+   While one interface is down, TEQL will force all traffic to 
+   the working interface.
+  
+
+1) Start all wanpipe devices
+	
+	wanrouter start
+
+
+2) Load a TEQL kernel module
+	
+	modprobe sch_teql
+
+	or
+
+	modprobe sch_teql max_equalizers=N
+
+		Where N=number of eql devices
+
+
+3) Setup queueing disciplines on each wanpipe interface
+   using iproute2 utility called 'tc'. 
+ 
+    	tc qdisc add dev wan0 root teql0
+    	tc qdisc add dev wan1 root teql0
+
+
+   Interfaces wan0 and wan1 could be running any protocol
+   WANPIPE supports (PPP, Frame Relay, CHDLC ...)
+   
+   The device teql0 is basically a roundrobbin distributor 
+   over wan0 and wan1, for sending packets. No data ever comes in 
+   over an teql device, that just appears on the 'raw' wan0 and wan1.
+	
+   
+4) Set the ip address of teql interface.  Note, the
+   ip address used is ARBITRARY, it is fake.
+
+   Reason for this is that packets will be forwarded through
+   this ROUTER, thus packets will never originate from this
+   box.  
+   
+   This means, however, that pinging from this machine
+   will not be possible (your local address if fake). 
+
+  	
+	ip addr add dev teql0 10.0.0.0/31
+    	ip link set teql0 up
+    	ip route del 10.0.0.0/31
+    	ip route add default dev teql0
+	
+
+   IMPORTANT:   The default route must be on teql0 device.
+
+5) Goth router A and B need to have return path filtering turned off, 
+   because they will otherwise drop packets destined for ip addresses 
+   other than their own:
+   
+    	echo "0" > /proc/sys/net/ipv4/conf/wan0/rp_filter
+    	echo "0" > /proc/sys/net/ipv4/conf/wan1/rp_filter
+
+
+
+6) Load Balancing Issues
+
+  There is the nasty problem of packet reordering. Let's say 6
+  packets need to be sent from A to B - wan0 might get 1, 3 and 5. wan1
+  would then do 2, 4 and 6. In an ideal world, router B would receive
+  this in order, 1, 2, 3, 4, 5, 6. But the possibility is very real that
+  the kernel gets it like this: 2, 1, 4, 3, 6, 5. 
+  
+  The problem is that this confuses TCP/IP. While not a problem for 
+  links carrying many different TCP/IP sessions, you won't be able 
+  to bundle multiple links and get to ftp a single file a lot 
+  faster, except when your receiving or sending OS is Linux :), 
+  which is not easily shaken by some simple reordering.
+
+
+
+FAQ
+---
+
+1) Question
+
+    I cannot get a single connection incoming or (downloading from here)
+    to download at greater that 175KB.
+
+   Answer
+   
+    OK that sounds about right.   The reason you are not getting download 
+    throughput of greater than 175KB is because your telco is not load balancing 
+    down to you.   The telco is sending the download stream over a single link.  
+    However if you do multiple downloads you do see, a greater throughput. 
+
+    In load balancing you can only control the outgoing direction.  The incoming can 
+    only be controlled from the other end (telco end) of the link. 
+
+
+
+2) Question  
+
+    My main concern is redundancy, it seems as if one line
+    goes down the entire connection is dead. I assume this is because
+    I cannot route the ips originally assigned to me on the first
+    T1 over the new T1.  Or am I mistaken.  Should I be able to route
+    say 216.133.91.193-222/27 over either line regardless of which are
+    up or down?
+
+  Answer
+
+    The TEQL determines the state of the link via state of
+    the network interface.  Thus, if the link is down, the
+    network interface must also come down and vice versa.
+
+    Wanpipe drivers have this option; to use the network 
+    interface state to show state of the link below.
+
+    Thus,enable the dynamic interface config (DYN_INTR_CFG) 
+    option in /usr/sbin/wancfg configurator.  
+    (or directly in wanpipe1.conf).
+    
+    This option will bring the network interface down, if the line
+    goes down !!!  Once the interface goes down, it will be
+    temporarily removed from the routing table until it comes
+    back up.
+
+
+
+Further questions or comments can be emailed to:
+
+Nenad Corbic <ncorbic@sangoma.com>

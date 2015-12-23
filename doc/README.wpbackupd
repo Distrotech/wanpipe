@@ -1,0 +1,20 @@
+WANPIPE BACKUP SYSTEM
+---------------------
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+Description:
+-----------
+	
+WANPIPE Backup Daemon utility is used to monitor the Primary PPP HIGH
+speed link.  If the Primary link goes down for any reason, the 
+wpbackupd will establish a dialup connection using the PPPD daemon.  
+
+At the same time the primary link will continue to be monitored 
+by wpbackupd for signs of life. If the PPP protocol is detected on 
+the primary link, the dialup connection will be terminated and the 
+Primary High speed connection will be re-established.
+	
+
+Please read the README file in backupd/
+for more information on how to setup wpbackupd daemon.

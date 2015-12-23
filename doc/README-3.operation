@@ -1,0 +1,331 @@
+Wanpipe Operation Manual
+========================
+
+For latest info please visit
+http://wiki.sangoma.com
+
+
+At the heart of WANPIPE operation is the 'wanrouter' operation
+script.  It is used to start/stop/restart and display
+WANPIPE current status and environment.
+
+
+'wanrouter' usage
+=================
+
+	/usr/sbin/wanrouter <cr>
+
+
+WANPIPE: WAN Router startup script
+
+Usage: wanrouter: {options} <wanpipe#> <interface>
+
+	wanrouter start : Starts all devices specified in
+                          /etc/wanpipe/wanrouter.rc WAN_DEVICES
+
+	wanrouter stop  : Stops all devices specified in
+                          /etc/wanpipe/wanrouter.rc WAN_DEVICES
+
+	wanrouter start wanpipe# : Start a single device
+
+	wanrouter stop  wanpipe# : Stops a single device
+                                  (# can range from 1 to 16)
+
+	wanrouter restart	 : Restart all devices specified in
+                                 /etc/wanpipe/wanrouter.rc WAN_DEVICES
+
+	wanrouter restart wanpipe# : Restart a single device
+                                     (# can range from 1 to 16)
+
+
+	wanrouter start wanpipe# if_name   : Start a single interface on device
+
+	wanrouter stop  wanpipe# if_name   : Stops a single interface on device
+                                             (# can range from 1 to 16)
+
+	wanrouter restart wanpipe# if_name : Restart a single interface on device
+                                             (# can range from 1 to 16)
+
+
+ 	wanrouter list		: List all active devices
+
+	wanrouter modules	: Show wanpipe kernel modules
+
+	wanrouter status	: Display status for all active devices
+
+	wanrouter summary	: Summary of config files in /etc/wanpipe
+
+	wanrouter hwprobe	: Display wanpipe hardware probe info.
+
+        wanrouter debug         : Check current wanpipe environment.
+                                  Wanpipe startup debugging. After a startup error
+                                  run this command to get a possible solution
+                                   i.e. wanrouter start; wanrouter debug;
+
+        wanrouter debug if_name : Display common debugging statistics
+                                  In case of line problems save to file, wait 2-5min
+                                  and send to Sangoma Tech Support
+                                   i.e. wanrouter debug wp1fr16 > debug_file;
+
+	wanrouter conflogs      : Display wanpipe configuration syntax errors
+                                  i.e. /var/log/wanrouter
+
+
+        wanrouter messages      : Display wanpipe kernel event messages
+                                  i.e. /var/log/messages
+
+
+	wanrouter version	: wanpipe version information.
+
+
+
+WANPIPE Environment Check
+=========================
+
+The wanrouter debug option will check current
+wanpipe environment, make sure that kernel modules
+do load, and that /var/log/messages and /var/log/wanrouter
+logs do not show any errors. It will also try
+to give possible solutions.
+
+	/usr/sbin/wanrouter debug
+
+
+Make sure that the new WANPIPE kernel modules have 
+been installed correcty and that they can be loaded 
+into the kernel, and the hardware is detected.  
+
+	/usr/sbin/wanrouter hwprobe
+
+
+Check that a configuration file exists in /etc/wanpipe
+directory.
+
+	/usr/sbin/wanrouter summary
+
+
+Make sure that no WANPIPE devices are currently running
+on the system
+
+	/usr/sbin/wanrouter list
+
+
+
+
+WANPIPE Startup
+===============
+
+Please note that all kernel driver output messages are
+located in /var/log/messages file.  
+
+Run 'tail -f /var/log/messages' in a separate console
+window, to monitor WANPIPE start/stop and operation
+messages.
+
+
+To start/stop/restart WANPIPE devices listed in 
+/etc/wanpipe/wanrouter.rc file: (default is wanpipe1)
+
+	/usr/sbin/wanrouter start
+	/usr/sbin/wanrouter stop
+	/usr/sbin/wanrouter restart
+
+
+To start/stop/restart single wanpipe device: (eg: wanpipe2)
+
+  This command is useful when running multiple devices
+  and would like to operate on a singe device.
+	
+	/usr/sbin/wanrouter start wanpipe2
+	/usr/sbin/wanrouter stop wanpipe2
+	/usr/sbin/wanrouter restart wanpipe2
+
+
+To start/stop/restart a single network interface from a 
+/etc/wanpipe/wanpipe1.conf configuration file:
+
+  This command is useful when adding an extra frame 
+  relay DLCI. Also to reconfigure a single DLCI. 
+
+	/usr/sbin/wanrouter start wanpipe2 wp2_fr18
+	/usr/sbin/wanrouter stop wanpipe2  wp2_fr18
+	/usr/sbin/wanrouter restart wanpipe2 wp2_fr18
+
+
+To view current status and configuration of active
+devices:
+
+	/usr/sbin/wanrouter status
+
+
+
+Error Debugging
+===============
+
+After a failed wanrouter start command
+run:
+	wanrouter debug
+
+The debug option will identify an error and
+offer solutions.
+
+
+Configuration Syntax Errors:
+	
+   All configuration file syntax errors, generated
+   during WANPIPE starup, will be displayed in:
+	
+	/var/log/wanrouter
+
+	(eg: cat /var/log/wanrouter)
+		
+
+	
+Kernel Driver Errors:
+
+   All device driver errors and events will be 
+   displayed in:
+
+   	/var/log/messages
+
+	(eg: tail -f /var/log/messages)
+
+
+Line Errors and Driver Statistics
+
+   After a successful WANPIPE startup any extra
+   debugging, such as line tracing or CSU/DSU 
+   debugging will be done using:
+
+   	/usr/sbin/wanpipemon -g
+
+
+For automated Line Error debugging run
+
+	/usr/sbin/wanrouter debug <if_name>
+
+	where <if_name> is wanpipe interface name.
+
+
+Sangoma Tech Support:
+---------------------
+   
+   When reporting problems to Sangoma Tech Support please
+   dump the current system debug information into
+   a temporary file and send it via email.
+
+   	1. wanrouter debug if_name > sangoma_debug_file.txt
+	   (where if_name is wanpipe interface name: eg wp1fr16)
+
+	2. Wait for 2-5 minutes
+
+	3. Stop the debug by pressing ENTER
+
+	4. Email sangoma_debug_file.txt to Sangoma Tech Support
+
+
+   Pleae refer to README-4.debugging
+
+
+
+Wanpipe Power User Operation
+-----------------------------
+
+Wanpipe package contents
+========================
+
+
+1. Wanpipe Kernel Drivers
+
+	The drivers are listed in order of
+	dependency.
+
+	sdladrv.o	: Hardware Layer
+	wanrouter.o	: Wanpipe Protocol Interface Layer
+	wanpipe_syncpp.o: Wanpipe PPP/CHDLC Protocol
+	wanpipe.o	: Wanpipe multi-protocol layer
+	                  (Frame-Relay,PPP,CHDLC,...)
+	af_wanpipe.o	: Wanpipe API socket layer
+	
+				
+	
+2. User space programs
+		
+   Configuration (/usr/sbin)
+		
+	wancfg		: Wanpipe configuration tool
+
+	cfgft1		: Wanpipe FT1 config tool for 
+	                  S508FT1 and S5143 cards
+			  (For all other cards use wancfg)
+	
+   Operation (/usr/sbin)
+
+	wanconfig	: Wanpipe operation tool that
+	                  parses the config file and
+			  executed config ioctl() calls to
+			  the kernel driver.
+			  (C program)
+
+			  wanconfig -a /etc/wanpipe/wan_adsl.list card wanpipe1 up 
+
+
+	wanrouter	: Wanpipe operation script
+	                  used to start/stop/restart
+			  Wanpipe drivers.  The wanrouter
+			  script uses the above wanconfig
+			  to start wanpipe as well as 
+			  standard "ifconfig" to bring
+			  all necessary interfaces up.
+
+   Debugging
+
+	wanpipemon	: Wanpipe debugging application
+	                  used to debug the hardware, drivers
+			  and sync line.  
+
+			  wanpipemon -g
+
+
+Wanpipe Operation
+=================
+
+If a power user desn't want to use
+the wanrouter master script.  Here is the
+break down of the wanpipe startup
+sequence:
+
+	wanrouter start
+
+
+1. Load Kernel Modules
+
+	insmod sdladrv.o
+	insmod wanrouter.o
+	insmod wanpipe_syncppp.o
+	insmod wanpipe.o
+	insmod af_wanpipe.o
+    or
+
+        modprobe af_wanpipe
+
+2. Configure and Start Drivers
+	
+	/usr/sbin/wanconfig -a /etc/wanpipe/wan_adsl.list card wanpipe1 up 
+
+3. Start up all network interfaces
+
+	ifconfig wan0 <local ip> pointopoint <remote ip> netmask 255.255.255.255
+
+4. Confirmation
+
+	tail -f /var/log/messages
+
+		Check the events and driver statistics.
+
+	cat /proc/net/wanrouter/status
+
+		Check driver state
+
+	
+	

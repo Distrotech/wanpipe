@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# xmtp2km_in: xmtp2km installer
+#
+# Derivation: Copyright (C) 2005 Xygnada Technology, Inc.
+# Copyright (C) 2001 Alessandro Rubini and Jonathan Corbet
+# Copyright (C) 2001 O'Reilly & Associates
+#
+# The source code in this file can be freely used, adapted,
+# and redistributed in source or binary form, so long as an
+# acknowledgment appears in derived source files.  The citation
+# should list that the code comes from the book "Linux Device
+# Drivers" by Alessandro Rubini and Jonathan Corbet, published
+# by O'Reilly & Associates.   No warranty is attached;
+# we cannot take responsibility for errors or fitness for use.
+#
+#
+# $Id: xmtp2km_in,v 1.1 2005/12/05 17:48:45 mike01 Exp $
+module="xmtp2km"
+device="xmtp2km"
+mode="664"
+path=/lib/modules/`uname -r`/kernel/drivers/net/wan
+
+# Group: since distributions do it differently, look for wheel or use staff
+if grep -q '^staff:' /etc/group; then
+    group="staff"
+else
+    group="wheel"
+fi
+
+# invoke insmod with all arguments we got
+# and use a pathname, as insmod doesn't look in . by default
+#/sbin/insmod ./$module.ko $* || exit 1
+#/sbin/insmod /usr/src/xmtp2km/$module.ko $* || exit 1
+/sbin/insmod $path/$module.ko $* || exit 1
+
+# retrieve major number
+major=$(awk "\$2==\"$module\" {print \$1}" /proc/devices)
+
+# Remove stale nodes and replace them, then give gid and perms
+
+rm -f /dev/${device}0
+mknod /dev/${device}0 c $major 0
+ln -sf ${device}0 /dev/${device}
+chgrp $group /dev/${device}0 
+chmod $mode  /dev/${device}0
+
+exit 23

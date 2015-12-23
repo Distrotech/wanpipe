@@ -1,0 +1,78 @@
+AFT A104dm Firmware Change Log
+=============================
+
+Release V44
+-----------
+Jun 29 2011
+Type:	Optional A104dm Firmware
+		New ss7 hw repeat feature.
+		
+Release V43
+-----------
+Aug 29 2010
+Type:	Recommended A104dm Firmware
+		Important PCI party error fixes. 
+		Fixes the Windows need to reboot after firmware update.
+
+Release V37
+-----------
+Feb 22 2010
+Type:	Recommended A104dm Firmware
+		Fixed PCIe dma timeouts.  On some new Dell/HP servers the PCIe timeouts
+		on dma transactions were causing PCI fatal error messages
+		in the logs.  This has now been fixed.
+
+
+Release V36
+-----------
+Aug 13 2009
+Type:		Recommended A104dm Firmware
+		New Feature: Added Free Running timer for Zaptel/Dahdi
+
+Changes:	Firmware bug fix
+		Fixes on potential pci parity errors on some systems.
+                      
+
+Release V33
+-----------
+Sep 27 2007
+
+Type:		Recommended A104dm Firmware for echo cancel cards
+		Fixes issue with hardware echo canceller chip 
+		security. 
+		Supports DTMF detection without hardware echo
+		cancellation operation.
+
+Changes:	Firmware bug fix for echo canceller
+		This bug can shut down the driver.
+
+		Note: This bug only afected new Maxim AFT cards with HWEC.
+		      DTMF detection only applies AFT cards with.
+
+
+Release V31
+-----------
+Jul 10 2007
+
+Type:           Mandatory A104dm Firmware for echo cancel cards
+                Fixes a serious bug with Echo Canceler operation.
+                This bug caused a radom channel of echo canceler
+                to become corrupted.
+
+Changes:        Firmware bug fix for echo canceler
+                This bug can cause hard crashes.
+
+                Note: This bug only afected new Maxim AFT cards with HWEC.
+
+
+
+Release V28
+------------
+Mar 16 2007
+	
+Tyep		Mandatory for PCI/PCI-Express Cards
+		
+		Initial Release
+
+
+		    

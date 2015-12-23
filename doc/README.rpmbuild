@@ -1,0 +1,70 @@
+Building a Custom RPM
+---------------------
+
+./Setup buildrpm --with-linux=<abs pth>
+
+	This command will create a custom rpm from for 
+	the current system.  
+	
+	It will compile the wanpipe kernel modules for 
+	the linux source defined by the --with-linux option.
+  	Default is /usr/src/linux
+  
+	It will compile all wanpipe utilities using the
+	current libraries. 
+	
+	Prerequisites:
+	~~~~~~~~~~~~~~
+	1. The --with-linux directory must point to a
+	   configured (.config file must exist)
+	   kernel source. 
+
+	2. The RPM will be build in a virtual
+	   directory called rpmbuild/. Thus, it
+	   will not pollute current environment
+	   except the patches added to the
+	   linux source directory.
+
+
+Manual RPM Build
+----------------
+
+In order to further customize a WANPIPE
+RPM user can manually create one.
+
+1) Install WANPIPE package into a virtual 
+   directory (eg: /root/rpmbuild) 
+
+   ./Setup install silent --builddir=/root/rpmbuild --with-linux=/usr/src/linux
+
+2) Customize the /root/rpmbuild directory.
+
+   eg: Copy already created wanpipe1.conf 
+       configuration file into 
+       /root/rpmbuild/etc/wanpipe directory.
+
+   This way the rpm can be installed and
+   wanpipe drivers started without further
+   re-configuration at the customer site.
+   
+3) The RPM spec file is located in rpmspec/
+   directory.  
+
+   Add any extra files into the %files list 
+   if needed.
+
+4) Create the new rpm using the following
+   command.
+   
+   rpm -ba --buildroot /root/buildrpm rpmspec/wanpipe.spec
+
+5) The new binary rpm will be located in
+   /usr/src/redhat/RPMS/i386 directory.
+
+6) Test the rpm using:
+  
+   rpm -qipl <rpm name>
+
+   The above command will display the installation
+   tree of the new rpm.
+

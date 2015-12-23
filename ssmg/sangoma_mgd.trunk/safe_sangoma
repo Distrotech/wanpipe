@@ -1,0 +1,227 @@
+#!/bin/bash -p
+# vim:textwidth=80:tabstop=4:shiftwidth=4:smartindent:autoindent
+
+APP=$1
+shift
+
+APPARGS="$*"				# Grab any args passed to safe_sangoma
+TTY=						# TTY (if you want one) for APP to run on
+CONSOLE=no					# Whether or not you want a console
+MACHINE=`hostname`			# To specify which machine has crashed when getting the mail
+DUMPDROP=/tmp
+SLEEPSECS=2
+BINDIR=/usr/sbin
+BINDIR_SS7="/usr/local/ss7box"
+PIDFILE=/var/run/$APP.pid
+CORENAME=$(cat /proc/sys/kernel/core_pattern)
+VARDIR=/var/log
+PROD="safe_sangoma"
+
+WAN_HOME=/etc/wanpipe
+META_SMG_CONF=$WAN_HOME/safe_sangoma.rc
+
+# Read meta-configuration file.
+# metconf file should define NOTIFY or EXEC path script
+# to run
+if [ -f $META_SMG_CONF ]
+	then . $META_SMG_CONF
+fi
+
+if [ -z $APP ]; then
+		echo
+        logit "Error: APP argument not specified"
+		echo 
+		logit "Usage: safe_sangoma <app_name> <app arguments>"
+		echo
+        exit 1
+fi
+
+if [ -e $BINDIR_SS7/$APP ]; then
+  		BINDIR=$BINDIR_SS7
+fi
+
+if [ ! -e $BINDIR/$APP ]; then
+		echo
+        logit "Error: APP not found: $BINDIR/$APP"
+        exit 1
+fi
+
+
+# run APP with this priority
+PRIORITY=0
+
+# set system filemax on supported OSes if this variable is set
+# SYSMAXFILES=262144
+
+# set max files open with ulimit. On linux systems, this will be automatically
+# set to the system's maximum files open devided by two, if not set here.
+MAXFILES=32768
+
+# Check if APP is already running.  If it is, then bug out, because
+# starting safe_sangoma when APP is running is very bad.
+PID=`pidof $APP`
+if [ ! -z $PID ]; then
+	logit "Error: $APP already running.  $0 will exit now."
+	exit 1
+fi
+
+if [ -f $PIDFILE ]; then
+	logit "Error: $APP pid file $PIDFILE exists!.  $0 will exit now."
+	exit 1
+fi
+
+# since we're going to change priority and open files limits, we need to be
+# root. if running APP as other users, pass that to APP on the command
+# line.
+# if we're not root, fall back to standard everything.
+if [ `id -u` != 0 ]
+then
+	logit "Oops. I'm not root. Falling back to standard prio and file max." >&2
+	logit "This is NOT suitable for large systems." >&2
+	PRIORITY=0
+else
+	if `echo $OSTYPE | grep linux 2>&1 > /dev/null `
+	then
+		# maximum number of open files is set to the system maximum divided by two if
+		# MAXFILES is not set.
+		if [ "$MAXFILES" = "" ]
+		then
+			# just check if file-max is readable
+			if [ -r /proc/sys/fs/file-max ]
+			then
+				MAXFILES=$(( `cat /proc/sys/fs/file-max` / 2 ))
+			fi
+		fi
+		SYSCTL_MAXFILES="fs.file-max"
+	elif `echo $OSTYPE | grep darwin 2>&1 > /dev/null `
+	then
+		SYSCTL_MAXFILES="kern.maxfiles"
+	fi
+
+
+	if [ "$SYSMAXFILES" != "" ]
+	then
+		if [ "$SYSCTL_MAXFILES" != "" ]
+		then
+			sysctl -w $SYSCTL_MAXFILES=$SYSMAXFILES
+		fi
+	fi
+
+
+	# set the process's filemax to whatever set above
+	ulimit -n $MAXFILES
+
+fi
+
+#
+# Let us dump core
+#
+ulimit -c unlimited
+
+#
+# Don't fork when running "safely"
+#
+
+#SARGS=""
+#if [ "$TTY" != "" ]; then
+#	if [ -c /dev/tty${TTY} ]; then
+#		TTY=tty${TTY}
+#	elif [ -c /dev/vc/${TTY} ]; then
+#		TTY=vc/${TTY}
+#	else
+#		echo "Cannot find your TTY (${TTY})" >&2
+#		exit 1
+#	fi
+#	SARGS="${SARGS} -vvvg"
+#	if [ "$CONSOLE" != "no" ]; then
+#		SARGS="${SARGS} -c"
+#	fi
+#fi
+
+if [ ! -w ${DUMPDROP} ]; then	
+	logit "Cannot write to ${DUMPDROP}" >&2
+	exit 1
+fi
+
+#
+# Don't die if stdout/stderr can't be written to
+#
+trap '' PIPE
+
+#
+# Run scripts to set any environment variables or do any other system-specific setup needed
+#
+if [ -d /etc/wanpipe/safe_startup.d ]; then
+	for script in /etc/wanpipe/safe_startup.d/*.sh; do
+		if [ -x $script ]; then
+			logit "Executing startup script: $script"
+			source $script
+		fi
+	done
+fi
+
+
+logit()
+{
+ 	local data="$1"
+
+	echo "$PROD: $data"
+	logger "$PROD: $data"
+}
+
+run_sangoma()
+{
+	while :; do 
+
+		cd /tmp
+		nice -n $PRIORITY ${BINDIR}/$APP ${APPARGS} 
+
+		EXITSTATUS=$?
+	   	logit  "$APP ended with exit status $EXITSTATUS"
+		if [ "$EXITSTATUS" = "0" ]; then
+			# Properly shutdown....
+			logit "$APP shutdown normally."
+			exit 0
+		elif [ $EXITSTATUS -gt 128 ]; then
+			let EXITSIGNAL=EXITSTATUS-128
+			logit "$APP exited on signal $EXITSIGNAL."
+		else
+			logit "$APP died with code $EXITSTATUS."
+		fi
+
+		if [ "$NOTIFY" != "" ]; then
+			logfile="/etc/wanpipe/safe_sangoma_crash_"$APP"_"$$".log"
+			echo >  $logfile
+			date >> $logfile
+			echo >> $logfile
+			echo  "$APP on $MACHINE exited on signal $EXITSIGNAL. " >> $logfile
+			echo   >> $logfile     
+			echo "/var/log/messages"   >> $logfile     
+			echo "====================" >> $logfile     
+			tail -n 50 /var/log/messages  >> $logfile     
+			echo "====================" >> $logfile     
+			echo   >> $logfile     
+			cat $logfile | \
+			mail -s "$APP on $MACHINE Died" $NOTIFY
+			ret=$?
+			logit "Email sent to $NOTIFY result $ret"
+		fi
+		if [ "$EXEC" != "" ]; then
+			$EXEC
+		fi
+		PID=`cat ${PIDFILE}`
+		if [ -f /tmp/$CORENAME.${PID} ]; then
+			mv /tmp/$CORENAME.${PID} ${DUMPDROP}/core.$APP.`hostname`-`date -Iseconds` &
+		elif [ -f /tmp/$CORENAME ]; then
+			mv /tmp/$CORENAME ${DUMPDROP}/core.$APP.`hostname`-`date -Iseconds` &
+		fi
+
+		logit "Automatically restarting $APP."
+		sleep $SLEEPSECS
+		\rm -f ${PIDFILE}
+	done
+}
+
+run_sangoma &
+
+exit 0

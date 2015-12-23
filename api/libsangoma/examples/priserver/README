@@ -1,0 +1,59 @@
+WANPIPE PRISERVER SAMPLE
+========================
+
+
+priserver utlity will listen on a TDM DCHAN and
+respond to PRI events.
+
+
+priserver links to /usr/local/lib/libsangoma
+
+
+FAQ
+====
+
+Q 1. What wanpipe version should I run with priserver ?
+-----------------------------------------------------
+
+	wanpipe-beta1-2.3.4 or greater.
+
+Q 2. Do I need to install Asterisk and/or Zaptel ?
+------------------------------------------------
+
+	No. 
+	
+	priserver application only uses the libsangoma TDM API
+        library as well as the libpri obtained through openpbx.org.
+
+
+Q 2. ./priserver fails to link to libsangoma ?
+--------------------------------------------
+
+	Make sure $LD_LIBRARY_PATH contains /usr/local/lib directory
+
+	eg:	
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
+	Add this line to your startup rc file: eg: .bashrc
+
+	or just run the following from priserver/ directory:
+
+		source librc
+
+
+Q 3. How do I configure wanpipe for priserver?
+---------------------------------------------
+
+	Use the wanpipe1.conf file located in
+	priserver/wancfg/ directory.
+	
+	Copy the cfg file to /etc/wanpipe directory
+	For A104: 
+		cp wanpipe1.a104 /etc/wanpipe/wanpipe1.conf
+
+	For A101/2:
+		cp wanpipe1.a101_2 /etc/wanpipe/wanpipe1.conf
+
+
+
+	

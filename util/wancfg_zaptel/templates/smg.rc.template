@@ -1,0 +1,11 @@
+#!/bin/sh
+# smg.rc	SMG_RC FILE
+# Autogenrated by wancfg_zaptel.pl on MYDATE
+#               Note:   This file is 'executed' by the shell script, so
+#                       the usual shell syntax must be observed.        
+SANGOMA_PRID="YES_NO"
+SANGOMA_BRID="YES_NO"
+SANGOMA_SS7ISUP="YES_NO"
+SANGOMA_SS7BOOST="YES_NO"
+SANGOMA_MEDIA_GATEWAY="YES_NO"
+

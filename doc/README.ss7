@@ -1,0 +1,231 @@
+WANPIPE T1/E1 SS7 API
+=====================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with SS7 support
+------------------------------------
+
+The SS7 API support is NOT installed by default
+during WANPIPE installation process. 
+
+
+1. Untar the wanpipe ss7 package update 
+   into the wanpipe release directory.
+   (The ss7 update must be obtained from Sangoma)
+
+   eg: tar xvfz wanpipe-2.3.0-9.tgz
+       tar xvfz wanpipe-2.3.0-9-ss7.tgz
+
+       (The above will create wanpipe/ directory)
+
+
+
+Use the CUSTOM driver compilation 
+option in 
+    ./Setup install
+script to enable SS7.
+
+
+After successful installation proceed to 
+configure the card for SS7 protocol 
+/usr/sbin/wancfg  GUI configurator.
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Configuring SS7 API
+--------------------
+
+Run: /usr/sbin/wancfg_legacy
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: SS7 Protocol
+
+4. T1/E1 Configuration (Optional)
+	Configure based on you isp info.
+
+5. Hardware Section
+	Select Probe Hardware
+		Select your adapter PRI port.
+
+	One can leave all other options as Default.
+	
+	
+6. Interface Section
+	
+	Specify interface name.
+	(Leave it default)
+	
+	Operation Mode:  
+		API 	used to develop custom applications  
+	            	on top of SS7
+
+6. End of configuration, exit and save
+
+
+
+Start SS7 API protocol
+----------------------- 
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are dispalyed.
+
+ 	Confirm the state of Front End (T1/E1/V35)
+	Confirm the Link state
+
+	Check for any error events.
+
+
+
+Custom API Application
+----------------------
+
+A sample API application exists in
+/etc/wanpipe/api/ss7 directory.
+
+To compile it run:  make
+
+Run:    ./ss7_api 
+
+	Refer to api options below:
+
+	SS7 API USAGE
+
+
+        ss7_api <options> <extra options>
+
+<options>:
+        -i  <ifname>     #interface name
+        -c  <card name>  #card name
+        -r               #read enable
+        -w               #write eable
+
+<extra options>
+        -txcnt   <digit>  #number of tx packets  (Dflt: 1)
+        -txsize  <digit>  #tx packet size        (Dflt: 10)
+        -txdelay <digit>  #delay in sec after each tx packet (Dflt: 0)
+        -txdata  <digit>  #data to tx <1-255>
+
+	
+Example:
+
+	#Enable rx on wp1ss7 interface
+	
+	./ss7_api -c wanpipe1 -i wp1ss7 -r -verbose 
+
+Use this app as a building block for you custom
+APP.
+
+
+SS7 Commands
+------------
+
+
+/* SS7-level interface commands */
+#define READ_SS7_CODE_VERSION		0x20	/* read the SS7 code version */
+#define L2_READ_EXCEPTION_CONDITION	0x21	/* L2 - read an exception condition from the adapter */
+#define L2_SET_CONFIGURATION		0x22	/* L2 - set the operational configuration */
+#define L2_READ_CONFIGURATION		0x23	/* L2 - read the current configuration */
+#define L2_READ_LINK_STATUS		0x24	/* L2 - read the link status */
+#define L2_READ_OPERATIONAL_STATS	0x25	/* L2 - retrieve the operational statistics */
+#define L2_FLUSH_OPERATIONAL_STATS	0x26	/* L2 - flush the operational statistics */
+#define L2_READ_HISTORY_TABLE		0x27	/* L2 - read the history table */
+#define L2_FLUSH_HISTORY_TABLE		0x28	/* L2 - flush the history table */
+#define L2_SET_INTERRUPT_TRIGGERS	0x30	/* L2 - set the application interrupt triggers */
+#define L2_READ_INTERRUPT_TRIGGERS	0x31	/* L2 - read the application interrupt trigger configuration */
+#define L2_POWER_ON			0x40	/* L2 - power on */
+#define L2_EMERGENCY			0x41	/* L2 - emergency */
+#define L2_EMERGENCY_CEASES		0x42	/* L2 - emergency ceases */
+#define L2_START			0x43	/* L2 - start */
+#define L2_STOP				0x44	/* L2 - stop */
+#define L2_RESUME			0x45	/* L2 - resume (ANSI) / local processor recovered (ITU) */
+#define L2_RETRIEVE_BSNT		0x46	/* L2 - retrieve BSNT */
+#define L2_RETRIEVAL_REQ_AND_FSNC	0x47	/* L2 - retrieval request and FSNC */
+#define L2_CLEAR_BUFFERS		0x48	/* L2 - clear buffers (ANSI) / flush buffers (ITU) */
+#define L2_CLEAR_RTB			0x49	/* L2 - clear RTB */
+#define L2_LOCAL_PROCESSOR_OUTAGE	0x4A	/* L2 - local processor outage */
+#define L2_CONTINUE			0x4B	/* L2 - continue (ITU) */
+#define L2_SET_TX_CONG_CFG		0x50	/* L2 - set the transmission congestion configuration */
+#define L2_READ_TX_CONG_STATUS		0x51	/* L2 - read the transmission congestion status */
+#define L2_SET_RX_CONG_CFG		0x52	/* L2 - set the receive congestion configuration */
+#define L2_READ_RX_CONG_STATUS		0x53	/* L2 - read the receive congestion status */
+#define L2_DEBUG			0x5F	/* L2 - debug */
+
+
+
+
+
+
+Further Info
+------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+

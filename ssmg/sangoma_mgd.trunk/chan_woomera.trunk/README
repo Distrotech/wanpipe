@@ -1,0 +1,70 @@
+WOOMERA Channel Driver for Asterisk and CallWeaver
+==================================================
+
+Author: Nenad Corbic
+	Anthony
+
+
+Descripton:
+
+Woomera is an abstracted VoIP protocol used as middleware
+to cross connect disparate VoIP protocols.
+
+Woomera channel driver is used to connect a PBX to
+an external VoIP Protocol/Stack.
+
+Eg:
+	Open Source PBX
+	---------------
+	      	woomera client <----TCP/IP-----> woomera server + SIP --> Internet
+
+	Open Source PBX
+	---------------
+		woomera client <----TCP/IP-----> woomera server + TDM/SS7/PRI/BRI
+
+
+As the above diagram states, the Woomera Channel Driver implements the
+Woomera Client portion of the Woomera Protocol.  The woomera server
+is responsible for connecting the woomera client to a VoIP protocol such
+as SIP, TDM/PRI/BRI/SS7.  
+
+The PBX has no idea that its talking to an external VoIP protocol.
+The only thing PBX understands is that incoming call arrived on
+woomera channel, or place a call on an outgoing woomera channel.
+All the Protocol/Stack logic is done on the woomera server.
+
+
+For more info please visit:
+http://wiki.sangoma.com
+
+
+For bugs, reports and enquiries please contact
+Nenad Corbic <ncorbic@sangoma.com>
+
+
+Compilation:
+
+	#> make
+	#> make install
+
+	Options:  PBXDIR=<absolute path to pbx source>
+
+		  By default PBXDIR=/usr/src/asterisk
+eg:
+	#> make PBXDIR=/usr/src/asterisk1.4
+	#> make PBXDIR=/usr/src/callweaver
+
+
+Makefile will remember the PBXDIR path in local .pbxdir file.
+From then on there is no need to pass in the PBXDIR 
+parameter.
+
+eg: 	make PBXDIR=/usr/src/asterisk1.4
+	make
+	
+The second make will know that PBXDIR=/usr/src/asterisk1.4
+Each time one passes PBXDIR to makefile the local ".pbxdir"
+file will be updated
+
+
+

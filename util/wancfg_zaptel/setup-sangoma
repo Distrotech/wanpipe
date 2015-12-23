@@ -1,0 +1,17 @@
+#!/bin/sh
+home=`pwd`
+cd /etc/wanpipe/wancfg_zaptel
+
+if [ ! -z $1 ]; then 
+	if [ $1 = 'smg' ]; then
+		wancfg_smg
+	else
+		echo "Invalid option $1 "
+	fi
+else
+	./wancfg_zaptel.pl --trixbox
+	#wancfg_dahdi
+fi
+
+
+cd $home

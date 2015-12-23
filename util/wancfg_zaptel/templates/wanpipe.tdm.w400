@@ -1,0 +1,39 @@
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Mon Jul 31 18:10:23 EDT 2006
+#
+# Note: This file was generated automatically
+#       by /usr/local/sbin/setup-sangoma program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipeDEVNUM = WAN_AFT_GSM, Comment
+
+[interfaces]
+wIFNUMg1 = wanpipeDEVNUM, , TDM_VOICE_OP_MODE, Comment
+
+[wanpipeDEVNUM]
+CARD_TYPE 	= AFT_GSM
+S514CPU 	= A
+CommPort 	= PRI
+AUTO_PCISLOT 	= NO
+PCISLOT 	= SLOTNUM
+PCIBUS  	= BUSNUM
+FE_MEDIA	= GSM
+FE_LINE 	= FELINE
+TDMV_LAW	= TDM_LAW
+MTU 		= 1500
+UDPPORT 	= 9000
+TDMV_SPAN	= TDMVSPANNO
+
+[wIFNUMg1]
+ACTIVE_CH	= ALL
+MTU		= 16

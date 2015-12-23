@@ -1,0 +1,33 @@
+TDM API Sample Code
+====================
+
+1. aft_tdm_voice_api 
+
+	- read/write data per span/chan 
+
+   Usage: 
+	./aft_tdm_voice_api -c <span number> -i <chan number> -r <enter>
+	./aft_tdm_voice_api -c <span number> -i <chan number> -r -verbose <enter> 
+
+1. aft_tdm_voice_api_rbs
+
+        - read/write data per span/chan
+        - read/write rbs data per span/chan
+	- setup a rbs event so driver calls the app on each rbs change.
+
+   Usage:
+        ./aft_tdm_voice_api_rbs -c <span number> -i <chan number> -r <enter>
+        ./aft_tdm_voice_api_rbs -c <span number> -i <chan number> -r -verbose <enter>
+
+
+3. aft_tdm_hdlc_test
+
+	- Used to test each span/chan for data corruption, using an HDLC engine.
+	- This test will run over voice and DCHAN HW HDLC devices.
+
+   Usage:
+	./tdm_hdlc_test.sh <span> 	#Run HDLC engines on all chans in a span
+	./tdm_hdlc_test.sh <span> <chan> #Run HDLC engine on single span chan
+	
+
+	

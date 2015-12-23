@@ -1,0 +1,239 @@
+WANPIPE MPAPI X25 API Support
+=============================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with MPAPI X25 support
+----------------------------------------
+
+The MPAPI X25 API is NOT distributed with standard
+wanpiep release. One has the request the MPAPI
+binary or source from Sangoma Technologies.
+
+The MPAPI X25 API support IS NOT installed by default
+during WANPIPE installation process.
+
+Use the CUSTOM driver compilation 
+option in 
+
+./Setup install           
+      Under CUSTOM Compilation mode choose:
+	DEF and MPAPI
+
+After successful installation proceed to 
+configure you MPAPI X25 API card using /usr/sbin/wancfg_legacy 
+GUI configurator.
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+Configuring MPAPI X25 API
+-------------------------
+
+Run: /usr/sbin/wancfg_legacy
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: MP Protocol
+
+4. Hardware Section
+	Select Probe Hardware
+		Select your adapter.
+
+
+        Configure hardware front end interface
+        based on your ISP config:
+
+	        Interface:  V35 
+        	            RS232
+
+	Configure clocking mode:
+
+		Clocking:   External (Default)
+                            Internal
+
+	Configure baud rage (if clocking = Internal)
+		
+		Baudrate:   64000    (Usually x25 lines go up to 128K)
+		
+
+5. T1/E1 CSU/DSU Configuration (Optional)
+	Configure your CSU/DSU based
+	on the ISP spec.
+
+	
+6. Interface Section
+	
+   Configure Operation Mode to: ANNEXG
+
+            
+   X25 Link Setup -->
+
+	Lapb Profile -->
+
+		Create New Lapb Profile -->
+
+			Configure lapb station based on your ISP spec.
+				lapb_station: DTE (default) 
+                                              DCE
+
+			
+			Configure other parameter based on your
+                        ISP specs.
+
+		
+	Lapb Interface Cfg -->
+	
+		Configure Operation mode to: API
+
+	X25 Profile -->
+
+		Create New Lapb Profile -->
+
+			Configure x25 station based on your ISP spec.
+				x25_station: DTE (default) 
+                                             DCE
+		
+			Configure PVC or SVC parameters based on
+                        your ISP specs.
+			***Make sure that either PVC or SVC values are set.
+
+			Configure other parameter based on your
+                        ISP specs.
+
+
+	X25 Interface Cfg --->
+
+		Configure Operation modes to: API
+
+
+7. Save and Exit
+
+
+Start MPAPI X25 API protocol
+---------------------------- 
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are dispalyed.
+
+	Confirm the Link state
+
+	Confirm that Restart Messages have been
+        received and transmitted.
+
+	Check for any error events.
+
+
+Custom MPAPI X25 API Application
+================================
+
+A sample API application exists in
+/etc/wanpipe/api/mpapi/x25 directory.
+
+
+Read the /etc/wanpipe/api/mpapi/x25/README 
+for more info.
+
+
+
+To compile it run:  make
+
+Run:    ./svc_client  #For placing SVC calls
+        ./server_v1   #For accepting SCV calls
+	./pvc_clinet  #For working with PVCs 
+
+
+
+API ./svc_client USAGE:
+
+./svc_api <options> <extra options>
+
+
+
+<options>:
+	-i  <ifname>     #interface name
+	-c  <card name>  #card name
+	-r               #read enable
+	-w               #write eable
+
+<extra options>
+	-txcnt   <digit>  #number of tx packets  (Dflt: 1)
+	-txsize  <digit>  #tx packet size        (Dflt: 10)
+	-txdelay <digit>  #delay in sec after each tx packet (Dflt: 0)
+	-txdata  <digit>  #data to tx <1-255>
+
+	-txfile  <file>   #Use file to tx instead
+	-rxfile  <file>   #Save all rx data to a file
+	
+	-rxcnt   <digit>  #number of rx packets before exit
+			  #this number overwrites the txcnt
+	                  #Thus, app will only exit after it
+	                  #receives the rxcnt number of packets.
+	
+	-verbose	  #Enable verbose mode
+
+
+

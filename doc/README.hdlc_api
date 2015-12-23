@@ -1,0 +1,267 @@
+WANPIPE (RAW) HDLC STREAMING API Support
+========================================
+
+
+Author: Nenad Corbic <ncorbic@sangoma.com>
+
+
+
+Pre requisites
+--------------
+
+1. A Linux kernel source must be available.
+   Usually in /usr/src/linux directory.
+   
+   Furthermore, the linux source version must
+   match the currently running image.
+
+   i.e. Output of 'uname -r'
+        must match the source version
+	number in /usr/src/linux/Makefile.
+
+   Note: The Setup installation script checks
+         for this condition and will take
+	 appropriate steps to resolve the
+	 name mismatch.
+
+
+
+
+Installing WANPIPE with RAW HDLC support
+----------------------------------------
+
+The HDLC API support IS installed by default
+during WANPIPE installation process.
+
+Use the CUSTOM driver compilation 
+option in 
+    ./Setup install
+script to enable CHDLC.
+
+After successful installation proceed to 
+configure you RAW HDLC card using:
+
+For AFT cards:
+	/usr/sbin/wancfg
+For Legacy S514 cards:
+	/usr/sbin/wancfg_legacy
+ 
+GUI configurator.
+
+
+Installation Verification
+-------------------------
+
+Run wanpipe hardware probe to
+make sure that the kernel modules
+are working fine:
+
+Run:	wanrouter hwprobe
+
+
+	In case of error:
+	-----------------
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+
+
+
+Configuring RAW HDLC API : AFT cards
+------------------------------------
+
+Run /usr/sbin/wancfg
+
+1. Select card from Hardware Probe
+
+2. Configure for T1 or E1 (Default T1)
+
+3. Select HDLC Streaming Protocol
+
+4. Under Interface Section
+
+   Selcect API operation mode.
+
+5. Save exit
+
+
+NOTE: 
+To Disable HDLC engine per interface
+one can manually change HDLC_STREAMING NO option
+to NO under interface section in /etc/wanpipe/ 
+wanpip#.conf config file. 
+This MODE is called TRANSPARENT.
+
+IMPORTANT: When configuring for Transparent mode (HDLC Disabled)
+           The MTU/MRU must be in multiples of channel numbers
+           eg: T1 = 24 channels: 24*50  MTU/MRU=1200
+               E1 = 31 channels: 31*40  MTU/MRU=1240
+	
+		
+
+Configuring RAW HDLC API : Legacy S514
+--------------------------------------
+
+Run: /usr/sbin/wancfg_legacy
+
+1. Create new device
+
+2. Select wanpipe1
+
+3. Protocol Section
+	Select Protocol: Cisco HDLC Protocol
+
+4. Hardware Section
+	Select Probe Hardware
+		Select your adapter.
+
+
+5. T1/E1 CSU/DSU Configuration (Optional)
+	Configure your CSU/DSU based
+	on the ISP spec.
+	
+6. Interface Section
+	
+   HDLC protocol can only have a single network interface
+   per physical line.
+
+   Set Operation Mode to API   
+   	
+   Select Protocol Configuration
+   	Set HDLC_STREAMING option to YES !!!!!
+
+
+7. Save and Exit
+
+
+Start Raw HDLC Streaming protocol
+---------------------------------- 
+
+Run: wanrouter start
+
+
+	In case of errors:
+	------------------
+	Run: 	wanrouter messages
+       	
+		It will display kernel error
+		messages.
+
+	Please contact Sangoma Tech Support
+	Tel. 	905 474 1990 ex118 
+	Email:  techdesk@sangoma.com
+
+
+Startup Confirmation
+--------------------
+
+Run: wanrouter messages
+
+	Make sure no error messages are dispalyed.
+
+ 	Confirm the state of Front End (T1/E1/V35)
+	Confirm the Link state
+
+	Check for any error events.
+
+
+
+Ethereal Tracing
+================
+
+The RAW HDLC interace can be used to trace any
+protocol to Ethereal type format.  
+
+
+  wanpipemon -i wan0 -pcap -pcap_file rx_trace.bin -prot FRAME -c tr
+
+
+For further info run:
+
+	wanpipemon -traceinfo
+
+
+After tracing to a file "rx_trace.bin" use Ethereal to
+view it:
+	ethereal rx_trace.bin
+
+
+Note: No Custom API application is necessary for
+      tracing data to a file. 
+
+
+
+
+
+
+
+Custom API Application
+======================
+
+A sample API application exists in
+/etc/wanpipe/api directory.
+
+To compile it run:  make
+
+For AFT Cards:
+Run: /etc/wanpipe/api/aft/aft_api
+
+For S514 Cards:
+Run: /etc/wanpipe/api/chdlc/chdlc_api 
+
+
+API aft_api or chdlc_api USAGE:
+
+./aft_api <options> <extra options>
+./chdlc_api <options> <extra options>
+
+
+<options>:
+	-i  <ifname>     #interface name
+	-c  <card name>  #card name
+	-r               #read enable
+	-w               #write eable
+
+<extra options>
+	-txcnt   <digit>  #number of tx packets  (Dflt: 1)
+	-txsize  <digit>  #tx packet size        (Dflt: 10)
+	-txdelay <digit>  #delay in sec after each tx packet (Dflt: 0)
+	-txdata  <digit>  #data to tx <1-255>
+
+	-txfile  <file>   #Use file to tx instead
+	-rxfile  <file>   #Save all rx data to a file
+	
+	-rxcnt   <digit>  #number of rx packets before exit
+			  #this number overwrites the txcnt
+	                  #Thus, app will only exit after it
+	                  #receives the rxcnt number of packets.
+	
+	-verbose	  #Enable verbose mode
+
+
+eg: To enable read:
+	
+	./aft_api -i w1g1 -c wanpipe1 -r -verbose
+	./chdlc_api -i wp1chdlc -c wanpipe1 -r -verbose
+
+
+eg: To enable read and write:
+	
+	./aft_api -i w1g1 -c wanpipe1 -r -w -txsize 100 -txcnt 10 -verbose
+	./chdlc_api -i wp1chdlc -c wanpipe1 -r -w -txsize 100 -txcnt 10 -verbose
+
+	
+
+
+
+      
+	
+
+
+
+
+
+

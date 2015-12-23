@@ -1,0 +1,46 @@
+AFT Firmware Update
+===================
+
+
+Latest Firmware Files
+---------------------
+
+Latest AFT firmware updates are located at
+
+	ftp.sangoma.com/linux/current_wanpipe/firmware
+
+
+Save the latest BIN files into the current (wan_aftup/)
+directory, and proceed with wanpipe firmware update.
+
+
+Updating AFT Firmware 
+---------------------
+
+1) Make sure wanpipe is unloaded 
+
+	wanrouter stop		
+
+	wanrouter modules #No modules loaded in kernel
+
+
+2) Start update program
+
+	./update_aft_firm.sh
+
+
+		Specify interface name that corresponds 
+		to your AFT card.
+
+
+		Select firmware latest firmware version
+
+		Once the flashing is done, select Y to reload firmware.
+		(This step only reloads flash, not your machine!)
+
+
+		Card is ready for normal operation. 
+		(No reboot needed)
+	
+
+

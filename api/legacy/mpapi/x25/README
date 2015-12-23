@@ -1,0 +1,35 @@
+X25 Annexg API Sample Code
+==========================
+
+
+Author: Nenad Corbic
+Date:   Mar 25, 2003
+
+The x25 annexg api package contains the sample client and server 
+programs which should be used in application development.
+
+
+Contents of the API Package
+---------------------------
+
+ server_v1.c :  	Multi-Process server application that waits for incoming calls.
+                        Once a call is accepted, it spawns a child process to
+			handle svc connection.
+
+			./server_v1 -i <lapb interface name> -r -w -txsize 100
+
+ server_v2.c :       	Single process server application that waits for incoming calls.
+ 			Once a call is accepted, it start tx/rx data.  All svc handing
+			is done inside a single process.  
+
+			./server_v2 -i <lapb interface name> -r -w -txsize 100
+
+ svc_client.c :		Client application that places calls. Application   
+                        doesn't wait for a call to be established; thus, multiple
+                        calls can be placed from a single process.
+
+			./svc_client -i <lapb interface name> -r -w -txsize 100 \
+			                                            -txcnt 100  \
+								    -txchan 1
+
+			

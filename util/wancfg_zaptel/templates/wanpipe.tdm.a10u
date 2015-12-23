@@ -1,0 +1,66 @@
+#================================================
+# WANPIPE1 Configuration File
+#================================================
+#
+# Date: Tue Dec 12 16:21:45 UTC 2006
+#
+# Note: This file was generated automatically
+#       by /usr/sbin/wancfg program.
+#
+#       If you want to edit this file, it is
+#       recommended that you use wancfg program
+#       to do so.
+#================================================
+# Sangoma Technologies Inc.
+#================================================
+
+[devices]
+wanpipeDEVNUM = WAN_AFT, Comment
+
+[interfaces]
+wIFNUMg1 = wanpipeDEVNUM, , TDM_VOICE_OP_MODE, Comment
+
+[wanpipeDEVNUM]
+CARD_TYPE 	= AFT
+S514CPU 	= FECPU
+CommPort 	= PRI
+AUTO_PCISLOT 	= NO
+PCISLOT 	= SLOTNUM
+PCIBUS  	= BUSNUM
+FE_MEDIA	= FEMEDIA
+FE_LCODE	= FELCODE
+FE_FRAME	= FEFRAME
+FE_LINE		= 1
+TE_CLOCK 	= FECLOCK
+TE_REF_CLOCK 	= 0
+TESIGMODE
+TE_HIGHIMPEDANCE	= NO
+TE_RX_SLEVEL    = RXSLEVEL
+LBO 		= FELBO
+FE_TXTRISTATE	= NO
+MTU 		= 1500
+UDPPORT 	= 9000
+TTL		= 255
+IGNORE_FRONT_END = NO
+TDMV_SPAN	= TDMVSPANNO
+TDMV_DCHAN	= TDMVDCHAN
+TE_AIS_MAINTENANCE = NO         #NO: defualt  YES: Start port in AIS Blue Alarm and keep line down
+                                #wanpipemon -i w1g1 -c Ttx_ais_off to disable AIS maintenance mode
+								#wanpipemon -i w1g1 -c Ttx_ais_on to enable AIS maintenance mode  
+TDMV_HW_DTMF        = NO        # YES: receive dtmf events from hardware
+TDMV_HW_FAX_DETECT      = NO     # YES: receive fax 1100hz events from hardware
+HWEC_OPERATION_MODE     = OCT_NORMAL    # OCT_NORMAL: echo cancelation enabled with nlp (default) 
+                                        # OCT_SPEECH: improves software tone detection by disabling NLP (echo possible)
+										# OCT_NO_ECHO:disables echo cancelation but allows VQE/tone functions. 
+HWEC_DTMF_REMOVAL       = NO    # NO: default  YES: remove dtmf out of incoming media (must have hwdtmf enabled)
+HWEC_NOISE_REDUCTION    = NO    # NO: default  YES: reduces noise on the line - could break fax
+HWEC_ACUSTIC_ECHO       = NO    # NO: default  YES: enables acustic echo cancelation
+HWEC_NLP_DISABLE        = NO    # NO: default  YES: guarantees software tone detection (possible echo)   
+HWEC_TX_AUTO_GAIN       = 0     # 0: disable   -40-0: default tx audio level to be maintained (-20 default)
+HWEC_RX_AUTO_GAIN       = 0     # 0: disable   -40-0: default tx audio level to be maintained (-20 default)  
+HWEC_TX_GAIN            = 0     # 0: disable   -24-24: db values to be applied to tx signal
+HWEC_RX_GAIN            = 0     # 0: disable   -24-24: db values to be applied to tx signal
+
+[wIFNUMg1]
+ACTIVE_CH	= ALL
+TDMV_HWEC	= NO

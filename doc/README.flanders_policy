@@ -1,0 +1,32 @@
+iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
+#iptables -L -t nat
+
+#Add a new adsl table
+echo 200 adsl >> /etc/iproute2/rt_tables
+
+#Default route in adsl table is ppp0
+#The /etc/ppp/ip-up.local should be used
+#in case ppp0 goes up and down.  The above
+#file should contain this line, because
+#this route will be removed if ppp0 goes
+#down
+ip route add default dev ppp0 table adsl
+#ip route list table adsl
+
+#Add a rule that pushes all traffic marked with 1
+#to adsl table
+ip rule add fwmark 1 table adsl
+#ip rule list
+
+#Set the incoming traffic that should be bound
+#to adsl
+
+iptables -A PREROUTING -i eth0 -t mangle -p tcp -s 209.47.108.82 --dport http \
+        -j MARK --set-mark 1
+
+iptables -A PREROUTING -i eth0 -t mangle -p tcp -s 209.47.108.82 --dport pop3 \
+        -j MARK --set-mark 1
+
+#iptables -L -t mangle
+
+ip route fulsh cache

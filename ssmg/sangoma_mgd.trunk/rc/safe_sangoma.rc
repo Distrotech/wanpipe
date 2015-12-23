@@ -1,0 +1,18 @@
+#!/bin/bash
+# safe_sangoma.rc
+
+#NOTIFY is list of email address that will be notified if
+#safe_sangoma has to restart a daemon
+#
+#Note: NOTIFY uses mail command to send email. The from
+#address will be the user@hostname.com. Some mail servers
+#will reject this email as junk/spam.  
+#Gmail accounts work very well.
+#--------------------------------------------------------
+NOTIFY=""
+
+
+#EXEC is the absolute path to an external script/app 
+#that is to be executed after safe_sangoma restarts a daemon
+#--------------------------------------------------------
+EXEC=""

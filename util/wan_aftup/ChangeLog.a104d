@@ -1,0 +1,125 @@
+AFT A104d Firmware Change Log
+=============================
+Release V26
+-----------
+Sep 27 2007
+
+Type:		Recommended Firmware for PCI/PCI-Express Cards
+		Fixes chip security issue.
+
+Changes:	Firmware bug fix for PCI/PCI-Express Cards
+		This bug can shut down the driver.
+
+Release V25
+------------
+Mar 16 2007
+	
+Tyep		Mandatory for PCI-Express Cards
+		
+		This update attempts to further fix the issue related in V24.
+		On some systems the symtoms in V24 were still prevalent.
+		V25 fixes those issues.
+
+
+Release V24
+-------------
+Nov 03 2006
+
+Type		Mandatory for PCI-Express Cards
+	
+  		A serious bug exists in A104d Firmware for PCI-E cards.
+		On each front end access the next pci transaction can
+		become corrupted, and if the next pci transaction is dma
+		transaction, then an invalid memory can be written to.
+
+Changes:	Firmware bug fix for PCI-E cards.
+		This bug can cause hard crashes.
+		
+		Note: This bug only affects DATA operation of A104d PCI
+		Express Card. The TDM Voice operation is not affected.
+
+         
+
+Release V23
+-------------
+Sep 27 2006
+
+Type:  		Optional (Feature) 
+
+Changes:	This firmware release contains new feature:
+		- Global TDM Voice Interrupt:
+			It that combines all spans on a single
+		   	interrupt. This significantly reduces cpu load.
+		  
+		  This option is only used in TDM Voice Mode.
+
+Symptoms:	New Feature.
+
+WARNING:	The new feature only works with the driver release beta8-2.3.4 and higher.
+		Do not install this firmware if you are running OLDER wanpipe release.
+		If you install this firmware on older wanpipe release TDM VOICE driver
+		will NOT work.
+
+
+Release V22
+-----------
+Sep 27 2006
+
+
+Type:  		Optional (Feature)   
+
+Changes:	This firmware release contains new feature: 
+		- E1 Unframed 
+	          Option to run E1 portin Unframed mode (all 32 channels)
+		  This option is only used in WAN/IP mode.
+		
+
+WARNING:	The new feature only works with the driver release beta8-2.3.4 and higher.
+		If you install this firware with OLDER wanpipe release ONLY E1 Unframed 
+		feature will not work, rest of the features will work fine.
+
+
+Release V21
+-----------
+Jul 17 2006
+
+Type:  		Recomended
+
+Changes:	This release fixes an issue with some boards where the echo canceller would not load properly.
+		If your echo canceller currently loads properly, you do not need to upgrade to this firmware.
+		
+			 
+Symptoms:	Echo canceller fails on chip open (err=103xxxx), cannot load echo canceller. 
+
+
+
+Release V18
+-----------
+Feb 06 2005
+
+Type:  		Recomended
+
+Changes:	This release fixes a possible bug when A104D card is used with
+	        new Octasic Echo Chip that has lower than 256 echo channels.
+		Bug is machine based and only occurs on some pci buses 
+		when hardware echo cancellation is being used.   
+			 
+
+Symptoms:	Non funcioning Echo Canceler. 
+
+
+
+Release V17
+-----------
+Jan 23 2005
+
+Type:  		Mandatory/Critical
+
+Changes:	This release fixes a critical bug in A104D hw. 
+		Bug is machine based and only occurs on some pci buses 
+		when hardware echo cancellation is being used.   	 
+
+Symptoms:	Noise and clicking sounds on hardware echo canceled channels.
+
+
+		    

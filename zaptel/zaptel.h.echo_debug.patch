@@ -1,0 +1,55 @@
+--- zaptel.h.orig	2006-02-02 11:00:57.178727216 -0500
++++ zaptel.h	2006-02-02 10:59:40.693354760 -0500
+@@ -614,7 +614,6 @@
+  */
+ #define ZT_INDIRECT _IOWR (ZT_CODE, 56, struct zt_indirect_data)
+ 
+-
+ /*
+  *  60-80 are reserved for private drivers
+  *  80-85 are reserved for dynamic span stuff
+@@ -717,6 +716,35 @@
+ 
+ };
+ 
++/*****************************************/
++/* structure for debugging echo problems */
++typedef struct _echo_spike_struct{
++	unsigned int channo;	/* set in user-mode program. MUST be first in the structure! */
++	unsigned int spanno;	/* set by the driver, used in user-mode program */
++	unsigned int law;	/* ZT_LAW_MULAW or ZT_LAW_ALAW, set by the driver, used in user-mode program */
++	unsigned int echocancel;/* number of taps */
++	unsigned char collect_sample_before_ec; /* 1 - sample will be collected BEFORE echo canceller,
++						   0 - sample will be collected AFTER echo canceller finished
++						   it's work */
++	unsigned char return_code;
++	unsigned int state_bits;
++	unsigned int sample_len_counter;/* current length of data in sample_buffer */
++	unsigned char *sample_buffer;
++	unsigned char is_hw_ec_used;
++}echo_spike_struct_t;
++
++#define ECHO_SPIKE_SAMPLE_LEN	1024
++
++/* values for 'state_bits' */
++#define ECHO_INITIAL_STATE		0x00000000
++#define ECHO_BUSY_COLLECTING_SAMPLE	0x00000001
++#define ECHO_FINISHED_COLLECTING_SAMPLE	0x00000002
++
++/* values for 'return_code' */
++#define ECHO_OK				0
++#define ECHO_NO_ACTIVE_CALL_OR_EC_OFF	1
++/*****************************************/
++
+ #ifdef __KERNEL__
+ #endif /* KERNEL */
+ 
+@@ -1175,6 +1203,8 @@
+ 	devfs_handle_t fhandle;  /* File handle in devfs for the channel */
+ 	devfs_handle_t fhandle_symlink;
+ #endif /* CONFIG_DEVFS_FS */
++
++	echo_spike_struct_t echo_spike_struct;	
+ };
+ 
+ /* defines for transmit signalling */

@@ -1,0 +1,40 @@
+# ============================================================================
+# Makefile	Make script for building Linux WAN router utilities.
+# ----------------------------------------------------------------------------
+# Copyright (c) 1995-1998 Sangoma Technologies Inc.  All Rights Reserved.
+# ============================================================================
+
+####### MACROS ###############################################################
+
+# Build options.
+OS_TYPE	= __LINUX__
+DEBUG	= 2
+
+LINK_ARGS= -lcurses -lpthread 
+
+WLINC=../../../patches/kdrivers/include
+WEC=../../../patches/kdrivers/wanec
+WECOCT=../../../patches/kdrivers/wanec/oct6100_api/include
+
+# Tools options.
+CFLAGS	= -Wall -O2 -D$(OS_TYPE) -D_DEBUG_=$(DEBUG)  -D_GNUC_  
+CFLAGS += -I$(WLINC) -I$(WEC) -I$(WECOCT)
+CFLAGS += -I$(WAN_VIRTUAL)/usr/include/wanpipe -I$(WAN_VIRTUAL)/usr/include/wanpipe/oct6100_api -I$(WAN_VIRTUAL)/usr/include/wanpipe/oct6100_api -I/usr/include
+CFLAGS += $(EXTRA_FLAGS) -D__LINUX__ 
+CFLAGS += -D_REENTRANT -DUSE_STELEPHONY_API -D_GNU_SOURCE -DWANPIPE_TDM_API
+
+CXX=g++ 
+
+TARGETS=sample_cpp
+LIBS= sangoma_port.cpp  sangoma_port_configurator.cpp sangoma_cthread.cpp sangoma_interface.cpp
+
+####### RULES ################################################################
+
+all:	$(TARGETS)  
+	@echo "Ok."
+
+sample_cpp:     sample.cpp  $(LIBS) $(LIBS_STEL) $(LIBS_TONE)
+	$(CXX) $(CFLAGS) -o $@ $^  $(LINK_ARGS) -lsangoma -lstelephony -lm
+
+clean:
+	rm -f $(TARGETS)

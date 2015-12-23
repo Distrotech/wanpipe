@@ -1,0 +1,38 @@
+AFT A400 Firmware Change Log
+=============================
+
+Release V11
+-----------
+Sep 27 2007
+
+Type     	Recommended update for A400d cards
+		Fixes bug with echo canceller chip security. 
+		Supports DTMF detection without hardware echo cancellation
+		operation. 
+
+Changes:	Firmware bug fixes for A400d cards
+		Card fail to load due to echo canceller chip secutiry.
+		Note: This bug only affects A400 with HWEC
+		      DTMF detecion support only applies to AFT card with
+		      HWEC.
+
+Release V10
+-----------
+Jun 10 2007
+
+Type            Mandatory for A400 cards
+                Update to echo canceler code.
+
+Changes:        Firmware bug fix.
+
+
+
+Release V09
+-----------
+Mar 16 2007
+
+Type:		Optional
+        
+		Initial Release
+
+		

@@ -1,0 +1,62 @@
+WANCFG : WANPIPE(tm) Configuration Utility
+==========================================
+
+
+Requirements
+------------
+
+1) The wancfg utility requires bash version 2.0 or 
+   greater.  Please install the new bash version
+   before proceeding.
+
+   The wancfg utility requires the /bin/bash2 executable.
+         
+
+2) Wancfg also uses the lxdialog GUI libraries.  The lxdialog
+   libraries depend on the following:
+
+        i) libtermcap-devel-2.0.8-13, or greater
+       ii) ncurses-devel-4.2-18, or greater
+
+    Note: These packages are usually installed by default
+          on Linux systems.
+	
+    The above packages can be found on the Sangoma ftp site:
+    ftp.sangoma.com: in  /linux/lib/ directory.    
+
+
+Compiling Utilities
+-------------------
+
+The "./wanpipe/Setup compile" will compile
+all utilites and setup all environment options. If you
+need to compile each utility separately do the
+following:
+
+
+1)  Change directory to ./wanpipe/config
+    run 'make'
+
+    If the make fails, please check that you have all ncurses
+    libraries installed, refer to above section.
+
+
+2)  Once all libraries are compiled you are ready to start the
+    wancfg utility.
+
+3)  run '/usr/sbin/wancfg'
+
+
+Note: 'wancfg' must be run for each wanpipe#.conf file.
+====    
+
+
+Help 
+----
+
+    All the help files are included into the wancfg utility.
+        Each option has a help option associated with it.
+
+
+
+

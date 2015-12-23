@@ -1,0 +1,35 @@
+--- kernel-source-2.4.4.orig/drivers/net/wan/Makefile	Thu Apr 12 15:11:39 2001
++++ kernel-source-2.4.4/drivers/net/wan/Makefile	Thu Dec  5 10:51:58 2002
+@@ -9,15 +9,18 @@
+ 
+ O_TARGET := wan.o
+ 
+-export-objs =	z85230.o syncppp.o comx.o sdladrv.o cycx_drv.o hdlc.o
++export-objs =	z85230.o syncppp.o comx.o sdladrv.o cycx_drv.o hdlc.o wanpipe_syncppp.o
+ list-multi =	wanpipe.o cyclomx.o
+ 
+-wanpipe-objs = sdlamain.o sdla_ft1.o $(wanpipe-y)
++wanpipe-objs = sdlamain.o sdla_ft1.o sdla_te1.o sdla_56k.o wanpipe_utils.o $(wanpipe-y)
+ wanpipe-$(CONFIG_WANPIPE_X25)	+= sdla_x25.o
+ wanpipe-$(CONFIG_WANPIPE_FR)	+= sdla_fr.o
+ wanpipe-$(CONFIG_WANPIPE_CHDLC)	+= sdla_chdlc.o
+ wanpipe-$(CONFIG_WANPIPE_PPP)	+= sdla_ppp.o
+ wanpipe-$(CONFIG_WANPIPE_MULTPPP) += wanpipe_multppp.o
++wanpipe-$(CONFIG_WANPIPE_BITSTRM) += sdla_bitstrm.o
++wanpipe-$(CONFIG_WANPIPE_EDU) += sdla_edu.o
++wanpipe-$(CONFIG_WANPIPE_BSC) += sdla_bsc.o
+ 
+ cyclomx-objs = cycx_main.o $(cyclomx-y)  
+ cyclomx-$(CONFIG_CYCLOMX_X25)	+= cycx_x25.o
+@@ -47,9 +50,9 @@
+ obj-$(CONFIG_DLCI)		+= dlci.o 
+ obj-$(CONFIG_SDLA)		+= sdla.o
+ ifeq ($(CONFIG_WANPIPE_MULTPPP),y)
+-  obj-$(CONFIG_VENDOR_SANGOMA) += sdladrv.o wanpipe.o syncppp.o	
++  obj-$(CONFIG_VENDOR_SANGOMA) += sdladrv.o wanpipe.o wanpipe_syncppp.o	
+ else
+-  obj-$(CONFIG_VENDOR_SANGOMA) += sdladrv.o wanpipe.o
++  obj-$(CONFIG_VENDOR_SANGOMA) += sdladrv.o wanpipe.o wanpipe_syncppp.o
+ endif
+ obj-$(CONFIG_CYCLADES_SYNC)	+= cycx_drv.o cyclomx.o
+ obj-$(CONFIG_LAPBETHER)		+= lapbether.o

@@ -1,0 +1,4 @@
+#Warning: This file was added by the wancfg_zaptel utility.
+
+wanpipe_enable="NO"
+wanrouter_rc_file="/usr/local/etc/wanpipe/wanrouter.rc"

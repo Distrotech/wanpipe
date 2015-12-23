@@ -1,0 +1,7 @@
+cp OCT612x-01.01.01/apilib/llman/octapi_llman.c OCT612x-01.04.01/apilib/llman/octapi_llman.c
+cp OCT612x-01.01.01/include/oct6100api/oct6100_apiud.h OCT612x-01.04.01/include/oct6100api/oct6100_apiud.h
+cp OCT612x-01.01.01/include/octosdependant.h OCT612x-01.04.01/include/octosdependant.h
+cp OCT612x-01.01.01/include/octtype.h  OCT612x-01.04.01/include/octtype.h
+cp OCT612x-01.01.01/include/octtypewin.h OCT612x-01.04.01/include/octtypewin.h
+cp OCT612x-01.01.01/octdeviceapi/oct6100api/oct6100_api/oct6100_user.c OCT612x-01.04.01/octdeviceapi/oct6100api/oct6100_api/oct6100_user.c
+
