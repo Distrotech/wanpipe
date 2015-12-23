@@ -1547,7 +1547,7 @@ int wanpipe_annexg_poll(struct file * file, struct socket *sock, poll_table *wai
 		mask |= POLLOUT | POLLWRNORM | POLLWRBAND;
 	}else{
 	      #ifdef LINUX_2_4
-		set_bit(SOCK_ASYNC_NOSPACE, &sk->socket->flags);
+		set_bit(SOCKWQ_ASYNC_NOSPACE, &sk->socket->flags);
 	      #else
  		sk->socket->flags |= SO_NOSPACE;
 	      #endif

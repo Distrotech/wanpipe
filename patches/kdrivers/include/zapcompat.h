@@ -32,7 +32,7 @@
 # include <dahdi/user.h> // this will bring dahdi user stuff
 #endif
 
-#if defined(DAHDI_28) || defined(DAHDI_29) || defined(DAHDI_210)
+#if defined(DAHDI_28) || defined(DAHDI_29) || defined(DAHDI_210) || defined(DAHDI_211)
 #define DAHDI_27
 #define DAHDI_26
 #define DAHDI_25

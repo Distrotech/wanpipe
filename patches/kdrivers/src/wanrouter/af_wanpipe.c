@@ -1888,7 +1888,7 @@ static unsigned int wanpipe_poll(struct file * file, struct socket *sock, poll_t
 		mask |= POLLOUT | POLLWRNORM | POLLWRBAND;
 	}else{
 #if defined(LINUX_2_4)||defined(LINUX_2_6)
-		set_bit(SOCK_ASYNC_NOSPACE, &sk->sk_socket->flags);
+		set_bit(SOCKWQ_ASYNC_NOSPACE, &sk->sk_socket->flags);
 #else
  		sk->sk_socket->flags |= SO_NOSPACE;
 #endif
